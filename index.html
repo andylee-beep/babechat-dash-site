@@ -207,12 +207,29 @@ document.getElementById('btnPptx').onclick=function(){
   s.addText('▼ Cut',{x:6.9,y:1.15,w:6,h:0.4,fontSize:14,bold:true,color:'C0392B'});
   s.addTable(mkTbl(M.worstcre),{x:6.9,y:1.55,w:6,fontSize:11,border:{type:'solid',color:'E1E6EE',pt:1},align:'center',rowH:0.45,colW:[2.2,1,0.9,0.95,0.95]});
   foot(s);
-  // 5 Monthly trend
-  s=P.addSlide();s.background={color:'FFFFFF'};title(s,'Monthly Trend');
-  const mh=['Month','Signups','Payers','Orders','Revenue$','Spend$','GP$'];
-  const mrows=[mh.map(x=>({text:x,options:{bold:true,color:'FFFFFF',fill:{color:NAVY}}}))].concat(
-    M.monthly.map(r=>[r.m.replace('月','M'),r.su,r.pu,r.od,money(r.rev),money(r.cost),money(r.gp)].map(x=>({text:String(x)}))));
-  s.addTable(mrows,{x:0.6,y:1.3,w:12.1,fontSize:14,border:{type:'solid',color:'E1E6EE',pt:1},align:'center',valign:'middle',rowH:0.5});
+  // 5 Last 4 Weeks Trend
+  const RT=1380;
+  const addDays=(isoStr,n)=>{const p=isoStr.split('-').map(Number);return new Date(Date.UTC(p[0],p[1]-1,p[2]+n)).toISOString().slice(0,10);};
+  const wkOrder=DECK.opts.map(o=>o.k).reverse();           // 舊→新
+  const si=wkOrder.indexOf(mk);
+  const last4=wkOrder.slice(Math.max(0,si-3),si+1).map(id=>({lbl:DECK.byW[id].label,k:DECK.byW[id].kpi}));
+  s=P.addSlide();s.background={color:'FFFFFF'};title(s,'Last 4 Weeks Trend');
+  const wh2=['Week','Signups','Revenue$','Spend$','MER','Repeat%'];
+  const w4rows=[wh2.map(x=>({text:x,options:{bold:true,color:'FFFFFF',fill:{color:NAVY}}}))].concat(
+    last4.map(w=>[w.lbl,w.k.su,money(w.k.rev),money(w.k.cost),w.k.mer.toFixed(2)+'x',w.k.repeat+'%'].map(x=>({text:String(x)}))));
+  s.addTable(w4rows,{x:0.6,y:1.3,w:12.1,fontSize:14,border:{type:'solid',color:'E1E6EE',pt:1},align:'center',valign:'middle',rowH:0.6});
+  foot(s);
+  // 6 Channel Performance (last 4 weeks, D30 cohort)
+  s=P.addSlide();s.background={color:'FFFFFF'};title(s,'Channel Performance · Last 4 Weeks (D30 cohort)');
+  const a4=addDays(mk,-21), b4=mk<DECK.end?addDays(mk,6):DECK.end;
+  const pf=v=>(v===null||v===undefined)?'—':v+'%';
+  const views=[['facebook.business','Facebook'],['x.ads','X (Twitter)'],['自然量','Organic'],['總量','Total']];
+  const chh=['Channel','Signups','Spend$','D0 Pay%','D30 Pay%','D30 ROAS','D1 Ret%','D7 Ret%'];
+  const chrows=[chh.map(x=>({text:x,options:{bold:true,color:'FFFFFF',fill:{color:NAVY}}}))].concat(
+    views.map(([v,lbl])=>{const arr=(D[v]||[]).filter(r=>r.ds>=a4&&r.ds<=b4);const g=agg(arr,lbl);
+      return [lbl,Math.round(g.su),'$'+Math.round(g.cost/RT).toLocaleString(),pf(g.p0),pf(g.p30),(g.r30!==null?g.r30+'%':'—'),pf(g.d1),pf(g.d7r)].map(x=>({text:String(x)}));}));
+  s.addTable(chrows,{x:0.6,y:1.3,w:12.1,fontSize:13,border:{type:'solid',color:'E1E6EE',pt:1},align:'center',valign:'middle',rowH:0.6});
+  s.addText('D30 metrics require 30-day-mature cohorts; recent weeks may under-read on D30 columns.',{x:0.6,y:5.2,w:12,h:0.4,fontSize:11,color:GRAY});
   foot(s);
   // 6 Analysis & Actions
   s=P.addSlide();s.background={color:'FFFFFF'};title(s,'Analysis & Actions · Week '+M.label);
