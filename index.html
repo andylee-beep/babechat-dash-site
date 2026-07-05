@@ -212,25 +212,34 @@ document.getElementById('btnPptx').onclick=function(){
   const addDays=(isoStr,n)=>{const p=isoStr.split('-').map(Number);return new Date(Date.UTC(p[0],p[1]-1,p[2]+n)).toISOString().slice(0,10);};
   const wkOrder=DECK.opts.map(o=>o.k).reverse();           // 舊→新
   const si=wkOrder.indexOf(mk);
-  const last4=wkOrder.slice(Math.max(0,si-3),si+1).map(id=>({lbl:DECK.byW[id].label,k:DECK.byW[id].kpi}));
+  const last4=wkOrder.slice(Math.max(0,si-3),si+1).map(id=>({id,lbl:DECK.byW[id].label,k:DECK.byW[id].kpi}));
   s=P.addSlide();s.background={color:'FFFFFF'};title(s,'Last 4 Weeks Trend');
   const wh2=['Week','Signups','Revenue$','Spend$','MER','Repeat%'];
   const w4rows=[wh2.map(x=>({text:x,options:{bold:true,color:'FFFFFF',fill:{color:NAVY}}}))].concat(
     last4.map(w=>[w.lbl,w.k.su,money(w.k.rev),money(w.k.cost),w.k.mer.toFixed(2)+'x',w.k.repeat+'%'].map(x=>({text:String(x)}))));
   s.addTable(w4rows,{x:0.6,y:1.3,w:12.1,fontSize:14,border:{type:'solid',color:'E1E6EE',pt:1},align:'center',valign:'middle',rowH:0.6});
   foot(s);
-  // 6 Channel Performance (last 4 weeks, D30 cohort)
-  s=P.addSlide();s.background={color:'FFFFFF'};title(s,'Channel Performance · Last 4 Weeks (D30 cohort)');
+  // 6~ Channel Performance：每個渠道一頁（合計 + 近4週，仿渠道大盤欄位）
   const a4=addDays(mk,-21), b4=mk<DECK.end?addDays(mk,6):DECK.end;
   const pf=v=>(v===null||v===undefined)?'—':v+'%';
-  const views=[['facebook.business','Facebook'],['x.ads','X (Twitter)'],['自然量','Organic'],['總量','Total']];
-  const chh=['Channel','Signups','Spend$','D0 Pay%','D30 Pay%','D30 ROAS','D1 Ret%','D7 Ret%'];
-  const chrows=[chh.map(x=>({text:x,options:{bold:true,color:'FFFFFF',fill:{color:NAVY}}}))].concat(
-    views.map(([v,lbl])=>{const arr=(D[v]||[]).filter(r=>r.ds>=a4&&r.ds<=b4);const g=agg(arr,lbl);
-      return [lbl,Math.round(g.su),'$'+Math.round(g.cost/RT).toLocaleString(),pf(g.p0),pf(g.p30),(g.r30!==null?g.r30+'%':'—'),pf(g.d1),pf(g.d7r)].map(x=>({text:String(x)}));}));
-  s.addTable(chrows,{x:0.6,y:1.3,w:12.1,fontSize:13,border:{type:'solid',color:'E1E6EE',pt:1},align:'center',valign:'middle',rowH:0.6});
-  s.addText('D30 metrics require 30-day-mature cohorts; recent weeks may under-read on D30 columns.',{x:0.6,y:5.2,w:12,h:0.4,fontSize:11,color:GRAY});
-  foot(s);
+  const chCols=['Week','Signups','Spend$','CPR$','D1 Ret','D7 Ret','D0 Pay','D7 Pay','D15 Pay','D30 Pay','R0','R7','R15','R30'];
+  const roasCol=new Set([10,11,12,13]);
+  const cellsFrom=(g)=>[g.su.toLocaleString(),'$'+Math.round(g.cost/RT).toLocaleString(),(g.su?'$'+Math.round(g.cost/g.su/RT):'—'),
+    pf(g.d1),pf(g.d7r),pf(g.p0),pf(g.p7),pf(g.p15),pf(g.p30),
+    (g.r0!==null?g.r0+'%':'—'),(g.r7!==null?g.r7+'%':'—'),(g.r15!==null?g.r15+'%':'—'),(g.r30!==null?g.r30+'%':'—')];
+  const chViews=[['facebook.business','Facebook'],['x.ads','X (Twitter)'],['自然量','Organic']];
+  chViews.forEach(([v,lbl])=>{
+    s=P.addSlide();s.background={color:'FFFFFF'};title(s,'Channel · '+lbl+' (Last 4 Weeks, D30 cohort)');
+    const arrAll=(D[v]||[]).filter(r=>r.ds>=a4&&r.ds<=b4);
+    const rows=[chCols.map((x,i)=>({text:x,options:{bold:true,color:'FFFFFF',fill:{color:NAVY}}}))];
+    const tot=agg(arrAll,''); rows.push(['Total'].concat(cellsFrom(tot)).map((x,i)=>({text:String(x),options:{bold:true,fill:{color:'EEF2F7'}}})));
+    last4.slice().reverse().forEach(w=>{const wa=w.id,wb=(w.id<DECK.end?addDays(w.id,6):DECK.end);
+      const g=agg((D[v]||[]).filter(r=>r.ds>=wa&&r.ds<=wb),''); rows.push([w.lbl].concat(cellsFrom(g)).map(x=>({text:String(x)})));});
+    s.addTable(rows,{x:0.3,y:1.25,w:12.7,fontSize:11,border:{type:'solid',color:'E1E6EE',pt:1},align:'center',valign:'middle',rowH:0.55,
+      colW:[1.9,0.85,0.95,0.85,0.75,0.75,0.75,0.75,0.8,0.85,0.72,0.72,0.72,0.72]});
+    s.addText('D30 needs 30-day-mature cohorts; recent weeks may show "—" on D15/D30. ROAS = revenue within N days / spend.',{x:0.3,y:5.5,w:12.7,h:0.4,fontSize:10,color:GRAY});
+    foot(s);
+  });
   // 6 Analysis & Actions
   s=P.addSlide();s.background={color:'FFFFFF'};title(s,'Analysis & Actions · Week '+M.label);
   const hot=(M.topcre[0]||['-'])[0], cold=(M.worstcre[0]||['-'])[0];
