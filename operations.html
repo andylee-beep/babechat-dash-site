@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BabeChat 台灣營運</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="canonical" id="canon" href="">
+<link rel="icon" type="image/png" href="../logo.png">
+<link rel="apple-touch-icon" href="../logo.png">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+:root{--bg:#08080c;--bg2:#0e0e14;--card:#101017;--card2:#14141d;--line:#21212c;--txt:#f3f1f8;--muted:#8d87a3;--muted2:#6f6a86;
+--pink:#ff2d6f;--pink2:#ff6aa3;--magenta:#d6249f;--purple:#a855f7;--cyan:#22d3ee;--green:#34d399;--red:#fb7185;--amber:#fbbf24;
+--grad:linear-gradient(90deg,#ff2d6f,#d6249f);--gradb:linear-gradient(135deg,#ff2d6f,#d6249f);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans TC",sans-serif;background:radial-gradient(1100px 480px at 88% -10%,rgba(255,45,111,.13),transparent 60%),var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;line-height:1.45}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1480px;margin:0 auto;padding:0 26px 90px}
+header{position:sticky;top:0;z-index:50;background:rgba(8,8,12,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:13px 26px;margin:0 -26px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;margin-right:auto}
+.logo{width:42px;height:42px;border-radius:12px;background:var(--gradb);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 6px 18px -6px var(--pink)}
+h1{font-size:19px;font-weight:800;letter-spacing:-.3px}
+h1 .b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);font-size:11.5px;margin-top:2px}
+.meta{display:flex;flex-direction:column;gap:5px;align-items:flex-end;font-size:11px}
+.meta .d{color:var(--muted)} .meta .d b{color:var(--pink)}
+.pills{display:flex;gap:6px}
+.pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:7px;border:1px solid var(--line);color:var(--muted)}
+.pill.dev{color:var(--purple);border-color:rgba(168,85,247,.4)}
+.seg{display:flex;gap:3px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:4px}
+.seg button{border:0;background:transparent;color:var(--muted);font-weight:700;font-size:12.5px;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.seg button.on{background:var(--gradb);color:#fff}
+.ico{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--muted);font-size:15px;cursor:pointer}
+section{margin-top:32px}
+.sh{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.sh .n{width:30px;height:26px;border-radius:8px;background:var(--gradb);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.sh h2{font-size:18px;font-weight:800}
+.sh .cap{margin-left:auto;color:var(--muted);font-size:12px;font-weight:600}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.kgrid{grid-template-columns:repeat(auto-fit,minmax(205px,1fr))}
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr}}
+@media(max-width:820px){.g2,.g4{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.kpi{position:relative;overflow:hidden}
+.kpi .lab{color:var(--muted);font-size:12px;font-weight:600;display:flex;gap:6px;align-items:center}
+.kpi .val{font-size:29px;font-weight:800;letter-spacing:-1px;margin-top:9px;line-height:1.05}
+.kpi .sub{color:var(--muted);font-size:11.5px;margin-top:8px}
+.dl{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:7px;margin-top:9px}
+.dl.up{color:var(--green);background:rgba(52,211,153,.13)}.dl.down{color:var(--red);background:rgba(251,113,133,.13)}
+.kstat .val{font-size:24px}.kstat .lab{margin-top:0}
+.ttl{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.ttl .r{margin-left:auto;color:var(--muted);font-size:11px;font-weight:600}
+.chartbox{position:relative;height:250px;cursor:zoom-in}
+.chartbox::after{content:"⤢";position:absolute;top:2px;right:6px;font-size:13px;color:var(--muted2);opacity:.6;pointer-events:none}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid rgba(255,255,255,.04)}
+th{color:var(--muted);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:hover{background:rgba(255,45,111,.05)}
+.rk{display:inline-flex;width:22px;height:22px;border-radius:7px;background:var(--card2);color:var(--muted);align-items:center;justify-content:center;font-weight:800;font-size:11px}
+.rk.t{background:var(--gradb);color:#fff}
+.clink{font-weight:700}.clink:hover{color:var(--pink2)}
+.by{color:var(--muted2);font-size:11px}
+.flag{font-size:13px}
+.exprow{cursor:pointer}
+.chars{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 8px}
+.cchip{font-size:11.5px;padding:5px 9px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);display:inline-flex;gap:6px;align-items:center}
+.cchip:hover{border-color:var(--pink);color:var(--pink2)}
+.cchip .c{color:var(--muted2);font-size:10px}
+.bar{height:5px;border-radius:4px;background:rgba(255,255,255,.05);margin-top:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--grad)}
+.pr{display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;margin:11px 0}
+.pr .k{color:var(--muted);font-size:12.5px;font-weight:600}
+.pr .track{height:22px;border-radius:7px;background:rgba(255,255,255,.05);overflow:hidden;position:relative}
+.pr .track i{display:block;height:100%;border-radius:7px;min-width:28px}
+.bargrad i{background:var(--grad)}.barg i{background:linear-gradient(90deg,#34d399,#10b981)}.barp i{background:linear-gradient(90deg,#a855f7,#7c3aed)}
+.pr .track .pct{position:absolute;left:9px;top:0;line-height:22px;font-size:11px;font-weight:800;color:#fff}
+.pr .v{font-weight:800;font-size:13px;text-align:right}
+.subtabs{display:flex;gap:6px;margin:0 0 10px}
+.subtab{padding:6px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg2);color:var(--muted);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+.subtab.on{background:var(--gradb);color:#fff;border-color:transparent}
+.abadge{font-size:9px;font-weight:800;padding:1px 5px;border-radius:5px;background:rgba(251,113,133,.18);color:var(--red)}
+.rec{display:flex;gap:13px;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:11px}
+.rec .ic{width:42px;height:42px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(255,45,111,.12)}
+.rec h4{font-size:14.5px;font-weight:800;margin-bottom:4px}.rec p{font-size:13px;color:var(--muted)}.rec .ev{font-size:12px;color:var(--pink2);margin-top:6px;font-weight:600}
+.prio{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:8px}
+.p1{background:rgba(251,113,133,.16);color:var(--red)}.p2{background:rgba(251,191,36,.16);color:var(--amber)}.p3{background:rgba(52,211,153,.14);color:var(--green)}
+.note{color:var(--muted2);font-size:11.5px;margin-top:8px}
+.scroll{overflow-x:auto}
+.foot{color:var(--muted2);font-size:11.5px;margin-top:42px;border-top:1px solid var(--line);padding-top:18px}
+.twonly{display:none}
+body.r-TW .twonly{display:block}
+/* ===== Discord 커뮤니티 탭 (TW 전용) ===== */
+#s_discord{display:none}
+body.v-discord.r-TW #s_discord{display:block}
+body.v-discord section:not(#s_discord){display:none}
+body.r-TW .seg.twonly{display:flex}
+.dcpie{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.dcpie .pv{position:relative;width:230px;height:230px;flex:none;cursor:zoom-in}
+.dcpie .top{font-size:13.5px;margin-bottom:10px;color:var(--muted)}.dcpie .top b{color:var(--pink2)}
+.pleg{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--muted)}
+.pleg span{display:inline-flex;align-items:center;gap:6px}
+.pleg .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.fbgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:820px){.fbgrid{grid-template-columns:1fr}}
+.fbh{font-size:12.5px;font-weight:800;border-radius:8px;padding:4px 12px;display:inline-block}
+.fb-Like{background:rgba(52,211,153,.13);color:var(--green)}
+.fb-Dislike{background:rgba(251,191,36,.14);color:var(--amber)}
+.fb-Bugs{background:rgba(251,113,133,.14);color:var(--red)}
+.fb-Others{background:rgba(141,135,163,.14);color:var(--muted)}
+.fbcnt{color:var(--muted2);font-size:11px;margin-left:6px}
+.fbul{list-style:none;margin-top:6px}
+.fbul li{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;line-height:1.5}
+.fbul li:last-child{border-bottom:0}
+.dcd{font-size:10.5px;color:var(--muted);background:var(--card2);border-radius:5px;padding:1px 6px;margin-right:6px}
+.dcs{font-size:10px;font-weight:700;border-radius:5px;padding:1px 7px;margin-right:6px}
+.s-Character{background:rgba(168,85,247,.16);color:#c9a4f9}
+.s-Service{background:rgba(34,211,238,.14);color:var(--cyan)}
+.s-Payment{background:rgba(251,191,36,.16);color:var(--amber)}
+.s-Memory{background:rgba(251,113,133,.16);color:var(--red)}
+.s-Ops{background:rgba(255,45,111,.16);color:var(--pink2)}
+.s-Platform{background:rgba(52,211,153,.14);color:var(--green)}
+a.dcmsg{font-size:10.5px;color:var(--pink2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;white-space:nowrap;margin-left:5px}
+a.dcmsg:hover{background:var(--card2)}
+.wowb{font-size:11.5px;font-weight:800;border-radius:16px;padding:4px 11px}
+.wow-up{background:rgba(52,211,153,.13);color:var(--green)}.wow-down{background:rgba(251,113,133,.13);color:var(--red)}
+.wow-base{background:var(--bg2);border:1px solid var(--line);color:var(--muted)}
+.wow-live{background:rgba(255,45,111,.14);color:var(--pink2)}
+.dcnote{font-size:13px;color:var(--txt);line-height:1.6}
+.subtab .ssub{display:block;font-size:9.5px;font-weight:500;opacity:.75;margin-top:1px;text-align:left}
+tr.dcdone td{opacity:.5}tr.dcdone .lbl{text-decoration:line-through}
+#s_discord input[type=checkbox]{width:16px;height:16px;accent-color:var(--pink);cursor:pointer}
+#s_discord select{background:var(--bg2);color:var(--txt);border:1px solid var(--line);border-radius:7px;padding:4px 7px;font-size:11.5px;cursor:pointer;font-family:inherit}
+#s_discord select.p-High{border-color:var(--red);color:var(--red)}
+#s_discord select.p-Med{border-color:var(--amber);color:var(--amber)}
+#s_discord select.p-Low{color:var(--muted)}
+.dcwk{font-size:10.5px;background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.dccat{font-size:10px;border-radius:5px;padding:1px 7px;font-weight:700;white-space:nowrap}
+.c-기억력,.c-버그{background:rgba(251,113,133,.14);color:var(--red)}
+.c-포인트,.c-결제,.c-UX{background:rgba(251,191,36,.14);color:var(--amber)}
+.c-운영{background:rgba(168,85,247,.16);color:#c9a4f9}
+.c-플랫폼{background:rgba(34,211,238,.13);color:var(--cyan)}
+.c-기타{background:rgba(141,135,163,.14);color:var(--muted)}
+.dcempty{color:var(--muted);font-size:12.5px;padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center;margin-top:8px}
+#chartModal{position:fixed;inset:0;background:rgba(4,4,8,.85);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:28px}
+#chartModal.open{display:flex}
+#chartModal .box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px 22px;width:min(1060px,95vw);height:min(660px,88vh);position:relative;display:flex;flex-direction:column}
+#chartModal h3{font-size:15px;font-weight:800;margin-bottom:12px;padding-right:40px}
+#chartModal .cv{flex:1;position:relative;min-height:0}
+#modalClose{position:absolute;top:12px;right:14px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:17px;cursor:pointer}
+</style>
+</head>
+<body class="r-TW">
+<div id="lock" style="position:fixed;inset:0;background:#08080c;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;font-family:-apple-system,BlinkMacSystemFont,sans-serif"><div style="color:#f3f1f8;font-size:16px;font-weight:800">BabeChat 台灣營運</div><div style="color:#8d87a3;font-size:13px">請輸入密碼</div><input id="pw" type="password" autofocus style="padding:9px 12px;border-radius:8px;border:1px solid #333;background:#1a1a1c;color:#ececec;font-size:14px;width:210px"><div id="err" style="color:#fb7185;font-size:12px;min-height:14px"></div></div><script>(function(){var P="babechat888";function ok(){var l=document.getElementById("lock");if(l)l.style.display="none";}if(sessionStorage.getItem("bc_ok")==="1"){ok();return;}function chk(){if(document.getElementById("pw").value===P){sessionStorage.setItem("bc_ok","1");ok();}else{document.getElementById("err").textContent="密碼錯誤";document.getElementById("pw").value="";}}var i=document.getElementById("pw");if(i)i.addEventListener("keydown",function(e){if(e.key==="Enter")chk();});})();</script>
+<div class="wrap">
+<header>
+  <div class="brand"><div class="logo" style="position:relative">💬<img src="../logo.png" alt="" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;border-radius:12px;object-fit:cover"></div>
+    <div><h1><span class="b">BabeChat</span> 台灣營運報表</h1>
+    <div class="sub" data-i18n>매출 · 사용자 · 캐릭터 · 크리에이터 인사이트 | Snowflake 기반</div></div>
+  </div>
+  <div class="meta"><div class="d" data-i18n>데이터 기준일: <b>2026-06-27</b></div><div class="pills"><span class="pill" data-i18n>라이브 (Snowflake)</span><span class="pill dev">v2</span></div></div>
+  <div class="seg" id="langseg"><button data-l="ko">한국어</button><button class="on" data-l="zh">繁體中文</button></div>
+  <div class="seg" id="regionseg"><button data-r="TW" class="on">🇹🇼 <span data-i18n>대만</span></button><button data-r="KR">🇰🇷 <span data-i18n>한국</span></button><button data-r="JP">🇯🇵 <span data-i18n>일본</span></button><button data-r="ALL" id="allBtn" style="display:none">🌏 <span data-i18n>전체</span></button></div>
+  
+  <button class="ico" id="presentBtn" title="발표하기 — 위클리 실적 덱 생성" style="display:none">📊</button><a class="ico" id="adminLink" href="../admin.html" title="유저 관리" style="display:none;text-align:center;line-height:36px;font-size:16px">👥</a><button class="ico" id="logoutBtn" title="로그아웃" style="display:none">⏻</button><button class="ico" onclick="location.reload()">↻</button>
+</header>
+
+<section><div class="sh"><span class="n">01</span><h2 data-i18n>핵심 지표</h2><span class="cap" id="cap01"></span></div>
+  <div class="grid kgrid" id="kpi_core" data-dyn></div>
+  <div class="grid kgrid" id="kpi_stat" style="margin-top:13px" data-dyn></div></section>
+
+<section><div class="sh"><span class="n">02</span><h2><span class="rg"></span> <span data-i18n>매출 · 사용자 추이</span></h2><div class="seg twonly" id="m02seg" style="margin-left:12px;padding:3px"><button class="on" data-m="week" style="padding:5px 12px">週</button><button data-m="month" style="padding:5px 12px">月</button></div><span class="cap" data-i18n>주간 (최근 12주)</span></div>
+  <div class="grid g3">
+    <div class="card"><div class="ttl" data-i18n>주간 매출<span class="r">₩</span></div><div class="chartbox"><canvas id="c_rev"></canvas><canvas id="c_rev_m" style="display:none"></canvas></div></div>
+    <div class="card"><div class="ttl" data-i18n>신규 사용자 · 활성(WAU)<span class="r" data-i18n>명</span></div><div class="chartbox"><canvas id="c_users"></canvas><canvas id="c_users_m" style="display:none"></canvas></div></div>
+    <div class="card"><div class="ttl" data-i18n>주간 신규 캐릭터<span class="r" data-i18n>개</span></div><div class="chartbox"><canvas id="c_char"></canvas><canvas id="c_char_m" style="display:none"></canvas></div></div>
+  </div>
+  <div class="card scroll" style="margin-top:14px"><div class="ttl" data-i18n>주간 상세 (최근 6주)</div>
+    <table id="t_wow" data-dyn-skip><thead><tr><th data-i18n>주</th><th class="num" data-i18n>신규</th><th class="num" data-i18n>결제건</th><th class="num" data-i18n>매출</th><th class="num" data-i18n>결제자</th><th class="num" data-i18n>신규 캐릭터</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<section><div class="sh"><span class="n">03</span><h2><span class="rg"></span> <span data-i18n>사용자 · 캐릭터 현황</span></h2></div>
+  <div class="grid g4">
+    <div class="card"><div class="ttl" data-i18n>사용자 구성</div><div id="userbars" data-dyn></div></div>
+    <div class="card"><div class="ttl" data-i18n>캐릭터 라이브러리</div><div id="charbars" data-dyn></div></div>
+    <div class="card"><div class="ttl" data-i18n>수익 / 비수익 캐릭터</div><div class="chartbox"><canvas id="c_revdonut2"></canvas></div></div>
+    <div class="card twonly"><div class="ttl" data-i18n>제작 IP 비중 (대만)<span class="r" data-i18n>캐릭터</span></div><div class="chartbox"><canvas id="c_ipdonut"></canvas></div></div>
+  </div>
+</section>
+
+<section><div class="sh"><span class="n">04</span><h2><span class="rg"></span> <span data-i18n>캐릭터 인사이트</span></h2><span class="cap" data-i18n>ProChat(유료) 사용수 · pt</span></div>
+  <div class="grid g2">
+    <div class="card"><div class="ttl">角色 ProChat<span class="r">每月·累計</span></div>
+      <div class="subtabs twonly" id="procseg"><button class="subtab on" data-k="all" data-i18n>전체</button><button class="subtab" data-k="adult">🔞<span data-i18n>성인</span></button><button class="subtab" data-k="sfw">👤<span data-i18n>비성인</span></button></div>
+      <div class="scroll"><table id="t_proc"><thead><tr><th>#</th><th data-i18n>캐릭터</th><th data-i18n>작가</th><th class="num">4월</th><th class="num">5월</th><th class="num">6월</th><th class="num" data-i18n>누적</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card twonly"><div class="ttl">在地(台灣IP)製作角色<span class="r">pt</span></div>
+      <div class="scroll"><table id="t_local"><thead><tr><th>#</th><th data-i18n>캐릭터</th><th data-i18n>작가</th><th class="num">4월</th><th class="num">5월</th><th class="num">6월</th><th class="num" data-i18n>누적</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card twonly" id="adultdonutcard"><div class="ttl" data-i18n>성인 / 비성인 ProChat 비중</div><div class="chartbox"><canvas id="c_adultdonut"></canvas></div></div>
+  </div>
+</section>
+
+<section class="twonly"><div class="sh"><span class="n">+</span><h2 data-i18n>대만 IP 분석</h2><span class="cap" data-i18n>TW-IP 확인 기준</span></div>
+  <div class="grid g2">
+    <div class="card scroll"><div class="ttl" data-i18n>제작자 IP 분포</div><table id="t_ipdist"><thead><tr><th data-i18n>IP 국가</th><th class="num" data-i18n>작가</th><th class="num" data-i18n>캐릭터</th><th class="num" data-i18n>대화수</th></tr></thead><tbody></tbody></table></div>
+    <div class="card scroll"><div class="ttl">在地(台灣IP)作者<span class="r">對話數</span></div><table id="t_localauth"><thead><tr><th>#</th><th data-i18n>작가</th><th class="num" data-i18n>대화수</th><th class="num" data-i18n>캐릭터</th><th class="num" data-i18n>팔로워</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<section><div class="sh"><span class="n">05</span><h2><span class="rg"></span> <span data-i18n>탑 사용자 · 탑 작가</span></h2></div>
+  <div class="grid g2">
+    <div class="card scroll"><div class="ttl">最高付款使用者<span class="r">付款額</span></div>
+      <table id="t_payers"><thead><tr><th>#</th><th data-i18n>닉네임</th><th class="num" data-i18n>결제액(₩)</th><th class="num">≈USD</th><th class="num" data-i18n>건수</th></tr></thead><tbody></tbody></table></div>
+    <div class="card scroll"><div class="ttl">人氣作者<span class="r">對話數 · 點列=角色</span></div>
+      <table id="t_authors"><thead><tr><th>#</th><th data-i18n>작가</th><th class="num" data-i18n>대화수</th><th class="num" data-i18n>캐릭터</th><th class="num" data-i18n>팔로워</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<section id="s_cmp"><div class="sh"><span class="n">06</span><h2 data-i18n>글로벌 비교 (대만 · 한국 · 일본)</h2><span class="cap" data-i18n>2026-05 ~ 06</span></div>
+  <div class="grid g2">
+    <div class="card"><div class="ttl" data-i18n>매출 비중 (USD)</div><div class="chartbox"><canvas id="c_revshare"></canvas></div></div>
+    <div class="card"><div class="ttl" data-i18n>수익 캐릭터 비율 & DAU/MAU</div><div class="chartbox"><canvas id="c_cmpratio"></canvas></div></div>
+  </div>
+  <div class="card scroll" style="margin-top:14px"><table id="t_cmp"><thead><tr><th data-i18n>지표</th><th class="num">🇹🇼 <span data-i18n>대만</span></th><th class="num">🇰🇷 <span data-i18n>한국</span></th><th class="num">🇯🇵 <span data-i18n>일본</span></th></tr></thead><tbody></tbody></table></div>
+</section>
+
+
+
+
+
+<div class="foot" data-i18n>Snowflake 원천 직접 집계. 매출은 현지통화로 기록 — 한국 ₩(KRW)·일본 ¥(JPY)·대만 ₩(KRW 결제, NT$는 환산). USD 환산 $1=₩1,538 / ¥161.6 / NT$31.86. '현지(대만)'=접속 IP가 TW로 확인된 계정. '수익 캐릭터'=ProChat 유료 1건 이상. 매일 자동 갱신.<span id="genAt"></span></div>
+</div>
+<div id="chartModal"><div class="box"><h3 id="modalTitle"></h3><button id="modalClose">✕</button><div class="cv"><canvas id="modalCanvas"></canvas></div></div></div>
+
+<script>window.__BAKED_DATA__={"meta": {"generatedAt": "2026-07-08 09:02 UTC", "source": "snowflake-mcp", "windows": {"rev": "2026-05-01~", "mau": "2026-06-07~2026-07-06", "dau": "avg 2026-06-23~2026-07-06"}, "monthlyNote": "monthly: [월, 매출KRW, 결제건, 결제자, 신규유저, 신규캐릭터, 활동작가] · 마지막 달은 진행중(partial)", "regionsNote": "regions.KR/JP: weekly=[주,신규,결제건,매출(현지통화),결제자,신규캐릭터,WAU](04월~), payers/authors/proc 형식은 TW와 동일", "dataThrough": {"TW": "2026-07-06", "KR": "2026-07-06", "JP": "2026-07-06"}, "coverage": {"TW": {"orders": "2026-07-06", "users": "2026-06-30", "chars": "2026-07-06", "att": "2026-07-06"}, "KR": {"orders": "2026-07-06", "users": "2026-06-26", "chars": "2026-07-06", "att": "2026-07-06"}, "JP": {"orders": "2026-07-06", "users": "2026-06-30", "chars": "2026-07-06", "att": "2026-07-06"}}, "jpCurrencyNote": "JP ORDERS amount는 2026-07-06 적재분부터 JPY(현지통화) 기준으로 재적재됨 — 이전 스냅샷(KRW 추정)과 직접 비교 불가", "lastChecked": "2026-07-08 08:10 UTC (수동 확인: 원천 적재 2026-07-06 19:00까지 — 어제 갱신본과 동일, 변경 없음)", "revMonth": {"label": "2026-07", "asOf": {"TW": "2026-07-07", "KR": "2026-07-06", "JP": "2026-07-06"}, "note": "TW는 Airbridge Order Complete(TWD, 대만시간 일자, transactionID dedup)를 KRW 환산(x48.27). KR/JP는 ORDERS. 예상=MTD/경과일*월일수. TW ORDERS 07-06 적재 이상(₩10,363만 기록)으로 Airbridge를 월 지표 원천으로 사용.", "prevLabel": "2026-06", "prevNote": "revPrevMonth=전월 확정 매출(ORDERS 기준; TW는 Airbridge가 전월 전체를 커버하는 달부터 Airbridge 기준으로 전환)"}, "twActivitySource": "TW mau/dau는 Airbridge WEB_EVENTS 로그인 유저 기준(대만시간, 추적 시작 2026-06-10). active(5월~)와 주간 WAU는 추적 시작일 한계로 체크인(ATTENDANCES) 기준 유지.", "twRevSource": "Airbridge (app_web_total_revenue, KRW) as of 2026-07-09"}, "FX": 1538, "C": {"TW": {"rev": 26816690, "payers": 442, "users": 4416, "newUsers": 4324, "active": 2352, "mau": 1991, "dau": 545, "chars": 653, "authors": 283, "revChars": 524, "arppu": 60671, "revMonth": 7350143, "revMonthProj": 25317159, "revPrevMonth": 17028759}, "KR": {"rev": 5552986000, "payers": 37248, "users": 410052, "newUsers": 63908, "active": 82205, "mau": 69923, "dau": 40427, "chars": 233712, "authors": 37224, "revChars": 156205, "arppu": 149081, "revMonth": 535116100, "revMonthProj": 2764766517, "revPrevMonth": 2507414800}, "JP": {"rev": 41955230, "payers": 1654, "users": 100431, "newUsers": 31009, "active": 26410, "mau": 19295, "dau": 8314, "chars": 30126, "authors": 10819, "revChars": 24240, "arppu": 25366, "revMonth": 3993000, "revMonthProj": 20630500, "revPrevMonth": 16191790}}, "wow": [["02-16", 2, 0, 0, 0, 0], ["02-23", 0, 0, 0, 0, 1], ["03-30", 5, 0, 0, 0, 6], ["04-06", 51, 0, 0, 0, 59], ["04-13", 31, 0, 0, 0, 28], ["04-20", 1, 1, 7362, 1, 11], ["04-27", 3, 0, 0, 0, 20], ["05-04", 8, 8, 86276, 6, 1], ["05-11", 122, 13, 190917, 11, 4], ["05-18", 662, 51, 618814, 36, 44], ["05-25", 663, 89, 1541781, 56, 66], ["06-01", 649, 138, 3624423, 86, 78], ["06-08", 583, 143, 3785097, 91, 125], ["06-15", 624, 178, 3911783, 67, 83], ["06-22", 806, 245, 4678575, 91, 68], ["06-29", 206, 286, 5460310, 108, 47], ["07-06", 0, 140, 2918714, 60, 8]], "wau": {"04-13": 11, "04-20": 10, "04-27": 5, "05-04": 5, "05-11": 62, "05-18": 370, "05-25": 522, "06-01": 672, "06-08": 767, "06-15": 895, "06-22": 990, "06-29": 1108, "07-06": 702}, "payers": [["Amos", 1904950, 285], ["蓮", 1473110, 29], ["陸遠", 907500, 12], ["小幸", 615100, 7], ["傑", 536000, 4], ["阿姆斯", 466000, 9], ["雅", 424000, 3], ["陸仁甲", 360500, 17], ["墨憂", 308500, 5], ["夜", 301500, 4]], "authors": [["CHIARLO", 163466, 2, 42, "🇰🇷", [["我的學院故事", "76fba557-658f-47a6-a05a-da888fd7caee", 151745], ["我的學院故事 (Safety/安全版)", "2d9b25ec-b123-467a-813c-c2eca5d46998", 11721]]], ["RUKE", 94794, 3, 31, "🇰🇷", [["《流明學院的法則》", "e591193a-0824-4111-b1ac-f43f5fc8f0bc", 76331], ["太陽熄滅的世界：異能生存記", "cb6e64f9-41e9-4da7-a52c-3852442c7610", 9326], ["老闆，請讓我留宿一晚吧。", "ae369573-4d7d-4686-9fd1-380db6a0efe3", 9137]]], ["毅OuO", 58276, 21, 35, "🇹🇼", [["異世界奴隸生活", "3a0caef0-b817-4f67-8772-9e4a502ee418", 25933], ["降妖物語", "b077688a-f848-48a7-b943-660da615f403", 6381], ["學生會默示錄", "05794b38-d206-4fff-be9d-79b03623ff33", 4456], ["經營異種族居酒屋", "2c900188-2349-4c6a-843f-e2145884d362", 3355], ["機娘戰鬥學院", "7a07bee8-3c63-4d9e-8411-e530349c5be0", 2802], ["只有我被困的地下城", "8bd5b61a-9797-4bec-97b0-8a071891195d", 2666]]], ["Kuraka", 52882, 2, 25, "🇰🇷", [["殘光之代", "6c7a500b-689d-4c4e-8afb-33668a16e591", 28065], ["九泉之天", "f5b15f4c-d342-4a10-b78f-0fe44d22eca5", 24817]]], ["ARISMILER", 52727, 3, 22, "🇰🇷", [["我的繼姊們", "fbcfa4bb-615f-48a0-8b6c-3df71242510a", 31429], ["與人妻們漂流無人島", "c789ddd2-0d38-4325-8b24-ec2f8e92767b", 13405], ["培養不知羞恥的女孩", "b8867fd0-e6ac-4d64-980e-26ba03ffb406", 7893]]], ["mikuruna", 38056, 1, 10, "🇰🇷", [["公會的青梅竹馬看起來和陽角很要好", "fbd2a9ac-05d9-4bc3-b221-d6c878697f58", 38056]]], ["ARISA", 34239, 2, 6, "🇰🇷", [["​在戒律之下，她被奪走了?", "1c4ef5ff-0fff-4993-b2a9-f20215098610", 20237], ["在色色房裡生存下來", "79e033a7-81ab-41f2-82ef-c91137178191", 14002]]], ["Sky", 31482, 3, 20, "🇹🇼", [["【色色大作戰/Ero A Live】", "3034e169-d9ed-42ab-a511-eb458b10ece4", 20772], ["【神靈遊戲：死亡逃脫審判】", "5396924e-025a-4388-b2a1-ef215e074b80", 10706], ["測試規則", "4e765ea3-e361-4f0f-a830-034bd8bf37d1", 4]]], ["daengdaengi0063", 30166, 4, 6, "🇰🇷", [["我的青梅竹馬墮落了了", "bcca4b18-5b09-44b6-b20d-d51b6a2f8bb5", 23302], ["請和我在一起吧，大叔", "a4c47152-188f-40b2-9d3c-c1bd4d7a09a3", 3867], ["你一直都是我的", "a9a7615e-93e7-45fd-8833-7b89a3c0b99c", 1655], ["我女朋友被訓練了", "21645769-247f-46b5-b51b-e77c305bfec2", 1342]]], ["장난아니네요", 29451, 1, 10, "🇰🇷", [["魔女學院的叛徒 ", "de9ab080-919a-4a0f-ad57-45d4a5f64a1b", 29451]]]], "adultProc": [["我的學院故事", "CHIARLO", "🇰🇷", "76fba557-658f-47a6-a05a-da888fd7caee", 900, 2066801, 4544835, 6612536], ["《流明學院的法則》", "RUKE", "🇰🇷", "e591193a-0824-4111-b1ac-f43f5fc8f0bc", 0, 558456, 2362900, 2921356], ["魔女學院的叛徒 ", "장난아니네요", "🇰🇷", "de9ab080-919a-4a0f-ad57-45d4a5f64a1b", 225, 253047, 757597, 1010869], ["公會的青梅竹馬看起來和陽角很要好", "mikuruna", "🇰🇷", "fbd2a9ac-05d9-4bc3-b221-d6c878697f58", 0, 365932, 641473, 1007405], ["只對2D有感覺的男人", "LongShort", "🇰🇷", "84c02a6e-e201-41eb-95c1-2c315ce874cb", 500, 268956, 536272, 805728], ["殘光之代", "Kuraka", "🇰🇷", "6c7a500b-689d-4c4e-8afb-33668a16e591", 0, 198834, 566619, 765453], ["我的繼姊們", "ARISMILER", "🇰🇷", "fbcfa4bb-615f-48a0-8b6c-3df71242510a", 0, 195014, 554866, 749880], ["​在戒律之下，她被奪走了?", "ARISA", "🇰🇷", "1c4ef5ff-0fff-4993-b2a9-f20215098610", 2625, 131288, 577372, 711285], ["素股俱樂部", "denne", "🇰🇷", "22d2a8d7-4022-49f0-ace9-33e4622297ef", 0, 281772, 427699, 709471], ["九泉之天", "Kuraka", "🇰🇷", "f5b15f4c-d342-4a10-b78f-0fe44d22eca5", 0, 161484, 493170, 654654], ["一開口就說淫言穢語的她，其實是處女？", "운시아", "🇰🇷", "c420c3a0-f8a3-4bc1-9f49-99a2986a0cc7", 0, 270590, 372693, 643283], ["我的青梅竹馬墮落了了", "daengdaengi0063", "🇰🇷", "bcca4b18-5b09-44b6-b20d-d51b6a2f8bb5", 0, 63197, 518165, 581362]], "sfwProc": [["御宅族奇幻冒險生活", "제로클링", "🇰🇷", "58d889d4-d7cd-43ed-b587-8ca68c963307", 365, 312390, 819227, 1131982], ["異世界奴隸生活", "毅OuO", "🇹🇼", "3a0caef0-b817-4f67-8772-9e4a502ee418", 0, 0, 590384, 590384], ["軍隊裏只有我一個人是男人", "lezu", "🇰🇷", "8e6db389-7214-4dcf-97eb-e5ea10441348", 1832, 235169, 271002, 508003], ["高校戰爭", "衣櫃的守護者", "🇰🇷", "74b97527-3ff2-4392-98ec-b40f43a35aaa", 200, 68540, 264943, 333683], ["高中籃球[The Clutch]", "UDO", "🇰🇷", "f0565e96-7b9a-4edb-b536-fa0022f31089", 140, 8300, 272996, 281436], ["四個厭惡我的惡魔", "trashbaby", "🇰🇷", "3121f1a2-14ea-42a0-a691-91e6e274bb78", 0, 192231, 69210, 261441], ["讓開啦，", "Myo_nyang", "🇰🇷", "95fed01f-e91d-4e88-a5de-a7425bd2708e", 935, 141353, 76833, 219121], ["我的學院故事 (Safety/安全版)", "CHIARLO", "🇰🇷", "2d9b25ec-b123-467a-813c-c2eca5d46998", 0, 0, 192625, 192625], ["我在女校當學生會副會長", "尚恩•雷特", "🇹🇼", "b2520aac-8bbc-4b22-bfec-3fe09c945a6c", 0, 0, 153978, 153978], ["財閥公主找上我", "吳邪", "🇹🇼", "01fd3dfe-c3ed-48fb-be76-356dddc641d4", 0, 0, 153647, 153647], ["【神靈遊戲：死亡逃脫審判】", "Sky", "🇹🇼", "5396924e-025a-4388-b2a1-ef215e074b80", 0, 0, 148062, 148062], ["降妖物語", "毅OuO", "🇹🇼", "b077688a-f848-48a7-b943-660da615f403", 0, 0, 139875, 139875]], "localProc": [["異世界奴隸生活", "毅OuO", "🇹🇼", "3a0caef0-b817-4f67-8772-9e4a502ee418", 0, 0, 590384, 590384], ["【色色大作戰/Ero A Live】", "Sky", "🇹🇼", "3034e169-d9ed-42ab-a511-eb458b10ece4", 0, 0, 167440, 167440], ["我在女校當學生會副會長", "尚恩•雷特", "🇹🇼", "b2520aac-8bbc-4b22-bfec-3fe09c945a6c", 0, 0, 153978, 153978], ["財閥公主找上我", "吳邪", "🇹🇼", "01fd3dfe-c3ed-48fb-be76-356dddc641d4", 0, 0, 153647, 153647], ["【神靈遊戲：死亡逃脫審判】", "Sky", "🇹🇼", "5396924e-025a-4388-b2a1-ef215e074b80", 0, 0, 148062, 148062], ["降妖物語", "毅OuO", "🇹🇼", "b077688a-f848-48a7-b943-660da615f403", 0, 0, 139875, 139875]], "ipdist": [["🇹🇼 대만 (TW-IP 확인)", 115, 378, 164875], ["🇰🇷 한국·IP불명 (비대만 시딩)", 168, 271, 843800]], "localAuth": [["毅OuO", 21, 58276, 35], ["Sky", 3, 31482, 20], ["MaxK", 9, 8929, 8], ["諾爾•納辛", 6, 5043, 5], ["秋", 2, 4882, 10], ["遊星", 8, 4467, 5], ["吳邪", 1, 4016, 1], ["蔚 晴空", 125, 3933, 0], ["尚恩•雷特", 3, 3757, 7], ["nayo", 2, 3031, 6]], "infra": [["패스 / 구독 구매 (USER_PASSES)", "0", "899,181", "15,701", "KR 검증된 핵심 매출원이 TW엔 전무", ["通行證/訂閱購買 (USER_PASSES)", "KR 已驗證的核心營收來源,TW 全無"]], ["패스 상품 설정 (PASS_PRODUCTS)", "0", "56", "0", "TW 상품 미설정 → 구독 매출 불가", ["通行證商品設定 (PASS_PRODUCTS)", "TW 未設定商品 → 無法產生訂閱營收"]], ["크리에이터 후원 (DONATIONS)", "8", "14,013", "0", "작가 직접 수익 거의 없음", ["創作者贊助 (DONATIONS)", "作者直接收益幾乎為零"]], ["크리에이터 수익 설정 (CREATOR_USER_CONFIG)", "0", "25", "0", "작가 등급/정산 체계 부재", ["創作者收益設定 (CREATOR_USER_CONFIG)", "缺乏作者等級/結算制度"]]], "traj": [["05-04", 72900], ["05-11", 148600], ["05-18", 542200], ["05-25", 1381200], ["06-01", 3019200], ["06-08", 3187400], ["06-15", 3313000], ["06-22", 3865700], ["06-29", 4548800], ["07-06", 10363]], "monthly": [["2026-02", 0, 0, 0, 2, 0, 0], ["2026-03", 0, 0, 0, 0, 1, 1], ["2026-04", 0, 0, 0, 90, 119, 61], ["2026-05", 2144900, 165, 76, 1456, 120, 73], ["2026-06", 14176300, 776, 203, 2868, 368, 146], ["2026-07", 3768163, 253, 96, 0, 41, 34]], "regions": {"KR": {"weekly": [["04-06", 4325, 21819, 484108200, 9728, 1753, 47981], ["04-13", 7009, 24038, 519012300, 10303, 1805, 49094], ["04-20", 11294, 24930, 523710500, 10755, 1892, 50478], ["04-27", 8936, 26535, 569158300, 11517, 1913, 51825], ["05-04", 7839, 28071, 600755400, 12088, 1984, 52693], ["05-11", 8428, 29257, 558795400, 13087, 1932, 53754], ["05-18", 8976, 28985, 531686200, 13144, 1924, 54266], ["05-25", 9538, 30781, 551369500, 13718, 2013, 55206], ["06-01", 6657, 33377, 591024800, 14351, 1931, 55442], ["06-08", 6864, 33803, 598304000, 14686, 1679, 54945], ["06-15", 6828, 33663, 581392300, 14649, 1753, 54893], ["06-22", 4763, 33102, 568113700, 14695, 1806, 55425], ["06-29", 0, 35721, 627293300, 15524, 1870, 55802], ["07-06", 0, 4647, 76402800, 3772, 192, 38901]], "payers": [["히마리", 18405200, 208], ["강찬", 18010800, 266], ["사르카", 15038800, 243], ["다크모닝", 15007000, 163], ["유현", 14590400, 154], ["백진우", 14076600, 162], ["이성현", 13742600, 586], ["송영일", 13733200, 154], ["최재원", 13323600, 310], ["보약", 12819400, 247]], "authors": [["키아를로", 22496817, 59, 8433, "🇰🇷", [["나의 아카데미 이야기", "a08b639c-9a80-4cd0-b1db-93e18713abe9", 8025781], ["이 세계에서 살아가는 법 ", "4ae72ca8-8fdc-4825-8ea4-7d3a2dbc1037", 1973033], ["너도 똑같을거잖아 RE", "9cee1ea6-8d34-496f-be82-e5240f7719ef", 1611368], ["너도 똑같을거잖아", "42288111-af3b-4cad-b6e8-f7942492601e", 966337], ["나의 아카데미 이야기(세이프티)", "fe89f463-1e1c-40ab-b535-8dbf5e8ac404", 791119], ["검성 키우기", "f584c661-3434-4755-beb5-9c785db47cda", 621979]]], ["선수겸 감독 김수겸", 18670082, 12, 765, "🇰🇷", [["창작물 빙의 시뮬레이션 (언셒)", "64fdf92e-ff54-4ecf-98be-3466f4e1d88a", 13846364], ["창작물 빙의 시뮬레이션", "c6bc2d84-4832-4165-8691-74715e12b9f2", 4815535], ["히키코모리 아싸 오타쿠 한수빈", "d69eab3d-36c6-4e5e-bf6a-24f2384a26e6", 7364], ["창작물 빙의 시뮬레이션 (테스트)", "bec3d1b2-055b-4de6-8e91-3e30d4680bd5", 576], ["엘라 그레이스턴", "41cdfbed-4042-4797-ba95-a55a5db50bef", 156], ["릴리안 메이어", "c7a6c461-9a9b-4396-b1ac-db8b6f8f33ea", 51]]], ["마시멜로", 12911500, 10, 2269, "🇰🇷", [["RE: X같은 성좌 말 좀 해라 제발", "6cf75841-856c-47e7-ad2f-df3f1ee02862", 12625970], ["성좌야, 저 새끼꺼 뺏어.", "3357ed24-9f18-473e-9b29-1d6e308b25fb", 129071], ["얼어붙은 심장", "96a7451f-a386-402f-a39b-6daae5802b94", 89604], ["복수를 위해!", "c27627c9-ffba-4fa6-bca3-c99ad452eecf", 43614], ["그날, 세상은 바뀌었다", "09d5d9f5-14c1-41c5-8d6c-8828735c1f22", 16766], ["에리시엘 노아르", "7359034e-160e-44c7-9ef8-3a90c4984f62", 3996]]], ["ㅇㅇ(39.7)", 10702517, 57, 4765, "🇰🇷", [["우리들의 이야기를!", "8b2d5b7c-dd97-4198-917a-f628a56b41b3", 2970811], ["어느새 눌러앉은 일진녀들", "6c4b5429-34b0-44fd-bd6b-0fdac3c20ae1", 1757070], ["Re:여군 포로 생존기", "316c76bc-2072-423c-9618-edf48e732150", 1166695], ["금태양 여친 정수아", "96af1784-3b05-4962-86c4-7ec16b77e109", 770896], ["동거 일진녀 한아린", "009d2962-dd3d-4f12-ae7a-565f49e96b00", 599378], ["지극히 평범하고 일상적인 세계.", "49f4fd5e-11d9-408d-b1d8-ed4bd5b17412", 434753]]], ["노치", 8667818, 31, 3979, "🇰🇷", [["신마전쟁:아크라이트", "2b1492c1-7777-4ded-9f34-bc1c6eca8890", 2829486], ["소꿉친구가 아카데미에 납치되었다", "fcc4cf55-ef40-44f2-be67-5b8e5528f892", 1918202], ["유니온 아카데미 RE", "ab604ee6-38c9-4440-9d71-204c3ee882b8", 1409408], ["여사친의 스마트폰", "d27234cd-25e6-4234-b1f3-f89b5a55dce8", 648075], ["신고는 안할테니까...", "963c9d40-aa16-43ce-9cbd-951294c9cca6", 410099], ["유니온 아카데미", "ede8c076-1c38-4a5c-bf87-ed99c6080cf7", 404594]]], ["룽기당", 8057234, 46, 2181, "🇰🇷", [["로얄 아카데미", "cf50f5dd-04e3-4f40-86cb-12c074ac42dc", 4246719], ["귀족 아카데미의 침략자", "09107060-b6d5-4ae3-bdf5-3a9774f11e5d", 2211996], ["차원수호대의 하렘탈취자", "54035830-6891-48ae-bed8-2d505d9c595e", 552736], ["히어로 아카데미의 빌런", "d426b466-7e93-4035-b1de-311162d57aef", 206919], ["하렘동아리의 패배자", "70c5ee2b-1077-4b9f-b701-143e0d0337db", 142007], ["하렘파티의 귀환자", "db419393-570f-4d82-955b-63229d8630c0", 101102]]], ["키보드에음료쏟아서고장내는이도윤", 8002068, 41, 3507, "🇰🇷", [["절대강림", "9a290a9e-f469-466e-b76f-f0b122a89d29", 2386818], ["절대환생", "45bf076d-a300-4fb5-b74b-c6139e722cdf", 1207227], ["이웃 걸레", "ac05a6c3-a9d4-46d7-9e15-91981f7c543c", 863025], ["X신 회귀", "d952fa5d-1fc3-46e2-948e-875f072f4dfc", 734961], ["절대귀환", "db391967-83fd-49e9-be34-4f4697a5fd33", 707494], ["하렘 빈집털이", "931b0b61-9d54-407c-9dc1-f9609405d525", 414756]]], ["레테", 7679085, 125, 2214, "🇰🇷", [["디바인 아카데미", "e332026d-d711-4bef-ad3b-70ec426bd944", 3624079], ["에버렛", "fc065d24-453b-4c60-ac6c-95edd173af4b", 1683871], ["디바인 아카데미(언셒)", "7640aeec-4e58-440e-ba7d-05f628a1f643", 500550], ["레라브", "194f89f6-f3ea-42cd-85be-c07733663f33", 337447], ["윤서아", "d2a043ee-4ce9-4217-bcad-8fd3d20b09d2", 134162], ["백하윤", "ecddfeb7-4e75-415a-abbd-76f78ff58204", 117470]]], ["유우키", 7494193, 83, 3423, "🇰🇷", [["재벌들이 다니는 학교에 입학했다.", "1156740d-2e9c-4695-8218-da6dc82fe64f", 2463957], ["슬기로운 군대생활", "e2a4587a-70d4-4716-93c4-f5cbc383c40d", 1055779], ["RE:슬기로운 군대생활", "4cc2c128-d4c2-4549-b392-0f8fbd55c954", 455264], ["초능력 히어로 아카데미", "f47c4d05-6b24-47a3-9257-f42f626dbb35", 336793], ["제자들이 성좌가 되었다.", "3e2813ca-52f2-48ab-bcca-8669b637be0c", 321004], ["RE:PLAY (라스트 피스)", "26107e41-f7fc-441d-94e4-807265efbedd", 189225]]], ["만악룡", 7374223, 62, 2047, "🇰🇷", [["BLACKDOGS", "8a13e58d-8621-4080-83f2-cc7854b2163b", 2059635], ["천태호", "699cdd42-5305-419c-8eac-7c324866e0e0", 955089], ["BLACKEE", "271ea7bc-a67c-4c24-838f-899c856b1e94", 499091], ["오지상", "1b9ec37d-cbfc-40d8-a250-452ce6a46bf1", 491169], ["태건후", "cc825a34-d8c7-4f2f-8cc1-9323c7c52daa", 463129], ["어서오세요 은화파출소", "18580e86-ca48-4881-ac17-6303f36c9f12", 380056]]]], "proc": [["창작물 빙의 시뮬레이션 (언셒)", "선수겸 감독 김수겸", "🇰🇷", "64fdf92e-ff54-4ecf-98be-3466f4e1d88a", 66219096, 74207999, 63909062, 1284996924], ["RE: X같은 성좌 말 좀 해라 제발", "마시멜로", "🇰🇷", "6cf75841-856c-47e7-ad2f-df3f1ee02862", 30915663, 22998620, 21351099, 1164675308], ["나의 아카데미 이야기", "키아를로", "🇰🇷", "a08b639c-9a80-4cd0-b1db-93e18713abe9", 104248019, 133078778, 89120680, 735824837], ["경찰특공대 하렘전쟁", "레이Zero", "🇰🇷", "f2af8515-1eb7-4442-87b7-9db8bf3321f2", 11684764, 9195392, 7368247, 463302242], ["창작물 속으로!", "셀트리온", "🇰🇷", "6b25632e-5c94-456f-a1fc-3cc1550d9156", 22104989, 22200800, 19632974, 420208180], ["창작물 빙의 시뮬레이션", "선수겸 감독 김수겸", "🇰🇷", "c6bc2d84-4832-4165-8691-74715e12b9f2", 23128122, 25353490, 22126895, 412122918], ["로얄 아카데미", "룽기당", "🇰🇷", "cf50f5dd-04e3-4f40-86cb-12c074ac42dc", 35991581, 26796095, 26383501, 384438738], ["아이 앰 어 히어로", "란음", "🇰🇷", "ab0f17ec-6265-415d-bfd7-1f1564981d92", 22205682, 16973584, 16589692, 374457678], ["아카데미의 하렘 붕괴범", "유재겸", "🇰🇷", "e807cc5e-7ddb-4c17-b4f3-89985db0c431", 4647771, 5724387, 4424721, 340351100], ["쿼터백이 너랑 자겠냐고ㅋㅋ", "안", "🇰🇷", "1dc8b056-5dee-4d98-9c1e-71e39cc77b68", 23556225, 22827736, 22482744, 323837224], ["이세계·판타지·시뮬레이션", "마목", "🇰🇷", "99528672-2c25-4b8b-aea7-30af6d14f4bc", 9870861, 10281617, 8222241, 279309715], ["우리들의 이야기를!", "ㅇㅇ(39.7)", "🇰🇷", "8b2d5b7c-dd97-4198-917a-f628a56b41b3", 5075289, 5434758, 4112882, 278981673]]}, "JP": {"weekly": [["04-06", 2158, 1445, 3278600, 363, 672, 8843], ["04-13", 1892, 1124, 2767060, 324, 631, 8622], ["04-20", 1971, 1121, 2834200, 342, 796, 8705], ["04-27", 2330, 748, 9298900, 248, 1068, 8947], ["05-04", 2648, 856, 6641510, 329, 1106, 9392], ["05-11", 2699, 917, 2544690, 349, 914, 9648], ["05-18", 2906, 1153, 3001140, 400, 921, 10236], ["05-25", 3291, 1374, 3195800, 472, 919, 10675], ["06-01", 3722, 1325, 3485940, 455, 1017, 11262], ["06-08", 3997, 1384, 3487860, 492, 991, 11543], ["06-15", 4215, 1490, 3794810, 501, 997, 11728], ["06-22", 4968, 1635, 4080690, 538, 968, 12048], ["06-29", 1613, 1834, 4833280, 586, 963, 12444], ["07-06", 0, 226, 502210, 154, 118, 8011]], "payers": [["わおん", 1669800, 849], ["レイヴン", 1227900, 137], ["コザ", 1102700, 87], ["クラウン", 1091000, 248], ["リィン", 1058200, 83], ["ひろくん", 985790, 312], ["ぽよ", 980590, 709], ["小林 幸太", 972800, 117], ["ななし", 781060, 204], ["涼音", 737280, 91]], "authors": [["CHIARLO", 6963138, 4, 742, "", [["私の アカデミー ストーリー", "ba108f0f-f75e-4757-80ca-e32aa2fa36f2", 4012177], ["この世界で生き抜く方法", "b44d33af-3a0b-4369-9b21-f7a81328d26c", 2409867], ["あなただって結局…同じでしょ？", "d5a2edb4-7eb6-42cd-b721-0d4f1be03b21", 541094], ["キャラクタ", "96fc32b9-3903-4204-819a-0ded6330f6ab", 0]]], ["ゴロシは悪い", 3773258, 1, 474, "", [["戦線都市(せんせんとし)", "a6def678-1d4e-4ea5-adef-6fc78bbe6b82", 3773258]]], ["バブバ", 3733402, 3, 778, "", [["ドスケべ特別捜査隊", "0bf12e9c-b354-446e-94f5-582d34bd0240", 3457236], ["CORRECTED", "f89be984-bce4-469e-aa6a-ee3e16d7469d", 263146], ["好感度操作アプリが…通じない？", "74d16592-102a-43bb-be81-a33935085bd6", 13020]]], ["知らん", 2871480, 1, 467, "", [["帝国と征服者", "8e961c2a-1798-4ea8-b5b9-b0205954843e", 2871480]]], ["まるおす", 2496802, 122, 1152, "", [["逃亡少女 サリナ", "f7401999-848d-4009-a75d-f19dfb0c0d7a", 185575], ["♡ビッチ・イン・ザ・ビーチ♡", "8baa3f89-c9df-4fe9-bf1b-503e55962119", 138502], ["淫乱褐色ギャルOL マナカ", "ad1b4552-755e-4c30-bb7c-9d2e2412dd39", 111549], ["爆乳家族に拾われて……♡", "f7371fea-410b-4fb4-8d07-7211c321301c", 94238], ["爆乳姉妹を言いなりに……♡ ミキ＆マヤ", "8f48bdcc-0572-40f1-89dd-ccb65ea027ee", 88899], ["♡プリンセス♔ガーデン♡", "e89daf26-27e4-4fa3-a808-0527dc734ef7", 82426]]], ["うるしるし", 1535956, 11, 346, "", [["世界は変わらず廻ってる", "9aa7d59e-d5e5-49e3-874d-4a7e8a5d95f4", 814354], ["誰が為のスペクトラ", "a41bac6d-e8b5-49ac-911d-5afab7ab9e22", 304452], ["アストラ戦記~ヴォイドの謎~", "f732c43b-7e55-49d4-9568-f1f577353a59", 299695], ["パイズリ専門店へようこそ！", "6042f96d-3ddd-4923-a3d7-f0bf4a1234dd", 75694], ["キャバ嬢るしちゃんと仲良くなろう！", "b2f6397b-175f-40a6-90d3-7278a989250e", 26072], ["(全年齢対象)世界は変わらず廻ってる", "e5404749-1e79-4685-bb4b-f2b95279eca2", 5101]]], ["無名00", 1496779, 5, 449, "", [["シェルターのメス 管理人 [サバイバル]", "b22a08a3-397b-4e31-8b4b-0af6cc6738e1", 728309], ["勇者の血統は俺だけだ。", "3109e31e-e9f4-4cc7-994b-6ddd81b3cf89", 307656], ["プロジェクト・ノイズ [シオン登場!]", "12a7dfaa-8e45-4cd4-91f1-60a20e0327d2", 273246], ["DV妻とヒモ", "2abdd1d4-c54a-4e27-9208-7f85ef23ab15", 142533], ["キス・ペットとして就職", "f9819e62-a8c0-4917-850e-5ac90e9d8509", 45035]]], ["RUKE", 1321433, 1, 173, "", [["ルーメンアカデミーの掟 おきて", "7cf3413d-3adc-4ed6-84af-ec9368288025", 1321433]]], ["エヌ", 1321323, 1, 191, "", [["アイドルアカデミーの救世主‼", "712dac0e-8009-4f98-a900-a9fe1540114c", 1321323]]], ["メロンアイス", 1241614, 3, 185, "", [["ブルーアーク", "7fdd522e-9bcb-49dc-b2b6-9d01cc86e103", 1074081], ["アルデニアへようこそ！", "999b3aae-177d-434a-88f5-a171d6d912e8", 167533], ["ブルーアーク 画像参考", "8801c86e-8574-4251-a0cc-11011ce0bf13", 0]]]], "proc": [["私の アカデミー ストーリー", "CHIARLO", "", "ba108f0f-f75e-4757-80ca-e32aa2fa36f2", 795011, 700650, 531953, 3842953], ["戦線都市(せんせんとし)", "ゴロシは悪い", "", "a6def678-1d4e-4ea5-adef-6fc78bbe6b82", 319390, 277964, 159343, 3729743], ["ドスケべ特別捜査隊", "バブバ", "", "0bf12e9c-b354-446e-94f5-582d34bd0240", 147187, 286216, 210258, 3408488], ["帝国と征服者", "知らん", "", "8e961c2a-1798-4ea8-b5b9-b0205954843e", 243636, 279873, 169838, 2837203], ["この世界で生き抜く方法", "CHIARLO", "", "b44d33af-3a0b-4369-9b21-f7a81328d26c", 188113, 150313, 92619, 2392568], ["アイドルアカデミーの救世主‼", "エヌ", "", "712dac0e-8009-4f98-a900-a9fe1540114c", 100334, 98540, 68686, 1299234], ["ルーメンアカデミーの掟 おきて", "RUKE", "", "7cf3413d-3adc-4ed6-84af-ec9368288025", 0, 525333, 684341, 1209674], ["ブルーアーク", "メロンアイス", "", "7fdd522e-9bcb-49dc-b2b6-9d01cc86e103", 101688, 85441, 59435, 1063145], ["幼馴染みがアカデミーに拉致された", "ノチ", "", "c8452e15-bfe4-4d75-b983-1a690052cc20", 113092, 87677, 80459, 949222], ["世界は変わらず廻ってる", "うるしるし", "", "9aa7d59e-d5e5-49e3-874d-4a7e8a5d95f4", 524570, 187888, 86474, 798932], ["シェルターのメス 管理人 [サバイバル]", "無名00", "", "b22a08a3-397b-4e31-8b4b-0af6cc6738e1", 56872, 73561, 46529, 718008], ["あなただって結局…同じでしょ？", "CHIARLO", "", "d5a2edb4-7eb6-42cd-b721-0d4f1be03b21", 40829, 42187, 38306, 535778]]}}, "recs": [["💳", "결제 패스·구독 상품 즉시 도입", "P1", "p1", "대만은 USER_PASSES·PASS_PRODUCTS가 모두 0. 한국은 누적 89.9만 건 패스 구매가 핵심 매출원. 월정액 패스/구독만 설정해도 가장 빠른 ARPPU 상승 가능.", "근거: ARPPU TW ₩67.4K vs KR ₩149.1K·JP ¥25.4K · 패스 TW 0 / KR 899,181", ["立即導入通行證·訂閱商品", "台灣的 USER_PASSES·PASS_PRODUCTS 皆為 0。韓國累計 89.9 萬筆通行證購買為核心營收來源。僅設定月費通行證/訂閱即可最快提升 ARPPU。", "依據: ARPPU TW ₩67.4K vs KR ₩149.1K·JP ¥25.4K · 通行證 TW 0 / KR 899,181"]], ["🐋", "고액 결제자(웨일) 관리", "P1", "p1", "상위 2명(Amos ₩1.90M·蓮 ₩1.47M)에 매출 집중. VIP 등급·전용 혜택·고액 패키지로 상위층 집중 육성.", "근거: 누적 결제 TOP10 · 고액 패키지(₩200K) 수요 확인", ["高額付費者(鯨魚)管理", "營收集中於前2名(Amos ₩1.90M·蓮 ₩1.47M)。以 VIP 等級·專屬權益·高額禮包重點培養頂層。", "依據: 累計付款 TOP10 · 高額禮包(₩200K)需求確認"]], ["✍️", "현지 크리에이터 수익화·육성", "P2", "p2", "크리에이터당 캐릭터 TW 2.3 vs KR 6.3로 생태계 얕음. 후원·정산·작가등급 열고 현지 작가 육성.", "근거: 후원 TW 8 vs KR 14,013 · TW-IP 작가 대화 비중 16.3%", ["在地創作者變現·培育", "每位創作者角色數 TW 2.3 vs KR 6.3,生態尚淺。開放贊助·結算·作者等級,培育在地作者。", "依據: 贊助 TW 8 vs KR 14,013 · TW-IP 作者對話佔比 16.3%"]], ["📈", "수익 캐릭터 비율 유지·확대", "P2", "p2", "수익 캐릭터 비율 TW 80.2%까지 개선(3개국 최고 수준). 신규 캐릭터 온보딩·추천 노출 유지로 비율 방어.", "근거: 수익 캐릭터 TW 80.2% / KR 66.8% / JP 80.5%", ["維持·擴大營收角色比率", "營收角色比率已改善至 TW 80.2%(三國最高水準)。維持新角色上架·推薦曝光以守住比率。", "依據: 營收角色 TW 80.2% / KR 66.8% / JP 80.5%"]], ["🔁", "리텐션·고착도 개선", "P3", "p3", "DAU/MAU TW 35%로 KR 58%보다 낮음. 출석 보상·푸시·연속 대화 리워드로 데일리 루프 강화.", "근거: DAU/MAU TW 34.6% / JP 43.1% / KR 57.8%", ["改善留存·黏著度", "DAU/MAU TW 35% 低於 KR 58%。以簽到獎勵·推播·連續對話獎勵強化每日循環。", "依據: DAU/MAU TW 34.6% / JP 43.1% / KR 57.8%"]]], "_m02": [["2026-02", 0, 2, 0, false], ["2026-03", 0, 0, 1, false], ["2026-04", 0, 90, 119, false], ["2026-05", 2437788, 1456, 120, false], ["2026-06", 17028759, 2868, 368, false], ["2026-07", 7350143, 0, 41, true]]};</script>
+<script>
+let FX=1538;
+let DATA_THROUGH={}; // meta.dataThrough(주문 기준) — 하위호환
+let COVERAGE={}; // meta.coverage: {rg:{orders,users,chars,att}} 지표별 적재 마지막 날짜 // 결제 데이터 적재 마지막 날짜(시드) — data.json meta.dataThrough가 덮어씀
+const TWBASE="https://babechat.asia",KRBASE="https://babechat.ai";
+const linkBase={TW:TWBASE,KR:KRBASE,JP:KRBASE,ALL:KRBASE};
+const clink=cid=>linkBase[REGION]+"/character/u/"+cid+"/profile";
+const nf=n=>Number(n).toLocaleString(), won=k=>"₩"+nf(k), usd=k=>"$"+Math.round(k/FX).toLocaleString();
+const CUR={TW:'KRW',KR:'KRW',JP:'JPY',ALL:'USD'},FXR={KRW:1538,JPY:161.6,TWD:31.86,USD:1},SYM={KRW:'₩',JPY:'¥',TWD:'NT$',USD:'$'};
+const usdNum=(rg,v)=>v/FXR[CUR[rg]];
+const usdOf=(rg,v)=>'$'+Math.round(usdNum(rg,v)).toLocaleString();
+const eok=()=>LANG==='zh'?'亿':'억';
+const locShort=(rg,v)=>rg==='ALL'?'$'+Number(Math.round(v)).toLocaleString():SYM[CUR[rg]]+(v/1e8).toFixed(2)+eok();
+const twNT=v=>'NT$'+Math.round(usdNum('TW',v)*FXR.TWD).toLocaleString();
+const nz=n=>n>0?nf(n):"–";
+
+// ===== 지역 비교 집계 (5월~) =====
+let C={TW:{},KR:{},JP:{}}; // 실데이터는 data.json d.C에서 로드 (시드 없음)
+const ratio=c=>c.revChars/c.chars*100, dauMau=c=>c.dau/c.mau*100;
+
+// ===== 지역별 상세 (weekly:[wk,nu,po,rev,pay,nc,wau], payers:[nick,spend,n], authors:[nick,chats,nchars,fol,flag,chars[[name,cid,chats]]], proc:[name,author,flag,cid,apr,may,jun,tot]) =====
+const REG={ // 실데이터는 data.json(wow·payers·authors·adultProc·sfwProc·localProc·ipdist·localAuth·regions.KR/JP)에서 로드 (시드 없음)
+TW:{cap:"대만 (BABECHAT_TW · KRW)",weekly:[],payers:[],authors:[],proc:[],adult:[],sfw:[],local:[],ipdist:[],localAuth:[]},
+KR:{cap:"한국 (BABECHAT · KRW)",weekly:[],payers:[],authors:[],proc:[]},
+JP:{cap:"일본 (BABECHAT_JP · JPY)",weekly:[],payers:[],authors:[],proc:[]}};
+let infra=[]; // data.json d.infra에서 로드
+let recs=[]; // data.json d.recs에서 로드
+
+// ===== 전체(TW+KR+JP) 통합 뷰 합성 — 매출은 USD 환산 합산 =====
+function buildALL(){
+ const rgs=['TW','KR','JP'],fl={TW:'🇹🇼',KR:'🇰🇷',JP:'🇯🇵'};
+ const sum=k=>rgs.reduce((t,r)=>t+(+C[r][k]||0),0);
+ const revU=rgs.reduce((t,r)=>t+usdNum(r,+C[r].rev||0),0);
+ const revMU=rgs.reduce((t,r)=>t+usdNum(r,+C[r].revMonth||0),0),revPU=rgs.reduce((t,r)=>t+usdNum(r,+C[r].revMonthProj||0),0);
+ C.ALL={rev:Math.round(revU),revMonth:Math.round(revMU),revMonthProj:Math.round(revPU),revPrevMonth:Math.round(rgs.reduce((t,r)=>t+usdNum(r,+C[r].revPrevMonth||0),0)),payers:sum('payers'),users:sum('users'),newUsers:sum('newUsers'),active:sum('active'),mau:sum('mau'),dau:sum('dau'),chars:sum('chars'),authors:sum('authors'),revChars:sum('revChars'),arppu:Math.round(revU/Math.max(1,sum('payers')))};
+ const wk={};
+ rgs.forEach(r=>(REG[r].weekly||[]).forEach(w=>{const o=wk[w[0]]||(wk[w[0]]=[w[0],0,0,0,0,0,0]);o[1]+=+w[1]||0;o[2]+=+w[2]||0;o[3]+=usdNum(r,+w[3]||0);o[4]+=+w[4]||0;o[5]+=+w[5]||0;o[6]+=+w[6]||0;}));
+ REG.ALL={cap:'전체 TW+KR+JP (USD 환산)',
+  weekly:Object.values(wk).sort((a,b)=>a[0]<b[0]?-1:1).map(o=>[o[0],o[1],o[2],Math.round(o[3]),o[4],o[5],o[6]]),
+  payers:rgs.flatMap(r=>(REG[r].payers||[]).map(x=>[fl[r]+' '+x[0],Math.round(usdNum(r,x[1])),x[2]])).sort((a,b)=>b[1]-a[1]).slice(0,10),
+  authors:rgs.flatMap(r=>(REG[r].authors||[]).map(a=>[a[0],a[1],a[2],a[3],fl[r],a[5]||[]])).sort((a,b)=>b[1]-a[1]).slice(0,10),
+  proc:rgs.flatMap(r=>(REG[r].proc||[]).map(x=>[x[0],x[1],fl[r],x[3],x[4],x[5],x[6],x[7]])).sort((a,b)=>b[7]-a[7]).slice(0,12)};
+}
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+let REGION='TW', LANG='zh', PROC='all', CH=[];
+const RGNAME={TW:'대만',KR:'한국',JP:'일본',ALL:'전체'};
+
+// ===== KPI =====
+function renderCore(){
+ const c=C[REGION]; $('#cap01').textContent=REG[REGION].cap; const isTW=REGION==='TW';const z=LANG==='zh';
+ const T=z?{rev:'營收 (5月~)',pay:'付款使用者',conv:'轉換率',reg:'註冊使用者',newu:'新增',mau:'活躍 MAU',avgdau:'平均 DAU',stick:'黏著度',ch:'角色',au:'作者',myeong:'人',ratio:'營收角色比率',occur:'個角色 ProChat 發生',arppu:'ARPPU',new5:'新增(5月~)',auth5:'作者數',act5:'活躍(5月~)',avg:'平均 DAU'}
+  :{rev:'매출 (5월~)',pay:'결제 사용자',conv:'전환율',reg:'등록 사용자',newu:'신규',mau:'활성 MAU',avgdau:'평균 DAU',stick:'고착도',ch:'캐릭터',au:'작가',myeong:'명',ratio:'수익 캐릭터 비율',occur:'개 ProChat 발생',arppu:'ARPPU',new5:'신규(5월~)',auth5:'작가 수',act5:'활성(5월~)',avg:'평균 DAU'};
+ const ml=((window.__REVM_LABEL||'').slice(5,7)||'').replace(/^0/,'');
+ const mLab=ml?(z?ml+'月 營收':ml+'월 매출'):(z?'本月營收':'이번달 매출');
+ const pml=ml?String(((+ml+10)%12)+1):'';
+ const pmLab=pml?(z?pml+'月 營收 (確定)':pml+'월 매출 (확정)'):(z?'上月營收':'전월 매출');
+ const core=[
+  {l:'💰 '+mLab,v:usdOf(REGION,c.revMonth||0),sub:(z?'月底預估 ':'월말 예상 ')+usdOf(REGION,c.revMonthProj||0)+(isTW&&c.revMonth?' · '+twNT(c.revMonth):''),d:(c.revMonthProj&&c.revPrevMonth)?[(c.revMonthProj>=c.revPrevMonth?'▲ +':'▼ ')+((c.revMonthProj/c.revPrevMonth-1)*100).toFixed(0)+'%'+(z?' vs 上月':' vs 전월'),c.revMonthProj>=c.revPrevMonth?'up':'down']:null},
+  {l:'🧾 '+(pmLab),v:usdOf(REGION,c.revPrevMonth||0),sub:locShort(REGION,c.revPrevMonth||0)+(isTW&&c.revPrevMonth?' ≈ '+twNT(c.revPrevMonth):''),d:null},
+  {l:'💳 '+T.pay,v:nf(c.payers),sub:T.conv+' '+(c.payers/c.mau*100).toFixed(1)+'% (／MAU)',d:null},
+  {l:'👥 '+T.reg,v:nf(c.users),sub:T.newu+' '+nf(c.newUsers)},
+  {l:'🟢 '+T.mau,v:nf(c.mau),sub:T.avgdau+' '+nf(c.dau)+' · '+T.stick+' '+dauMau(c).toFixed(0)+'%'},
+  {l:'🎭 '+T.ch,v:nf(c.chars),sub:T.au+' '+nf(c.authors)+T.myeong},
+  {l:'🔥 '+T.ratio,v:ratio(c).toFixed(1)+'%',sub:nf(c.revChars)+T.occur},
+  {l:'💳 '+(z?'累計營收 (5月~)':'누적 매출 (5월~)'),v:usdOf(REGION,c.rev),sub:locShort(REGION,c.rev)+(isTW?' ≈ '+twNT(c.rev):'')}];
+ $('#kpi_core').innerHTML=core.map(k=>`<div class="card kpi"><div class="lab">${k.l}</div><div class="val">${k.v}</div>${k.d?`<span class="dl ${k.d[1]}">${k.d[0]}</span>`:''}<div class="sub">${k.sub}</div></div>`).join('');
+ const st=[[T.arppu,SYM[CUR[REGION]]+nf(c.arppu)],[T.avg,nf(c.dau)],[T.new5,nf(c.newUsers)],[T.auth5,nf(c.authors)],[T.act5,nf(c.active)]];
+ $('#kpi_stat').innerHTML=st.map(s=>`<div class="card kpi kstat"><div class="val">${s[1]}</div><div class="lab">${s[0]}</div></div>`).join('');
+}
+// ===== tables =====
+function renderWow(){const w=REG[REGION].weekly.filter(r=>r[3]>0||REGION!=='TW').slice(-6);
+ const wkMark=lab=>['orders','users','chars','att'].some(mt=>wkCov(REGION,mt,lab).state!=='full')?' ⏳':'';
+ $('#t_wow tbody').innerHTML=w.map(r=>`<tr><td>${r[0]}${wkMark(r[0])}</td><td class="num">${nz(r[1])}</td><td class="num">${nz(r[2])}</td><td class="num">${r[3]?locShort(REGION,r[3]):'–'}</td><td class="num">${nz(r[4])}</td><td class="num">${nz(r[5])}</td></tr>`).join('');}
+function procTable(el,list){const max=Math.max(...list.map(p=>p[7]));
+ $(el).innerHTML='<tbody>'+list.slice(0,6).map((p,i)=>`<tr><td><span class="rk ${i<3?'t':''}">${i+1}</span></td><td><a class="clink" href="${clink(p[3])}" target="_blank" rel="noopener">${p[0]}</a><div class="bar"><i style="width:${Math.max(4,p[7]/max*100)}%"></i></div></td><td class="by">${p[2]?`<span class="flag">${p[2]}</span> `:''}${p[1]}</td><td class="num">${nz(p[4])}</td><td class="num">${nz(p[5])}</td><td class="num" style="color:var(--pink2);font-weight:700">${nz(p[6])}</td><td class="num" style="font-weight:800">${nf(p[7])}</td></tr>`).join('')+'</tbody>';
+ // keep thead
+ $(el).querySelector('tbody').insertAdjacentElement('beforebegin',$(el).querySelector('thead'));}
+function renderProc(){const r=REG[REGION];const map={all:r.proc,adult:r.adult||r.proc,sfw:r.sfw||r.proc};
+ const list=map[PROC]||r.proc;
+ const tb=$('#t_proc tbody');const max=Math.max(...list.map(p=>p[7]));
+ tb.innerHTML=list.slice(0,LIM_PROC).map((p,i)=>`<tr><td><span class="rk ${i<3?'t':''}">${i+1}</span></td><td><a class="clink" href="${clink(p[3])}" target="_blank" rel="noopener">${p[0]}</a>${(PROC==='adult'&&REGION==='TW')?' <span class="abadge">🔞</span>':''}<div class="bar"><i style="width:${Math.max(4,p[7]/max*100)}%"></i></div></td><td class="by">${p[2]?`<span class="flag">${p[2]}</span> `:''}${p[1]}</td><td class="num">${nz(p[4])}</td><td class="num">${nz(p[5])}</td><td class="num" style="color:var(--pink2);font-weight:700">${nz(p[6])}</td><td class="num" style="font-weight:800">${nf(p[7])}</td></tr>`).join('');
+ if(REGION==='TW'&&r.local){const lt=$('#t_local tbody');const lm=Math.max(...r.local.map(p=>p[7]));
+  lt.innerHTML=r.local.slice(0,LIM_LOCAL).map((p,i)=>`<tr><td><span class="rk ${i<3?'t':''}">${i+1}</span></td><td><a class="clink" href="${clink(p[3])}" target="_blank" rel="noopener">${p[0]}</a><div class="bar"><i style="width:${Math.max(4,p[7]/lm*100)}%"></i></div></td><td class="by">${p[1]}</td><td class="num">${nz(p[4])}</td><td class="num">${nz(p[5])}</td><td class="num" style="color:var(--pink2);font-weight:700">${nz(p[6])}</td><td class="num" style="font-weight:800">${nf(p[7])}</td></tr>`).join('');}
+}
+function renderPayers(){const p=REG[REGION].payers;const max=Math.max(...p.map(x=>x[1]));
+ $('#t_payers tbody').innerHTML=p.slice(0,LIM_PAYERS).map((x,i)=>`<tr><td><span class="rk ${i<3?'t':''}">${i+1}</span></td><td>${x[0]}<div class="bar"><i style="width:${x[1]/max*100}%"></i></div></td><td class="num" style="color:var(--pink2);font-weight:700">${SYM[CUR[REGION]]+nf(x[1])}</td><td class="num by">${usdOf(REGION,x[1])}</td><td class="num">${x[2]}</td></tr>`).join('');}
+function renderAuthors(){const a=REG[REGION].authors;const tb=$('#t_authors tbody');tb.innerHTML='';const max=Math.max(...a.map(x=>x[1]));
+ a.slice(0,LIM_AUTH).forEach((x,i)=>{const main=document.createElement('tr');main.className='exprow';
+  main.innerHTML=`<td><span class="rk ${i<3?'t':''}">${i+1}</span></td><td>${x[4]?`<span class="flag">${x[4]}</span> `:''}${x[0]} <span class="by">▾</span><div class="bar"><i style="width:${x[1]/max*100}%"></i></div></td><td class="num" style="color:var(--pink2);font-weight:700">${nf(x[1])}</td><td class="num">${x[2]}</td><td class="num">${x[3]}</td>`;
+  const ex=document.createElement('tr');ex.style.display='none';
+  ex.innerHTML=`<td></td><td colspan="4"><div class="chars">${(x[5]||[]).map(c=>`<a class="cchip" href="${clink(c[1])}" target="_blank" rel="noopener">${c[0]} <span class="c">💬${nf(c[2])}</span></a>`).join('')}</div></td>`;
+  main.onclick=()=>{ex.style.display=ex.style.display==='none'?'table-row':'none';};
+  tb.appendChild(main);tb.appendChild(ex);});}
+function renderBars(){const c=C[REGION];const z=LANG==='zh';
+ const u=[[z?'註冊':'등록',c.users,c.users,'bargrad'],[z?'活躍 MAU':'활성 MAU',c.mau,c.users,'barg'],[z?'平均 DAU':'평균 DAU',c.dau,c.users,'barp']];
+ $('#userbars').innerHTML=u.map(x=>`<div class="pr"><span class="k">${x[0]}</span><div class="track ${x[3]}"><i style="width:${Math.max(3,x[1]/x[2]*100)}%"></i><span class="pct">${(x[1]/x[2]*100).toFixed(0)}%</span></div><span class="v">${nf(x[1])}</span></div>`).join('');
+ let ch;if(REGION==='TW')ch=[[z?'全部角色':'전체 캐릭터',587],[z?'在地(台灣)':'현지(대만)',337],[z?'韓國·種子':'한국·시딩',246],[z?'作者數':'작가 수',246]];else ch=[[z?'全部角色':'전체 캐릭터',c.chars],[z?'營收角色':'수익 캐릭터',c.revChars],[z?'作者數':'작가 수',c.authors]];
+ const cmax=Math.max(...ch.map(x=>x[1]));
+ $('#charbars').innerHTML=ch.map(x=>`<div class="pr"><span class="k">${x[0]}</span><div class="track bargrad"><i style="width:${x[1]/cmax*100}%"></i><span class="pct">${nf(x[1])}</span></div><span class="v"></span></div>`).join('');}
+function renderTWtables(){if(REGION!=='TW')return;
+ const z=LANG==='zh';const ipl=[z?'🇹🇼 台灣 (TW-IP 確認)':'🇹🇼 대만 (TW-IP 확인)',z?'🇰🇷 韓國·IP不明 (種子)':'🇰🇷 한국·IP불명 (시딩)'];
+ $('#t_ipdist tbody').innerHTML=REG.TW.ipdist.map((r,i)=>`<tr><td>${ipl[i]}</td><td class="num">${nf(r[1])}</td><td class="num" style="font-weight:700">${nf(r[2])}</td><td class="num by">${nf(r[3])}</td></tr>`).join('');
+ const la=REG.TW.localAuth;const m=Math.max(...la.map(x=>x[2]));
+ $('#t_localauth tbody').innerHTML=la.slice(0,LIM_LOCALAUTH).map((x,i)=>`<tr><td><span class="rk ${i<3?'t':''}">${i+1}</span></td><td>${x[0]}<div class="bar"><i style="width:${x[2]/m*100}%"></i></div></td><td class="num" style="color:var(--pink2);font-weight:700">${nf(x[2])}</td><td class="num">${x[1]}</td><td class="num">${x[3]}</td></tr>`).join('');}
+function renderCmp(){const z=LANG==='zh';
+ const rows=[[z?'營收(現地)':'매출(현지통화)',g=>locShort(g,C[g].rev)],[z?'營收(USD)':'매출(USD)',g=>usdOf(g,C[g].rev)],[z?'註冊使用者':'등록 사용자',g=>nf(C[g].users)],[z?'活躍(簽到)':'활성(체크인)',g=>nf(C[g].active)],[z?'平均 DAU':'평균 DAU',g=>nf(C[g].dau)],[z?'付款使用者':'결제 사용자',g=>nf(C[g].payers)],[z?'角色':'캐릭터',g=>nf(C[g].chars)],[z?'作者':'작가',g=>nf(C[g].authors)],[z?'營收角色比率':'수익 캐릭터 비율',g=>ratio(C[g]).toFixed(1)+'%'],['ARPPU',g=>SYM[CUR[g]]+nf(C[g].arppu)],['DAU/MAU',g=>dauMau(C[g]).toFixed(1)+'%']];
+ $('#t_cmp tbody').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td class="num" style="color:var(--pink2);font-weight:700">${r[1]('TW')}</td><td class="num">${r[1]('KR')}</td><td class="num">${r[1]('JP')}</td></tr>`).join('');}
+function renderStrat(){ // 한/중 병기: infra r[5]=[labelZh,noteZh], recs r[6]=[titleZh,bodyZh,evZh] (data.json)
+ const z=LANG==='zh', ti=$('#t_infra tbody'), rc=$('#recs');
+ if(ti){ti.setAttribute('data-dyn','');ti.innerHTML=infra.map(r=>{const w=r[5]||[];return `<tr><td>${z&&w[0]?w[0]:r[0]}</td><td class="num" style="color:var(--red);font-weight:700">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td class="by">${z&&w[1]?w[1]:r[4]}</td></tr>`;}).join('');}
+ if(rc){rc.setAttribute('data-dyn','');rc.innerHTML=recs.map(r=>{const w=r[6]||[];return `<div class="rec"><div class="ic">${r[0]}</div><div><h4>${z&&w[0]?w[0]:r[1]}<span class="prio ${r[3]}">${r[2]}</span></h4><p>${z&&w[1]?w[1]:r[4]}</p><div class="ev">${z&&w[2]?w[2]:r[5]}</div></div></div>`;}).join('');}}
+// ===== charts =====
+function donutOpts(fmt){return{maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{boxWidth:11,font:{size:11},padding:9}},datalabels:{color:'#fff',font:{weight:'800',size:13},formatter:(v,ctx)=>{const t=ctx.dataset.data.reduce((a,b)=>a+b,0);const p=v/t*100;return p>=5?p.toFixed(0)+'%':'';}},tooltip:{callbacks:{label:c=>' '+c.label+': '+(fmt?fmt(c.raw):nf(c.raw))+' ('+(c.raw/c.dataset.data.reduce((a,b)=>a+b,0)*100).toFixed(1)+'%)'}}}};}
+function mk(id,cfg){const el=$('#'+id);if(!el)return;CH.push(new Chart(el,cfg));}
+// 지표별 적재 커버리지 판별 — metric: orders|users|chars|att
+// 반환 {state:'full'|'partial'|'none', days, factor:7/days} (주=월요일 시작 MM-DD 라벨)
+function covDate(rg,metric){
+ const pick=r=>(COVERAGE[r]&&COVERAGE[r][metric])||DATA_THROUGH[r];
+ if(rg==='ALL'){const ds=['TW','KR','JP'].map(pick).filter(Boolean).sort();return ds[0];}
+ return pick(rg);
+}
+function wkCov(rg,metric,lab){
+ const dt=covDate(rg,metric); if(!dt)return{state:'full'};
+ const d=new Date(dt+'T00:00:00Z'); if(isNaN(d))return{state:'full'};
+ const ws=new Date(Date.UTC(d.getUTCFullYear(),+lab.slice(0,2)-1,+lab.slice(3,5))); // 주: 2026년 내 가정
+ const we=new Date(ws); we.setUTCDate(ws.getUTCDate()+6);
+ if(d>=we)return{state:'full'};
+ if(d<ws)return{state:'none'};
+ const days=Math.round((d-ws)/864e5)+1;
+ return{state:'partial',days,factor:7/days};
+}
+const covSuffix=c=>c&&c.state!=='full'?(LANG==='zh'?' (預估 · 依近3個月週成長趨勢)':' (예상 · 최근 3개월 주간 성장 추세 기반)'):'';
+// 최근 3개월(최대 12주) 창에서 '최근 4개' WoW 성장률 평균 — 초기 폭증 구간에 안 끌리게. 캡 [-30%,+50%]
+function trendGrow(vals){
+ const v=vals.filter(x=>x>0).slice(-12);
+ if(v.length<2)return 0;
+ const rates=[];
+ for(let i=1;i<v.length;i++)rates.push(v[i]/v[i-1]-1);
+ const r=rates.slice(-4);
+ const g=r.reduce((a,b)=>a+b,0)/r.length;
+ return Math.max(-0.3,Math.min(0.5,g));
+}
+// 미완결(partial/none) 후행 주를 직전값×(1+g)로 투영. data 배열을 제자리 수정.
+function projectTail(data,covs){
+ const g=trendGrow(data.filter((v,i)=>v!==null&&covs[i].state==='full'));
+ for(let i=0;i<data.length;i++){
+  if(covs[i].state!=='full'){
+   const base=i>0&&data[i-1]!==null?data[i-1]:0;
+   data[i]=Math.round(base*(1+g));
+  }
+ }
+ return data;
+}
+function renderCharts(){
+ CH.forEach(c=>c.destroy());CH=[];
+ Chart.defaults.color='#8d87a3';Chart.defaults.font.family=getComputedStyle(document.body).fontFamily;Chart.defaults.borderColor='rgba(33,33,44,.7)';
+ Chart.defaults.plugins.datalabels={display:false};
+ const w=REG[REGION].weekly, wk=w.map(r=>r[0]);
+ const m=w.map((r,i)=>r[3]>0?i:-1).filter(i=>i>=0);
+  // 주간 매출: TW·ALL은 USD 표시, 적재 미완료 주는 예상치(점선)
+ const usdRev=REGION==='ALL'||REGION==='TW', rSym=usdRev?'$':SYM[CUR[REGION]];
+ const rCov=m.map(i=>wkCov(REGION,'orders',w[i][0]));
+ const revData=projectTail(m.map((i,k)=>rCov[k].state==='full'?Math.round(REGION==='TW'?w[i][3]/FX:w[i][3]):null),rCov);
+ const rsEl=$('#c_rev')&&$('#c_rev').closest('.card').querySelector('.r');if(rsEl)rsEl.textContent=rSym;
+ const rFmt=v=>usdRev?'$'+(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(1)+'K':Math.round(v)):SYM[CUR[REGION]]+(v>=1e8?(v/1e8).toFixed(1)+eok():(v/1e6).toFixed(0)+'M');
+ mk('c_rev',{type:'line',data:{labels:m.map(i=>wk[i]),datasets:[{label:'每週營收',data:revData,borderColor:'#ff2d6f',backgroundColor:'rgba(255,45,111,.18)',fill:true,tension:.35,pointRadius:c=>rCov[c.dataIndex]&&rCov[c.dataIndex].state==='partial'?5:3,pointStyle:c=>rCov[c.dataIndex]&&rCov[c.dataIndex].state==='partial'?'rectRot':'circle',pointBackgroundColor:'#ff2d6f',segment:{borderDash:c=>rCov[c.p1DataIndex]&&rCov[c.p1DataIndex].state==='partial'?[6,5]:undefined}}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>rSym+nf(c.raw)+covSuffix(rCov[c.dataIndex])}}},scales:{y:{ticks:{callback:rFmt}}}}});
+ const nuCov=w.map(r=>wkCov(REGION,'users',r[0])), wauCov=w.map(r=>wkCov(REGION,'att',r[0]));
+ const nuData=projectTail(w.map((r,i)=>nuCov[i].state==='full'?(+r[1]||0):null),nuCov);
+ const wauData=projectTail(w.map((r,i)=>wauCov[i].state==='full'?(+r[6]||null):null),wauCov);
+ mk('c_users',{type:'bar',data:{labels:wk,datasets:[{label:'新增',data:nuData,backgroundColor:w.map((r,i)=>nuCov[i].state==='partial'?'rgba(214,36,159,.35)':'rgba(214,36,159,.8)'),borderRadius:5},{label:'WAU',type:'line',data:wauData,borderColor:'#22d3ee',backgroundColor:'#22d3ee',tension:.35,pointRadius:c=>wauCov[c.dataIndex]&&wauCov[c.dataIndex].state==='partial'?4:2,pointStyle:c=>wauCov[c.dataIndex]&&wauCov[c.dataIndex].state==='partial'?'rectRot':'circle',segment:{borderDash:c=>wauCov[c.p1DataIndex]&&wauCov[c.p1DataIndex].state==='partial'?[6,5]:undefined}}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+nf(c.raw)+covSuffix(c.datasetIndex===0?nuCov[c.dataIndex]:wauCov[c.dataIndex])}}},scales:{y:{beginAtZero:true}}}});
+ const ncCov=w.map(r=>wkCov(REGION,'chars',r[0]));
+ const ncData=projectTail(w.map((r,i)=>ncCov[i].state==='full'?(+r[5]||0):null),ncCov);
+ mk('c_char',{type:'bar',data:{labels:wk,datasets:[{label:'新增角色',data:ncData,backgroundColor:w.map((r,i)=>ncCov[i].state==='partial'?'rgba(255,45,111,.3)':'rgba(255,45,111,.7)'),borderRadius:5}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>nf(c.raw)+covSuffix(ncCov[c.dataIndex])}}},scales:{y:{beginAtZero:true}}}});
+ const c=C[REGION];
+ mk('c_revdonut2',{type:'doughnut',data:{labels:['營收角色','非營收角色'],datasets:[{data:[c.revChars,Math.max(0,c.chars-c.revChars)],backgroundColor:['#ff2d6f','#3a3550'],borderColor:'#101017',borderWidth:3}]},options:donutOpts(),plugins:[ChartDataLabels]});
+ if(REGION==='TW'){
+  mk('c_ipdonut',{type:'doughnut',data:{labels:['台灣(TW確認)','韓國·IP不明'],datasets:[{data:[REG.TW.ipdist[0][2],REG.TW.ipdist[1][2]],backgroundColor:['#ff2d6f','#a855f7'],borderColor:'#101017',borderWidth:3}]},options:donutOpts(),plugins:[ChartDataLabels]});
+  const aS=REG.TW.adult.reduce((s,p)=>s+p[7],0),sS=REG.TW.sfw.reduce((s,p)=>s+p[7],0);
+  mk('c_adultdonut',{type:'doughnut',data:{labels:['成人','非成人'],datasets:[{data:[aS,sS],backgroundColor:['#fb7185','#22d3ee'],borderColor:'#101017',borderWidth:3}]},options:donutOpts(),plugins:[ChartDataLabels]});
+ }
+ mk('c_revshare',{type:'doughnut',data:{labels:['🇹🇼 TW','🇰🇷 KR','🇯🇵 JP'],datasets:[{data:[usdNum('TW',C.TW.rev),usdNum('KR',C.KR.rev),usdNum('JP',C.JP.rev)],backgroundColor:['#ff2d6f','#a855f7','#22d3ee'],borderColor:'#101017',borderWidth:3}]},options:donutOpts(v=>'$'+Math.round(v).toLocaleString()),plugins:[ChartDataLabels]});
+ const cl=['🇹🇼 TW','🇰🇷 KR','🇯🇵 JP'];
+ mk('c_cmpratio',{type:'bar',data:{labels:cl,datasets:[{label:'營收角色%',data:[ratio(C.TW),ratio(C.KR),ratio(C.JP)],backgroundColor:'#ff2d6f',borderRadius:6},{label:'DAU/MAU%',data:[dauMau(C.TW),dauMau(C.KR),dauMau(C.JP)],backgroundColor:'#a855f7',borderRadius:6}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toFixed(1)+'%'}}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}});
+ const twW=REG.TW.weekly.filter(r=>r[3]>0);
+ const tCov=twW.map(r=>wkCov('TW','orders',r[0]));
+ const tData=twW.map((r,k)=>tCov[k].state==='none'?null:Math.round(r[3]/FX*(tCov[k].state==='partial'?tCov[k].factor:1)));
+ mk('c_traj',{type:'line',data:{labels:twW.map(r=>r[0]),datasets:[{label:'주간 매출($)',data:tData,borderColor:'#ff2d6f',backgroundColor:'rgba(255,45,111,.2)',fill:true,tension:.35,pointRadius:c=>tCov[c.dataIndex]&&tCov[c.dataIndex].state==='partial'?5:4,pointStyle:c=>tCov[c.dataIndex]&&tCov[c.dataIndex].state==='partial'?'rectRot':'circle',pointBackgroundColor:'#ff2d6f',segment:{borderDash:c=>tCov[c.p1DataIndex]&&tCov[c.p1DataIndex].state==='partial'?[6,5]:undefined}}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+nf(c.raw)+covSuffix(tCov[c.dataIndex])}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+(v>=1e3?(v/1e3).toFixed(1)+'K':v)}}}}});
+ $$('.chartbox canvas').forEach(cv=>cv.onclick=()=>openModal(cv));
+}
+function openModal(cv){const src=Chart.getChart(cv);if(!src)return;const card=cv.closest('.card');const h=card&&card.querySelector('.ttl');
+ $('#modalTitle').textContent=h?h.textContent.trim():'차트';if(window.__m)window.__m.destroy();
+ window.__m=new Chart($('#modalCanvas'),{type:src.config.type,data:{labels:(src.config.data.labels||[]).slice(),datasets:src.config.data.datasets.map(d=>Object.assign({},d))},options:Object.assign({},src.config.options,{maintainAspectRatio:false}),plugins:src.config.type==='doughnut'?[ChartDataLabels]:[]});
+ $('#chartModal').classList.add('open');}
+function closeModal(){$('#chartModal').classList.remove('open');if(window.__m){window.__m.destroy();window.__m=null;}}
+$('#modalClose').onclick=closeModal;$('#chartModal').addEventListener('click',e=>{if(e.target.id==='chartModal')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+function setRGlabels(){$$('.rg').forEach(s=>s.textContent=RGNAME[REGION]);}
+function renderRegion(){document.body.className='r-'+REGION;setRGlabels();renderCore();renderWow();renderProc();renderPayers();renderAuthors();renderBars();renderTWtables();renderCmp();renderStrat();renderCharts();applyLang(LANG);}
+
+$$('#regionseg button').forEach(b=>b.onclick=()=>{$$('#regionseg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');REGION=b.dataset.r;PROC='all';$$('#procseg .subtab').forEach((x,i)=>x.classList.toggle('on',i===0));renderRegion();});
+$$('#procseg .subtab').forEach(b=>b.onclick=()=>{$$('#procseg .subtab').forEach(x=>x.classList.remove('on'));b.classList.add('on');PROC=b.dataset.k;renderProc();if(LANG==='zh')applyLang('zh');});
+
+// ===== Discord 커뮤니티 탭 (TW 전용) =====
+const DC_GUILD="1472075675077836910",DC_CHAN="1472088914587160697";
+function dcLk(spec){
+ if(/^\d{15,}$/.test(spec)) return `https://discord.com/channels/${DC_GUILD}/${DC_CHAN}/${spec}`;
+ if(spec&&spec.indexOf('http')===0) return spec;
+ if(spec==='chG') return `https://discord.com/channels/${DC_GUILD}/${DC_CHAN}`;
+ if(spec==='srv') return `https://discord.com/channels/${DC_GUILD}`;
+ return '#';
+}
+const dcMl=(spec,label)=>`<a class="dcmsg" href="${dcLk(spec)}" target="_blank" rel="noopener">${label||'💬'}</a>`;
+let DC_WORKS=[]; // discord.json에서 로드
+let DC_SPEAKERS=[];
+const DC_PIECOL={기억력:'#fb7185',포인트:'#fbbf24',버그:'#a855f7',결제:'#22d3ee',운영:'#34d399'};
+let DC_WEEKS_G=[];
+let DC_WEEKS_A=[];
+function dcMergeWeeks(){
+ const order=DC_WEEKS_G.map(w=>w.wk);
+ DC_WEEKS_A.forEach(w=>{if(!order.includes(w.wk)) order.push(w.wk);});
+ return order.map(wk=>{
+   const g=DC_WEEKS_G.find(w=>w.wk===wk), a=DC_WEEKS_A.find(w=>w.wk===wk), base=g||a;
+   const fb={};['Like','Dislike','Bugs','Others'].forEach(n=>{ fb[n]=[...((g&&g.fb[n])||[]),...((a&&a.fb[n])||[])]; });
+   let issues=null;
+   if((g&&g.issues)||(a&&a.issues)){ issues={}; [g,a].forEach(x=>{ if(x&&x.issues) for(const k in x.issues) issues[k]=(issues[k]||0)+x.issues[k]; }); }
+   const msgs=((g&&g.msgs)||0)+((a&&a.msgs)||0);
+   const live=(g&&g.live)||(a&&a.live);
+   let note=(g&&g.note)||(a&&a.note);
+   if(g&&g.note&&a&&a.note) note="💬 "+g.note+"<br>🔞 "+a.note;
+   return {wk,label:base.label,range:base.range,issues,fb,msgs:msgs||undefined,live,note};
+ });
+}
+let DC_CHS={all:dcMergeWeeks(), general:DC_WEEKS_G, adult:DC_WEEKS_A};
+let DC_CUR="all", DC_WKCUR="", DC_PIE=null, DC_READY=false;
+function dcBuildTabs(){
+ const weeks=DC_CHS[DC_CUR];
+ $('#dc_wtabs').innerHTML=weeks.map(w=>
+  `<button class="subtab" data-w="${w.wk}" onclick="dcSelWeek('${w.wk}')">${w.label}<span class="ssub">${w.range}</span></button>`).join('');
+}
+function dcWow(weeks,i){
+ const w=weeks[i];
+ if(w.live) return '<span class="wowb wow-live">현재 주 · 앱 라이브 수집</span>';
+ if(i===0||weeks[i-1].live||weeks[i-1].msgs==null) return '<span class="wowb wow-base">기준주</span>';
+ const d=Math.round((w.msgs-weeks[i-1].msgs)/weeks[i-1].msgs*100),up=d>=0;
+ return `<span class="wowb ${up?'wow-up':'wow-down'}">WoW ${up?'▲ +':'▼ '}${d}%</span>`;
+}
+function dcFbCol(name,items){
+ const cnt=items.length?`<span class="fbcnt">${items.length}건</span>`:'';
+ const lis=items.length?items.map(it=>`<li><span class="dcd">${it[1]}</span><span class="dcs s-${it[2]}">${it[2]}</span>${it[3]}${dcMl(it[0])}</li>`).join('')
+  :'<li style="color:var(--muted2)">해당 주 없음</li>';
+ return `<div class="card"><span class="fbh fb-${name}">${name}</span>${cnt}<ul class="fbul">${lis}</ul></div>`;
+}
+function dcRenderWeek(wk){
+ if(DC_PIE){DC_PIE.destroy();DC_PIE=null;}
+ const weeks=DC_CHS[DC_CUR], i=weeks.findIndex(w=>w.wk===wk), w=weeks[i];
+ const fbhtml=['Like','Dislike','Bugs','Others'].map(n=>dcFbCol(n,w.fb[n])).join('');
+ const head=`<div style="display:flex;align-items:center;gap:12px;margin:4px 0 14px;flex-wrap:wrap">
+    <h3 style="margin:0;font-size:16px;font-weight:800">📅 ${w.label} <span style="color:var(--muted);font-size:12.5px;font-weight:500">· ${w.range}${w.msgs?` · 메시지 ${w.msgs.toLocaleString()}건`:''}</span></h3>
+    <span style="flex:1"></span>${dcWow(weeks,i)}</div>`;
+ let top='';
+ if(w.issues){
+   const labels=Object.keys(w.issues),data=labels.map(k=>w.issues[k]),total=data.reduce((a,b)=>a+b,0);
+   const cols=labels.map(k=>DC_PIECOL[k]);
+   const tk=labels[data.indexOf(Math.max(...data))],tp=Math.round(Math.max(...data)/total*100);
+   const leg=labels.map((k,j)=>`<span><i class="dot" style="background:${cols[j]}"></i>${k} ${Math.round(data[j]/total*100)}%</span>`).join('');
+   top=`<div class="card dcpie"><div class="pv"><canvas id="dc_pie"></canvas></div>
+     <div style="flex:1;min-width:220px"><div class="ttl">이슈 분포</div><p class="top">최다 이슈: <b>${tk}</b> (${tp}%) · 총 언급 ${total}회 · 어떤 내용이 많았는지 한눈에</p><div class="pleg">${leg}</div></div></div>`;
+ }else{
+   top=`<div class="card dcnote">📝 ${w.note}</div>`;
+ }
+ $('#dc_week').innerHTML=head+top+`<div class="fbgrid">${fbhtml}</div>`;
+ if(w.issues){
+   const labels=Object.keys(w.issues),data=labels.map(k=>w.issues[k]),total=data.reduce((a,b)=>a+b,0),cols=labels.map(k=>DC_PIECOL[k]);
+   DC_PIE=new Chart($('#dc_pie'),{type:'doughnut',
+     data:{labels,datasets:[{data,backgroundColor:cols,borderColor:'#101017',borderWidth:3}]},
+     options:{maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},
+       datalabels:{color:'#fff',font:{weight:'800',size:12},formatter:(v,ctx)=>{const t=ctx.dataset.data.reduce((a,b)=>a+b,0);const p=v/t*100;return p>=5?p.toFixed(0)+'%':'';}},
+       tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}회 (${Math.round(c.raw/total*100)}%)`}}}},
+     plugins:[ChartDataLabels]});
+   const pv=$('#dc_pie');if(pv)pv.onclick=()=>openModal(pv);
+ }
+}
+function dcSelWeek(wk){DC_WKCUR=wk;$$('#dc_wtabs .subtab').forEach(t=>t.classList.toggle('on',t.dataset.w===wk));dcRenderWeek(wk);}
+function dcSelCh(ch){
+ DC_CUR=ch;
+ $$('#dc_chseg .subtab').forEach(b=>b.classList.toggle('on',b.dataset.c===ch));
+ dcBuildTabs();
+ const weeks=DC_CHS[ch];
+ if(!weeks||!weeks.length)return;
+ dcSelWeek(weeks[weeks.length-1].wk);
+}
+/* 트래커 (일반 채널) */
+let DC_ISSUES=[];
+const DC_KEY="babechat_tracker_v2";
+let DC_STATE={}; try{DC_STATE=JSON.parse(localStorage.getItem(DC_KEY))||{};}catch(e){DC_STATE={};}
+function dcSave(){try{localStorage.setItem(DC_KEY,JSON.stringify(DC_STATE));}catch(e){}}
+function dcStt(id){return DC_STATE[id]||{};}
+function dcDone(id){return !!dcStt(id).done;}
+function dcPri(it){return dcStt(it.id).pri||it.pri;}
+const DC_PRANK={High:0,Med:1,Low:2}; let DC_FILTER="all";
+function dcSetFilter(f){DC_FILTER=f;$$('#dc_filters .subtab').forEach(c=>c.classList.toggle('on',c.dataset.f===f));dcRenderTrk();}
+function dcToggle(id){const s=dcStt(id);s.done=!s.done;DC_STATE[id]=s;dcSave();dcRenderTrk();}
+function dcSetPri(id,v){const s=dcStt(id);s.pri=v;DC_STATE[id]=s;dcSave();dcRenderTrk();}
+function dcRow(it){const p=dcPri(it);
+ return `<tr class="${dcDone(it.id)?'dcdone':''}"><td style="width:42px;text-align:center"><input type="checkbox" ${dcDone(it.id)?'checked':''} onchange="dcToggle('${it.id}')"></td>
+   <td><span class="dcwk">${it.wk}</span><div style="color:var(--muted2);font-size:10px;margin-top:3px">${it.date}</div></td>
+   <td><span class="dccat c-${it.cat}">${it.cat}</span></td><td class="lbl">${it.label}</td>
+   <td><select class="p-${p}" onchange="dcSetPri('${it.id}',this.value)"><option ${p==='High'?'selected':''}>High</option><option ${p==='Med'?'selected':''}>Med</option><option ${p==='Low'?'selected':''}>Low</option></select></td>
+   <td>${dcMl(it.id,'💬 보기 ↗')}</td></tr>`;}
+function dcRenderTrk(){
+ const list=DC_ISSUES.filter(i=>DC_FILTER==='all'||i.cat===DC_FILTER);
+ const pend=list.filter(i=>!dcDone(i.id)).sort((a,b)=>DC_PRANK[dcPri(a)]-DC_PRANK[dcPri(b)]||b.id.localeCompare(a.id));
+ const res=list.filter(i=>dcDone(i.id)).sort((a,b)=>b.id.localeCompare(a.id));
+ $('#dc_pend tbody').innerHTML=pend.map(dcRow).join('');
+ $('#dc_res tbody').innerHTML=res.map(dcRow).join('');
+ $('#dc_pendEmpty').innerHTML=pend.length?'':'<div class="dcempty">해당 조건의 미해결 항목 없음 🎉</div>';
+ $('#dc_resEmpty').innerHTML=res.length?'':'<div class="dcempty">아직 해결 표시된 항목이 없습니다. 체크박스를 누르면 이리로 이동합니다.</div>';
+ $('#dc_cntPend').textContent=`${pend.length}건`; $('#dc_cntRes').textContent=`${res.length}건`;
+ const total=DC_ISSUES.length,dn=DC_ISSUES.filter(i=>dcDone(i.id)).length;
+ $('#dc_counts').textContent=`전체 ${total}건 · 해결 ${dn}건 · 진행 ${total-dn}건`;
+}
+function dcRenderTop(){
+ $('#dc_works tbody').innerHTML=DC_WORKS.map((w,i)=>{const max=DC_WORKS[0][1];
+  return `<tr><td><span class="rk ${i<3?'t':''}">${i+1}</span></td><td><a class="clink" href="${TWBASE}/search?q=${encodeURIComponent(w[0])}" target="_blank" rel="noopener">${w[0]}</a><div class="bar"><i style="width:${Math.max(4,w[1]/max*100)}%"></i></div></td><td class="num" style="color:var(--pink2);font-weight:700">${w[1]}회</td></tr>`;}).join('');
+ $('#dc_speakers').innerHTML=DC_SPEAKERS.map((s,i)=>`<span class="cchip"><span class="rk ${i<1?'t':''}" style="width:18px;height:18px;font-size:10px">${i+1}</span> ${s}</span>`).join('');
+}
+// discord.json이 있으면 내장 데이터를 덮어씀 (매주 discord.json만 갱신하면 탭·발표덱 모두 반영)
+async function dcLoadData(){
+ try{
+  const r=await fetch('../discord.json',{cache:'no-store'});
+  if(!r.ok)return false;
+  const j=await r.json();
+  if(Array.isArray(j.works)&&j.works.length)DC_WORKS=j.works;
+  if(Array.isArray(j.speakers)&&j.speakers.length)DC_SPEAKERS=j.speakers;
+  if(Array.isArray(j.weeksG)&&j.weeksG.length)DC_WEEKS_G=j.weeksG;
+  if(Array.isArray(j.weeksA)&&j.weeksA.length)DC_WEEKS_A=j.weeksA;
+  if(Array.isArray(j.issues)&&j.issues.length)DC_ISSUES=j.issues;
+  DC_CHS={all:dcMergeWeeks(), general:DC_WEEKS_G, adult:DC_WEEKS_A};
+  return true;
+ }catch(e){console.warn('[v2] discord.json 로드 실패 — 내장 데이터 사용',e);return false;}
+}
+function dcInit(){
+ if(DC_READY)return; DC_READY=true;
+ $$('#dc_chseg .subtab').forEach(b=>b.onclick=()=>dcSelCh(b.dataset.c));
+ $$('#dc_filters .subtab').forEach(b=>b.onclick=()=>dcSetFilter(b.dataset.f));
+ dcLoadData().then(ok=>{
+  if(ok){dcRenderTop();dcSelCh('all');dcRenderTrk();}
+  else{const sd=$('#s_discord');if(sd)sd.insertAdjacentHTML('afterbegin','<div class="card" style="border-color:#f43f5e;color:#f87171;font-weight:700">⚠️ discord.json을 불러오지 못했습니다 — 표시할 커뮤니티 데이터가 없습니다.</div>');}
+ });
+}
+// ===== 탭 전환 (대만에서만 노출) =====
+let VIEW='main';
+function applyView(){
+ if(REGION!=='TW')VIEW='main';
+ document.body.classList.toggle('v-discord',VIEW==='discord');
+ $$('#viewseg button').forEach(b=>b.classList.toggle('on',b.dataset.v===VIEW));
+ if(VIEW==='discord')dcInit();
+}
+const __renderRegion0=renderRegion;
+renderRegion=function(){__renderRegion0();applyView();};
+$$('#viewseg button').forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;applyView();});
+
+// ===== i18n =====
+const DICT={"주간 매출($)":"每週營收($)","실시간 데이터(data.json)를 불러오지 못했습니다. 이 대시보드는 시드 없이 실데이터만 표시합니다 — 새로고침하거나 관리자에게 문의하세요.":"無法載入即時資料(data.json)。本儀表板僅顯示真實資料 — 請重新整理或聯繫管理員。","⚠️ discord.json을 불러오지 못했습니다 — 표시할 커뮤니티 데이터가 없습니다.":"⚠️ 無法載入 discord.json — 沒有可顯示的社群資料。","매출 · 사용자 · 캐릭터 · 크리에이터 인사이트 | Snowflake 기반":"營收 · 使用者 · 角色 · 創作者洞察 | 基於Snowflake","라이브 (Snowflake)":"即時(Snowflake)","대만":"台灣","한국":"韓國","일본":"日本","핵심 지표":"核心指標","매출 · 사용자 추이":"營收 · 使用者趨勢","주간 (최근 12주)":"每週(近12週)","주간 매출":"每週營收","신규 사용자 · 활성(WAU)":"新增使用者 · 活躍(WAU)","명":"人","주간 신규 캐릭터":"每週新增角色","개":"個","주간 상세 (최근 6주)":"每週明細(近6週)","주":"週","신규":"新增","결제건":"付款筆","매출":"營收","결제자":"付款者","신규 캐릭터":"新增角色","사용자 · 캐릭터 현황":"使用者 · 角色現況","사용자 구성":"使用者組成","캐릭터 라이브러리":"角色庫","수익 / 비수익 캐릭터":"營收/非營收角色","제작 IP 비중 (대만)":"製作IP佔比(台灣)","캐릭터":"角色","캐릭터 인사이트":"角色洞察","ProChat(유료) 사용수 · pt":"ProChat(付費)使用數 · pt","캐릭터 ProChat TOP 6":"角色 ProChat TOP 6","월별 · 누적":"每月 · 累計","전체":"全部","성인":"成人","비성인":"非成人","작가":"作者","누적":"累計","현지(대만 IP) 제작 캐릭터 TOP 6":"在地(台灣IP)製作角色 TOP 6","성인 / 비성인 ProChat 비중":"成人/非成人 ProChat佔比","대만 IP 분석":"台灣IP分析","TW-IP 확인 기준":"以TW-IP確認","제작자 IP 분포":"製作者IP分布","IP 국가":"IP國家","대화수":"對話數","현지(대만 IP) 작가 TOP 6":"在地(台灣IP)作者 TOP 6","팔로워":"粉絲","탑 사용자 · 탑 작가":"頂級使用者 · 作者","최고 결제 사용자 TOP 6":"最高付款使用者 TOP 6","결제액":"付款額","결제액(₩)":"付款額(₩)","건수":"筆數","닉네임":"暱稱","인기 작가 TOP 6":"人氣作者 TOP 6","대화수 · 행 클릭=캐릭터":"對話數 · 點列=角色","글로벌 비교 (대만 · 한국 · 일본)":"全球比較(台灣·韓國·日本)","매출 비중 (USD)":"營收佔比(USD)","수익 캐릭터 비율 & DAU/MAU":"營收角色比率 & DAU/MAU","지표":"指標","성장 전략 (대만)":"成長策略(台灣)","대만 매출 Trajectory":"台灣營收 Trajectory","수익화 인프라 격차":"變現基礎設施差距","기능":"功能","시사점":"啟示","데이터 기준일:":"資料基準日：","Snowflake 원천 직접 집계. 매출은 현지통화로 기록 — 한국 ₩(KRW)·일본 ¥(JPY)·대만 ₩(KRW 결제, NT$는 환산). USD 환산 $1=₩1,538 / ¥161.6 / NT$31.86. '현지(대만)'=접속 IP가 TW로 확인된 계정. '수익 캐릭터'=ProChat 유료 1건 이상. 매일 자동 갱신.":"Snowflake原始直接彙整。營收以當地貨幣記錄 — 韓國 ₩(KRW)·日本 ¥(JPY)·台灣 ₩(KRW結帳，NT$為換算)。USD換算 $1=₩1,538 / ¥161.6 / NT$31.86。「在地(台灣)」=連線IP確認為TW的帳號。「營收角色」=ProChat付費至少1筆。每日自動更新。",
+"패스/구독 (USER_PASSES)":"通行證/訂閱 (USER_PASSES)","패스 상품 (PASS_PRODUCTS)":"通行證商品 (PASS_PRODUCTS)","크리에이터 후원 (DONATIONS)":"創作者贊助 (DONATIONS)","크리에이터 수익설정":"創作者收益設定","KR 핵심 매출원 TW 전무":"KR核心營收來源TW全無","구독 매출 불가":"無法訂閱營收","작가 직접 수익 거의 없음":"作者直接收益幾乎為零","작가 등급/정산 부재":"缺乏作者等級/結算",
+"결제 패스·구독 상품 즉시 도입":"立即導入付款通行證·訂閱商品","고액 결제자(웨일) 관리":"高額付款者(鯨魚)管理","현지 크리에이터 수익화·육성":"在地創作者變現·培養","수익 캐릭터 비율 개선":"提升營收角色比率","리텐션·고착도 개선":"留存·黏著度改善",
+"대만은 USER_PASSES·PASS_PRODUCTS가 모두 0. 한국은 누적 89.9만 건 패스 구매가 핵심 매출원. 월정액 패스/구독만 설정해도 가장 빠른 ARPPU 상승 가능.":"台灣 USER_PASSES·PASS_PRODUCTS 皆為0。韓國累計89.9萬筆通行證購買為核心營收來源。只要設定月費通行證/訂閱即可最快提升ARPPU。",
+"상위 2명(Amos·蓮)이 각 100만원+ 결제. VIP 등급·전용 혜택·고액 패키지로 상위층 집중 육성.":"前2名(Amos·蓮)各付款逾100萬韓元。以VIP等級·專屬權益·高額方案集中培養高付款層。",
+"크리에이터당 캐릭터 TW 2.4 vs KR 6.3로 생태계 얕음. 후원·정산·작가등급 열고 현지 작가 육성.":"每位創作者角色數 TW 2.4 vs KR 6.3，生態淺薄。開放贊助·結算·作者等級並培養在地作者。",
+"유료 캐릭터 비율 TW 60%로 최저(JP 79%). 추천·노출·신규 온보딩 강화.":"付費角色比率 TW 60%最低(JP 79%)。強化推薦·曝光·新角色導入。",
+"DAU/MAU TW 30%로 KR 61%의 절반. 출석 보상·푸시·연속 대화 리워드로 데일리 루프 강화.":"DAU/MAU TW 30%約為KR 61%的一半。以簽到獎勵·推播·連續對話獎勵強化每日循環。",
+"근거: ARPPU TW ₩62.7K vs JP ₩196K · 패스 TW 0 / KR 899,181":"依據：ARPPU TW ₩62.7K vs JP ₩196K · 通行證 TW 0 / KR 899,181","근거: 고액 패키지(₩200K) 수요 확인":"依據：已確認高額方案(₩200K)需求","근거: 후원 TW 8 vs KR 14,013 · 1인당 캐릭터 TW 0.21 vs KR 0.56":"依據：贊助 TW 8 vs KR 14,013 · 每人角色 TW 0.21 vs KR 0.56","근거: 수익 캐릭터 TW 60.0% / KR 66.5% / JP 78.7%":"依據：營收角色 TW 60.0% / KR 66.5% / JP 78.7%","근거: DAU/MAU TW 29.6% / JP 45.1% / KR 61.1%":"依據：DAU/MAU TW 29.6% / JP 45.1% / KR 61.1%"};
+let _ap=false;
+function applyLang(lang){_ap=true;LANG=lang;const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);const ns=[];while(w.nextNode())ns.push(w.currentNode);
+ ns.forEach(n=>{if(n.parentNode&&(n.parentNode.tagName==='SCRIPT'||n.parentNode.tagName==='STYLE'))return;if(n.parentElement&&n.parentElement.closest('[data-dyn]'))return;if(n.__ko===undefined){if(!n.nodeValue||!n.nodeValue.trim())return;n.__ko=n.nodeValue;}const k=n.__ko.trim();if(!k)return;n.nodeValue=(lang==='zh'&&DICT[k])?n.__ko.replace(k,DICT[k]):n.__ko;});
+ if(window.Chart&&Chart.instances)Object.values(Chart.instances).forEach(ch=>{try{ch.data.datasets.forEach(d=>{if(d.__ko===undefined)d.__ko=d.label||'';const k=(d.__ko||'').trim();d.label=(lang==='zh'&&DICT[k])?DICT[k]:d.__ko;});ch.update('none');}catch(e){}});_ap=false;}
+$$('#langseg button').forEach(b=>b.onclick=()=>{$$('#langseg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');LANG=b.dataset.l;renderRegion();});
+
+// ===== data.json 로더: 키가 있으면 시드값을 덮어쓰고, 없으면 내장 시드 유지 =====
+// 프록시 경로(/babychattw/v2/) 안전을 위해 상대경로 사용.
+async function loadData(){
+ try{
+  const d=window.__BAKED_DATA__;
+  if(!d)return false;
+  if(!d||(d.meta&&d.meta.generatedAt==='seed'))return false;
+  let dirty=false;
+  if(+d.FX){FX=+d.FX;FXR.KRW=+d.FX;dirty=true;}
+  if(d.C){for(const k in d.C){C[k]=Object.assign(C[k]||{},d.C[k]);}dirty=true;}
+  const T=REG.TW;
+  if(Array.isArray(d.wow)&&d.wow.length){T.weekly=d.wow.map(r=>[r[0],+r[1]||0,+r[2]||0,+r[3]||0,+r[4]||0,+r[5]||0,(d.wau&&+d.wau[r[0]])||0]);dirty=true;}
+  if(Array.isArray(d.payers)&&d.payers.length){T.payers=d.payers;dirty=true;}
+  if(Array.isArray(d.authors)&&d.authors.length){T.authors=d.authors.map(a=>a.length>=6?a:[a[0],a[1],a[2],a[3],'',a[4]||[]]);dirty=true;}
+  if(Array.isArray(d.adultProc)&&d.adultProc.length){T.adult=d.adultProc;dirty=true;}
+  if(Array.isArray(d.sfwProc)&&d.sfwProc.length){T.sfw=d.sfwProc;dirty=true;}
+  if((Array.isArray(d.adultProc)&&d.adultProc.length)||(Array.isArray(d.sfwProc)&&d.sfwProc.length)){
+   T.proc=[...(T.adult||[]),...(T.sfw||[])].sort((a,b)=>b[7]-a[7]).slice(0,12);}
+  if(Array.isArray(d.localProc)&&d.localProc.length){T.local=d.localProc;dirty=true;}
+  else if(T.proc){const loc=T.proc.filter(p=>p[2]==='🇹🇼');if(loc.length>=3)T.local=loc.slice(0,6);}
+  if(Array.isArray(d.ipdist)&&d.ipdist.length){T.ipdist=d.ipdist;dirty=true;}
+  if(Array.isArray(d.localAuth)&&d.localAuth.length){T.localAuth=d.localAuth;dirty=true;}
+  if(d.regions){for(const rg of ['KR','JP']){const R=d.regions[rg],T2=REG[rg];if(!R||!T2)continue;
+   if(Array.isArray(R.weekly)&&R.weekly.length){T2.weekly=R.weekly.map(r=>[r[0],+r[1]||0,+r[2]||0,+r[3]||0,+r[4]||0,+r[5]||0,+r[6]||0]);dirty=true;}
+   if(Array.isArray(R.payers)&&R.payers.length){T2.payers=R.payers;dirty=true;}
+   if(Array.isArray(R.authors)&&R.authors.length){T2.authors=R.authors.map(a=>a.length>=6?a:[a[0],a[1],a[2],a[3],'',a[4]||[]]);dirty=true;}
+   if(Array.isArray(R.proc)&&R.proc.length){T2.proc=R.proc;dirty=true;}
+  }}
+  if(Array.isArray(d.infra)&&d.infra.length){infra=d.infra;dirty=true;}
+  if(Array.isArray(d.recs)&&d.recs.length){recs=d.recs;dirty=true;}
+  if(d.meta&&d.meta.dataThrough){Object.assign(DATA_THROUGH,d.meta.dataThrough);dirty=true;}
+  if(d.meta&&d.meta.coverage){Object.assign(COVERAGE,d.meta.coverage);dirty=true;}
+  if(d.meta&&d.meta.revMonth&&d.meta.revMonth.label)window.__REVM_LABEL=d.meta.revMonth.label;
+  if(d.meta&&d.meta.generatedAt){
+   const b=$('.meta .d b');if(b)b.textContent=String(d.meta.generatedAt).slice(0,10);
+   const g=$('#genAt');if(g)g.textContent=' · 갱신: '+d.meta.generatedAt;}
+  return dirty;
+ }catch(e){console.warn('[v2] data.json 로드 실패 — 내장 시드 사용',e);return false;}
+}
+// ===== Optional auth: if no auth API exists, render this public dashboard normally. =====
+let ME=null;
+async function initAuth(){
+ try{const r=await fetch('../api/me',{cache:'no-store'});if(r.ok)ME=await r.json();}
+ catch(e){ME=null;}
+ if(!ME)return true;
+ if(ME.role==='admin'){const a=$('#adminLink');if(a)a.style.display='';}
+ if(ME.role==='admin'||ME.role==='master'){
+  const ab=$('#allBtn');if(ab)ab.style.display='';
+  const pb=$('#presentBtn');
+  if(pb){pb.style.display='';pb.onclick=async()=>{
+   if(!confirm('이번 주 발표 덱을 생성/업데이트할까요?\n(위클리 실적 구글 슬라이드에 반영됩니다)'))return;
+   pb.disabled=true;
+   try{
+    const r=await fetch('../api/present',{method:'POST'});
+    const j=await r.json().catch(()=>({}));
+    if(r.ok)alert('✅ '+j.week+' 주차 발표 덱이 생성되었습니다.\n'+(j.slides==='triggered'?'구글 슬라이드 갱신을 요청했습니다 (약 30초 소요).':'⚠️ 슬라이드 웹훅이 아직 연결되지 않아 덱은 갱신되지 않았습니다.'));
+    else alert('생성 실패: '+(j.error||r.status));
+   }catch(e){alert('서버에 연결할 수 없습니다.');}
+   pb.disabled=false;
+  };}
+ }
+ const lb=$('#logoutBtn');
+ if(lb){lb.style.display='';lb.onclick=async()=>{try{await fetch('../api/logout',{method:'POST'});}catch(e){}location.href='../login.html';};}
+ if(ME.role==='region'){
+  const allow=ME.regions||[];
+  $$('#regionseg button').forEach(b=>{if(!allow.includes(b.dataset.r))b.remove();});
+  if(!allow.includes(REGION))REGION=allow[0]||'TW';
+  $$('#regionseg button').forEach(b=>b.classList.toggle('on',b.dataset.r===REGION));
+  if(allow.length<3){const sc=$('#s_cmp');if(sc)sc.style.display='none';}
+  if(!allow.includes('TW')){const st=$('#s_strat');if(st)st.style.display='none';}
+ }
+ return true;
+}
+(async()=>{
+ if(!await initAuth())return;
+ if(await loadData()){buildALL();renderStrat();renderRegion();}
+ else{document.body.insertAdjacentHTML('afterbegin','<div style="margin:14px;padding:14px 16px;border:1px solid #f43f5e;border-radius:12px;color:#f87171;font-weight:700;background:rgba(244,63,94,.08)">⚠️ 실시간 데이터(data.json)를 불러오지 못했습니다. 이 대시보드는 시드 없이 실데이터만 표시합니다 — 새로고침하거나 관리자에게 문의하세요.</div>');}
+})();
+try{const c=$('#canon');if(c)c.href=(window.__APP_CONFIG__&&window.__APP_CONFIG__.baseUrl)||location.origin;}catch(e){}
+</script>
+
+<script>
+(function(){
+ var MODE='week', built=false;
+ function M(){try{return window.__BAKED_DATA__._m02||[];}catch(e){return[];}}
+ function buildMonthly(){
+  if(typeof Chart==='undefined')return; var d=M(); if(!d.length)return;
+  var fx=1538; var labs=d.map(function(r){return r[0].slice(5);});
+  var rev=d.map(function(r){return Math.round(r[1]/fx);});
+  var usr=d.map(function(r){return r[2];}), chr=d.map(function(r){return r[3];}), part=d.map(function(r){return r[4];});
+  function mk(id,cfg){var el=document.getElementById(id);if(!el)return;var ex=Chart.getChart(el);if(ex)ex.destroy();new Chart(el,cfg);}
+  mk('c_rev_m',{type:'bar',data:{labels:labs,datasets:[{label:'月營收($)',data:rev,backgroundColor:part.map(function(p){return p?'rgba(255,45,111,.35)':'rgba(255,45,111,.85)';}),borderRadius:5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '$'+c.raw.toLocaleString()+(part[c.dataIndex]?' (進行中)':'');}}}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return '$'+(v>=1e3?(v/1e3).toFixed(0)+'K':v);}}}}}});
+  mk('c_users_m',{type:'bar',data:{labels:labs,datasets:[{label:'新增使用者',data:usr,backgroundColor:part.map(function(p){return p?'rgba(214,36,159,.35)':'rgba(214,36,159,.85)';}),borderRadius:5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw.toLocaleString()+(part[c.dataIndex]?' (進行中)':'');}}}},scales:{y:{beginAtZero:true}}}});
+  mk('c_char_m',{type:'bar',data:{labels:labs,datasets:[{label:'新增角色',data:chr,backgroundColor:part.map(function(p){return p?'rgba(255,45,111,.3)':'rgba(255,45,111,.7)';}),borderRadius:5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw.toLocaleString()+(part[c.dataIndex]?' (進行中)':'');}}}},scales:{y:{beginAtZero:true}}}});
+  built=true;
+ }
+ function setTtl(cid,wkT,moT){var c=document.getElementById(cid);if(!c)return;var t=c.closest('.card').querySelector('.ttl');if(!t||t.childNodes[0].nodeType!==3)return;t.childNodes[0].nodeValue=(MODE==='week'?wkT:moT);}
+ function apply(){
+  var wk=(MODE==='week');
+  [['c_rev','c_rev_m'],['c_users','c_users_m'],['c_char','c_char_m']].forEach(function(p){
+   var a=document.getElementById(p[0]),b=document.getElementById(p[1]);
+   if(a)a.style.display=wk?'':'none'; if(b)b.style.display=wk?'none':'';});
+  if(!wk&&!built)buildMonthly();
+  setTtl('c_rev','每週營收','每月營收');
+  setTtl('c_users','新增使用者 · 活躍(WAU)','每月新增使用者');
+  setTtl('c_char','每週新增角色','每月新增角色');
+  var cap=document.querySelector('#m02seg')&&document.querySelector('#m02seg').closest('.sh').querySelector('.cap');
+  if(cap){if(cap.__wk===undefined)cap.__wk=cap.textContent;cap.textContent=wk?cap.__wk:'每月(近6個月)';}
+  var seg=document.getElementById('m02seg');
+  if(seg)seg.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x.dataset.m===MODE);});
+ }
+ function wire(){var seg=document.getElementById('m02seg');if(!seg){return setTimeout(wire,120);}
+  seg.querySelectorAll('button').forEach(function(b){b.onclick=function(){MODE=b.dataset.m;apply();};});
+  if(window.renderRegion){var _r=window.renderRegion;window.renderRegion=function(){_r.apply(this,arguments);if(!document.body.classList.contains('r-TW'))MODE='week';apply();};}
+ }
+ setTimeout(wire,250);
+})();
+</script>
+
+
+<script>
+(function(){
+ window.LIM_PROC=6;window.LIM_LOCAL=6;window.LIM_LOCALAUTH=6;window.LIM_PAYERS=6;window.LIM_AUTH=6;
+ var OPTS=[6,10,30,50,100];
+ function depth(id){try{var d=window.__BAKED_DATA__;var m={t_proc:(d.adultProc||[]).length+(d.sfwProc||[]).length,t_local:(d.localProc||[]).length,t_localauth:(d.localAuth||[]).length,t_payers:(d.payers||[]).length,t_authors:(d.authors||[]).length};return m[id]||99;}catch(e){return 99;}}
+ function mkSel(id,cb){var t=document.getElementById(id);if(!t)return;var card=t.closest('.card');if(!card)return;var ttl=card.querySelector('.ttl');if(!ttl)return;
+  var dep=depth(id);
+  var sel=document.createElement('select');sel.className='topsel';
+  sel.style.cssText='margin-left:8px;background:var(--bg2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:11.5px;font-family:inherit;cursor:pointer';
+  OPTS.forEach(function(n){var o=document.createElement('option');o.value=n;o.textContent='Top '+n+(n>dep?' (僅'+dep+')':'');sel.appendChild(o);});
+  ttl.appendChild(sel);sel.onchange=function(){cb(+sel.value);};}
+ function ready(){
+  if(typeof renderProc!=='function'||!document.getElementById('t_payers')){return setTimeout(ready,80);}
+  mkSel('t_proc',function(n){window.LIM_PROC=n;renderProc();});
+  mkSel('t_local',function(n){window.LIM_LOCAL=n;renderProc();});
+  mkSel('t_localauth',function(n){window.LIM_LOCALAUTH=n;renderTWtables();});
+  mkSel('t_payers',function(n){window.LIM_PAYERS=n;renderPayers();});
+  mkSel('t_authors',function(n){window.LIM_AUTH=n;renderAuthors();});
+ }
+ setTimeout(ready,200);
+})();
+</script>
+
+</body>
+</html>
