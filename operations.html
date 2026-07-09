@@ -761,9 +761,11 @@ try{const c=$('#canon');if(c)c.href=(window.__APP_CONFIG__&&window.__APP_CONFIG_
  function monDate(lab){return yr()+'-'+lab;}
  function addD(iso,n){var p=iso.split('-').map(Number);return new Date(Date.UTC(p[0],p[1]-1,p[2]+n)).toISOString().slice(0,10);}
  function rangeLbl(lab){return lab+' – '+addD(monDate(lab),6).slice(5);}
+ function dr(lab){var a=monDate(lab),b=addD(a,6);var f=function(iso){var q=iso.split('-');return (+q[1])+'/'+(+q[2]);};return f(a)+'-'+f(b);}
+ function inprog(lab){var b=addD(monDate(lab),6);return MKT()?(b>MKT().END):false;}
  function weeks(){return (D().wow||[]).map(function(r,i){return {i:i,lab:r[0]};}).filter(function(x){var r=D().wow[x.i];return (+r[3]||0)>0||(+r[1]||0)>0;});}
  function fillSel(){var s=document.getElementById('deckWk');if(!s)return;var ws=weeks();
-  s.innerHTML=ws.map(function(x){return '<option value="'+x.i+'">Week '+x.lab+'</option>';}).join('');
+  s.innerHTML=ws.map(function(x){return '<option value="'+x.i+'">'+dr(x.lab)+(inprog(x.lab)?' (進行中)':'')+'</option>';}).join('');
   if(ws.length)s.value=ws[ws.length-1].i;}
  function gen(){
   if(typeof PptxGenJS==='undefined'){alert('簡報元件載入中，請稍候再試');return;}
@@ -812,7 +814,7 @@ try{const c=$('#canon');if(c)c.href=(window.__APP_CONFIG__&&window.__APP_CONFIG_
   var span=wow.slice(Math.max(0,idx-3),idx+1);
   var rows=[[H('Week'),H('Revenue','right'),H('New Users','right'),H('Orders','right'),H('Paying','right')]];
   span.forEach(function(r){var a=monDate(r[0]);var nu=RAW?sumSu('總量',a,addD(a,6)):(+r[1]||0);
-   rows.push([{text:r[0]},{text:usd(r[3]),options:{align:'right'}},{text:nu.toLocaleString(),options:{align:'right'}},{text:(+r[2]||0).toLocaleString(),options:{align:'right'}},{text:(+r[4]||0).toLocaleString(),options:{align:'right'}}]);});
+   rows.push([{text:dr(r[0])},{text:usd(r[3]),options:{align:'right'}},{text:nu.toLocaleString(),options:{align:'right'}},{text:(+r[2]||0).toLocaleString(),options:{align:'right'}},{text:(+r[4]||0).toLocaleString(),options:{align:'right'}}]);});
   s.addTable(rows,Object.assign({x:0.6,y:1.5,w:12.1,colW:[3,2.5,2.4,2.1,2.1],fontSize:14,rowH:0.55},TBL));foot(s);
   // 4 & 5 marketing (RAW) — Overall cohort + channels
   if(RAW){
@@ -823,7 +825,7 @@ try{const c=$('#canon');if(c)c.href=(window.__APP_CONFIG__&&window.__APP_CONFIG_
    var tot=agg(rawWk('總量',addD(wA,-21),wB),END);
    crows.push(['Total'].concat(cells(tot)).map(function(x){return {text:String(x),options:{bold:true,align:'center'}};}));
    span.slice().reverse().forEach(function(r){var a=monDate(r[0]);var g=agg(rawWk('總量',a,addD(a,6)),END);
-    crows.push([r[0]].concat(cells(g)).map(function(x){return {text:String(x),options:{align:'center'}};}));});
+    crows.push([dr(r[0])].concat(cells(g)).map(function(x){return {text:String(x),options:{align:'center'}};}));});
    s.addTable(crows,Object.assign({x:0.3,y:1.4,w:12.75,fontSize:11,rowH:0.55,align:'center',colW:[1.75,0.78,0.86,0.76,0.66,0.66,0.66,0.66,0.66,0.72,0.78,0.6,0.6,0.6,0.6,0.6]},TBL));
    s.addText('Same-cohort windows → ROAS is monotonic (R0≤R3≤…). D30 needs 30-day-mature cohorts; recent weeks show “—” on D15/D30. ROAS = revenue within N days / spend.',{x:0.3,y:5.65,w:12.7,h:0.4,fontSize:9,color:GRAY});foot(s);
    // 5 channels this week
@@ -831,10 +833,10 @@ try{const c=$('#canon');if(c)c.href=(window.__APP_CONFIG__&&window.__APP_CONFIG_
    var lbl=function(v){return v==='自然量'?'Organic':({'facebook.business':'Facebook','x.ads':'X (Twitter)','google.adwords':'Google','ggads':'Google'}[v]||v);};
    var chRows=Object.keys(RAW).filter(function(v){return v!=='總量';}).map(function(v){return {v:v,g:agg(rawWk(v,wA,wB),END)};}).filter(function(x){return x.g.su>0||x.g.cost>0;});
    chRows.sort(function(a,b){return b.g.cost-a.g.cost;});
-   var ch=[[H('Channel'),H('Signups','right'),H('Spend$','right'),H('CPR$','right'),H('D7 Ret','right'),H('D7 Pay','right'),H('ROAS (latest)','right')]];
-   chRows.forEach(function(x){var g=x.g;var ro=[g.r30,g.r15,g.r7,g.r3,g.r0].filter(function(z){return z!==null&&z!==undefined;})[0];
-    ch.push([{text:lbl(x.v)},{text:g.su.toLocaleString(),options:{align:'right'}},{text:'$'+Math.round(g.cost/RT).toLocaleString(),options:{align:'right'}},{text:g.su?'$'+Math.round(g.cost/g.su/RT):'—',options:{align:'right'}},{text:pf(g.d7r),options:{align:'right'}},{text:pf(g.p7),options:{align:'right'}},{text:(ro!=null?ro+'%':'—'),options:{align:'right',color:HL}}]);});
-   s.addTable(ch,Object.assign({x:0.6,y:1.5,w:12.1,colW:[3.1,1.6,1.7,1.6,1.5,1.5,1.7],fontSize:13,rowH:0.5},TBL));
+   var ch=[[H('Channel'),H('Signups','right'),H('Spend$','right'),H('CPR$','right'),H('D7 Ret','right'),H('D7 Pay','right'),H('R3','right'),H('R7','right')]];
+   chRows.forEach(function(x){var g=x.g;
+    ch.push([{text:lbl(x.v)},{text:g.su.toLocaleString(),options:{align:'right'}},{text:'$'+Math.round(g.cost/RT).toLocaleString(),options:{align:'right'}},{text:g.su?'$'+Math.round(g.cost/g.su/RT):'—',options:{align:'right'}},{text:pf(g.d7r),options:{align:'right'}},{text:pf(g.p7),options:{align:'right'}},{text:pf(g.r3),options:{align:'right',color:HL}},{text:pf(g.r7),options:{align:'right',color:HL}}]);});
+   s.addTable(ch,Object.assign({x:0.4,y:1.5,w:12.5,colW:[3.0,1.5,1.6,1.5,1.35,1.35,1.1,1.1],fontSize:12,rowH:0.5},TBL));
    s.addText('Per acquisition channel, this week’s signup cohort, sorted by spend. Organic = unattributed. ROAS = latest mature window.',{x:0.6,y:6.35,w:12,h:0.4,fontSize:9,color:GRAY});foot(s);
   }
   // 6 Character insights
@@ -854,19 +856,6 @@ try{const c=$('#canon');if(c)c.href=(window.__APP_CONFIG__&&window.__APP_CONFIG_
   au.forEach(function(a,i){t2.push([{text:''+(i+1)},{text:(a[4]?a[4]+' ':'')+a[0]},{text:(+a[1]||0).toLocaleString(),options:{align:'right',color:HL}}]);});
   s.addText('Popular Authors',{x:6.9,y:1.3,w:6,h:0.4,fontSize:14,bold:true,color:PINK});
   s.addTable(t2,Object.assign({x:6.9,y:1.78,w:5.9,colW:[0.6,3.5,1.8],fontSize:12.5,rowH:0.44},TBL));foot(s);
-  // 8 Global comparison
-  s=P.addSlide();s.background={color:BG};head(s,'Global Comparison (Taiwan · Korea · Japan)');
-  var CC=d.C||{},FXR={KRW:FX,JPY:161.6},cur={TW:'KRW',KR:'KRW',JP:'JPY'};
-  var u=function(rg,v){return '$'+Math.round((+v||0)/(FXR[cur[rg]]||FX)).toLocaleString();};
-  var g=[[H('Metric'),H('🇹🇼 Taiwan','right'),H('🇰🇷 Korea','right'),H('🇯🇵 Japan','right')]];
-  function grow(name,f){g.push([{text:name},{text:f('TW'),options:{align:'right',color:HL}},{text:f('KR'),options:{align:'right'}},{text:f('JP'),options:{align:'right'}}]);}
-  grow('Revenue (USD, cumulative)',function(rg){return u(rg,(CC[rg]||{}).rev);});
-  grow('Registered Users',function(rg){return (+(CC[rg]||{}).users||0).toLocaleString();});
-  grow('Paying Users',function(rg){return (+(CC[rg]||{}).payers||0).toLocaleString();});
-  grow('Characters',function(rg){return (+(CC[rg]||{}).chars||0).toLocaleString();});
-  grow('Authors',function(rg){return (+(CC[rg]||{}).authors||0).toLocaleString();});
-  grow('DAU / MAU',function(rg){var c=CC[rg]||{};return c.mau?Math.round(c.dau/c.mau*100)+'%':'—';});
-  s.addTable(g,Object.assign({x:0.6,y:1.5,w:12.1,colW:[4.6,2.5,2.5,2.5],fontSize:14,rowH:0.6},TBL));foot(s);
   P.writeFile({fileName:'BabeChat_Taiwan_Weekly_'+lab+'.pptx'});
  }
  function wire(){var b=document.getElementById('opsPptx');if(!b){return setTimeout(wire,150);}fillSel();b.onclick=gen;}
