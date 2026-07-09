@@ -12,6 +12,7 @@
 <script src="../config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <style>
 :root{--bg:#08080c;--bg2:#0e0e14;--card:#101017;--card2:#14141d;--line:#21212c;--txt:#f3f1f8;--muted:#8d87a3;--muted2:#6f6a86;
 --pink:#ff2d6f;--pink2:#ff6aa3;--magenta:#d6249f;--purple:#a855f7;--cyan:#22d3ee;--green:#34d399;--red:#fb7185;--amber:#fbbf24;
@@ -166,7 +167,7 @@ tr.dcdone td{opacity:.5}tr.dcdone .lbl{text-decoration:line-through}
   <div class="seg" id="langseg"><button data-l="ko">한국어</button><button class="on" data-l="zh">繁體中文</button></div>
   <div class="seg" id="regionseg"><button data-r="TW" class="on">🇹🇼 <span data-i18n>대만</span></button><button data-r="KR">🇰🇷 <span data-i18n>한국</span></button><button data-r="JP">🇯🇵 <span data-i18n>일본</span></button><button data-r="ALL" id="allBtn" style="display:none">🌏 <span data-i18n>전체</span></button></div>
   
-  <button class="ico" id="presentBtn" title="발표하기 — 위클리 실적 덱 생성" style="display:none">📊</button><a class="ico" id="adminLink" href="../admin.html" title="유저 관리" style="display:none;text-align:center;line-height:36px;font-size:16px">👥</a><button class="ico" id="logoutBtn" title="로그아웃" style="display:none">⏻</button><button class="ico" onclick="location.reload()">↻</button>
+  <button class="ico" id="presentBtn" title="발표하기 — 위클리 실적 덱 생성" style="display:none">📊</button><a class="ico" id="adminLink" href="../admin.html" title="유저 관리" style="display:none;text-align:center;line-height:36px;font-size:16px">👥</a><button class="ico" id="logoutBtn" title="로그아웃" style="display:none">⏻</button><select id="deckWk" title="選擇週" style="background:var(--bg2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;cursor:pointer"></select><button class="ico" id="opsPptx" title="輸出簡報（週報·英文）" style="width:auto;padding:0 13px;font-weight:800;background:var(--gradb);color:#fff;border:0;white-space:nowrap">⬇ 輸出簡報</button><button class="ico" onclick="location.reload()">↻</button>
 </header>
 
 <section><div class="sh"><span class="n">01</span><h2 data-i18n>핵심 지표</h2><span class="cap" id="cap01"></span></div>
@@ -733,6 +734,95 @@ try{const c=$('#canon');if(c)c.href=(window.__APP_CONFIG__&&window.__APP_CONFIG_
   if(window.renderRegion){var _r=window.renderRegion;window.renderRegion=function(){_r.apply(this,arguments);if(!document.body.classList.contains('r-TW'))MODE='week';apply();};}
  }
  setTimeout(wire,250);
+})();
+</script>
+
+
+<script>
+(function(){
+ function D(){return window.__BAKED_DATA__||{};}
+ function weeks(){return (D().wow||[]).map(function(r,i){return {i:i,lab:r[0],rev:+r[3]||0,nu:+r[1]||0};}).filter(function(x){return x.rev>0||x.nu>0;});}
+ function fillSel(){var s=document.getElementById('deckWk');if(!s)return;var ws=weeks();
+  s.innerHTML=ws.map(function(x){return '<option value="'+x.i+'">Week '+x.lab+'</option>';}).join('');
+  if(ws.length)s.value=ws[ws.length-1].i;}
+ function rng(lab){var y=((D().meta&&D().meta.revMonth&&D().meta.revMonth.label)||'2026').slice(0,4);
+  var dd=new Date(+y,+lab.slice(0,2)-1,+lab.slice(3,5));var e=new Date(dd);e.setDate(dd.getDate()+6);
+  var p=function(n){return ('0'+n).slice(-2);};return lab+' – '+p(e.getMonth()+1)+'-'+p(e.getDate());}
+ function gen(){
+  if(typeof PptxGenJS==='undefined'){alert('簡報元件載入中，請稍候再試');return;}
+  var d=D(),C=(d.C||{}).TW||{},wow=d.wow||[],wau=d.wau||{},FX=+d.FX||1380;
+  var idx=+document.getElementById('deckWk').value;var wk=wow[idx]||[],pv=wow[idx-1]||[];var lab=wk[0]||'';
+  var usd=function(k){return '$'+Math.round((+k||0)/FX).toLocaleString();};
+  var won=function(k){return '₩'+Math.round(+k||0).toLocaleString();};
+  var pctd=function(a,b){a=+a||0;b=+b||0;return b?((a>=b?'+':'')+Math.round((a/b-1)*100)+'%'):'—';};
+  var P=new PptxGenJS();P.defineLayout({name:'W',width:13.33,height:7.5});P.layout='W';
+  var PINK='ff2d6f',BG='0b0b12',CARD='16161f',LINE='23232e',WHITE='FFFFFF',GRAY='8d87a3',GREEN='34d399',RED='fb7185',HL='ff8fb3';
+  var genAt=((d.meta&&d.meta.generatedAt)||'').slice(0,10);
+  function foot(s){s.addText('BabeChat Taiwan  ·  Source: Airbridge (revenue) + Snowflake (product)  ·  Generated '+genAt,{x:0.5,y:7.05,w:12.3,h:0.3,fontSize:8,color:GRAY});}
+  function head(s,tx){s.addText(tx,{x:0.6,y:0.45,w:12.1,h:0.6,fontSize:23,bold:true,color:PINK});}
+  var TBL={color:'e8e6f0',fill:{color:CARD},border:{type:'solid',color:LINE,pt:1},valign:'middle'};
+  // 1 Cover
+  var s=P.addSlide();s.background={color:BG};
+  s.addText('BabeChat Taiwan',{x:0.7,y:2.3,w:12,h:0.9,fontSize:44,bold:true,color:WHITE});
+  s.addText('Weekly Operations Report',{x:0.72,y:3.35,w:12,h:0.6,fontSize:24,color:PINK});
+  s.addText('Week of '+rng(lab),{x:0.74,y:4.15,w:12,h:0.5,fontSize:16,color:GRAY});
+  foot(s);
+  // 2 Weekly KPIs (this week vs last week)
+  s=P.addSlide();s.background={color:BG};head(s,'Weekly Performance — '+rng(lab));
+  var kp=[['Revenue',usd(wk[3]),won(wk[3]),pctd(wk[3],pv[3])],
+          ['New Users',(+wk[1]||0).toLocaleString(),'',pctd(wk[1],pv[1])],
+          ['WAU',(+wau[lab]||0).toLocaleString(),'',pctd(wau[lab],wau[pv[0]])],
+          ['Orders',(+wk[2]||0).toLocaleString(),'',pctd(wk[2],pv[2])],
+          ['Paying Users',(+wk[4]||0).toLocaleString(),'',pctd(wk[4],pv[4])],
+          ['New Characters',(+wk[5]||0).toLocaleString(),'',pctd(wk[5],pv[5])]];
+  kp.forEach(function(k,i){var col=i%3,row=Math.floor(i/3);var x=0.6+col*4.15,y=1.55+row*2.5;
+   s.addText(' ',{x:x,y:y,w:3.9,h:2.2,fill:{color:CARD},line:{color:LINE,width:1}});
+   s.addText(k[0],{x:x+0.25,y:y+0.22,w:3.5,h:0.4,fontSize:13,color:GRAY});
+   s.addText(k[1],{x:x+0.25,y:y+0.62,w:3.5,h:0.75,fontSize:29,bold:true,color:WHITE});
+   var dl=k[3],dc=(dl.charAt(0)==='-')?RED:GREEN;
+   s.addText((k[2]?k[2]+'    ':'')+(dl==='—'?'':dl+' WoW'),{x:x+0.25,y:y+1.55,w:3.5,h:0.4,fontSize:12,color:(dl==='—'?GRAY:dc)});
+  });foot(s);
+  // 3 Weekly trend
+  s=P.addSlide();s.background={color:BG};head(s,'Weekly Trend (last 8 weeks)');
+  var H=function(t,a){return {text:t,options:{bold:true,color:WHITE,align:a||'left'}};};
+  var last=wow.filter(function(r){return (+r[3]||0)>0||(+r[1]||0)>0;}).slice(-8);
+  var rows=[[H('Week'),H('Revenue','right'),H('New Users','right'),H('Orders','right'),H('Paying','right')]];
+  last.forEach(function(r){rows.push([{text:r[0]},{text:usd(r[3]),options:{align:'right'}},{text:(+r[1]||0).toLocaleString(),options:{align:'right'}},{text:(+r[2]||0).toLocaleString(),options:{align:'right'}},{text:(+r[4]||0).toLocaleString(),options:{align:'right'}}]);});
+  s.addTable(rows,Object.assign({x:0.6,y:1.5,w:12.1,colW:[3,2.5,2.4,2.1,2.1],fontSize:14,rowH:0.5},TBL));foot(s);
+  // 4 Character insights
+  s=P.addSlide();s.background={color:BG};head(s,'Character Insights — ProChat TOP (cumulative)');
+  var proc=[].concat(d.adultProc||[],d.sfwProc||[]).sort(function(a,b){return (b[7]||0)-(a[7]||0);}).slice(0,8);
+  var pr=[[H('#'),H('Character'),H('Author'),H('ProChat pt','right')]];
+  proc.forEach(function(p,i){pr.push([{text:''+(i+1)},{text:(p[2]?p[2]+' ':'')+p[0]},{text:p[1]||''},{text:(+p[7]||0).toLocaleString(),options:{align:'right',color:HL}}]);});
+  s.addTable(pr,Object.assign({x:0.6,y:1.5,w:12.1,colW:[0.7,5.4,3.5,2.5],fontSize:13,rowH:0.46},TBL));foot(s);
+  // 5 Top users & authors
+  s=P.addSlide();s.background={color:BG};head(s,'Top Paying Users & Popular Authors');
+  var pay=(d.payers||[]).slice(0,8),au=(d.authors||[]).slice(0,8);
+  var t1=[[H('#'),H('Nickname'),H('Spend','right')]];
+  pay.forEach(function(p,i){t1.push([{text:''+(i+1)},{text:p[0]||''},{text:usd(p[1]),options:{align:'right',color:HL}}]);});
+  s.addText('Top Paying Users',{x:0.6,y:1.3,w:6,h:0.4,fontSize:14,bold:true,color:PINK});
+  s.addTable(t1,Object.assign({x:0.6,y:1.78,w:5.9,colW:[0.6,3.5,1.8],fontSize:12.5,rowH:0.44},TBL));
+  var t2=[[H('#'),H('Author'),H('Chats','right')]];
+  au.forEach(function(a,i){t2.push([{text:''+(i+1)},{text:(a[4]?a[4]+' ':'')+a[0]},{text:(+a[1]||0).toLocaleString(),options:{align:'right',color:HL}}]);});
+  s.addText('Popular Authors',{x:6.9,y:1.3,w:6,h:0.4,fontSize:14,bold:true,color:PINK});
+  s.addTable(t2,Object.assign({x:6.9,y:1.78,w:5.9,colW:[0.6,3.5,1.8],fontSize:12.5,rowH:0.44},TBL));foot(s);
+  // 6 Global comparison
+  s=P.addSlide();s.background={color:BG};head(s,'Global Comparison (Taiwan · Korea · Japan)');
+  var CC=d.C||{},FXR={KRW:FX,JPY:161.6},cur={TW:'KRW',KR:'KRW',JP:'JPY'};
+  var u=function(rg,v){return '$'+Math.round((+v||0)/(FXR[cur[rg]]||FX)).toLocaleString();};
+  var g=[[H('Metric'),H('🇹🇼 Taiwan','right'),H('🇰🇷 Korea','right'),H('🇯🇵 Japan','right')]];
+  function grow(name,f){g.push([{text:name},{text:f('TW'),options:{align:'right',color:HL}},{text:f('KR'),options:{align:'right'}},{text:f('JP'),options:{align:'right'}}]);}
+  grow('Revenue (USD, cumulative)',function(rg){return u(rg,(CC[rg]||{}).rev);});
+  grow('Registered Users',function(rg){return (+(CC[rg]||{}).users||0).toLocaleString();});
+  grow('Paying Users',function(rg){return (+(CC[rg]||{}).payers||0).toLocaleString();});
+  grow('Characters',function(rg){return (+(CC[rg]||{}).chars||0).toLocaleString();});
+  grow('Authors',function(rg){return (+(CC[rg]||{}).authors||0).toLocaleString();});
+  grow('DAU / MAU',function(rg){var c=CC[rg]||{};return c.mau?Math.round(c.dau/c.mau*100)+'%':'—';});
+  s.addTable(g,Object.assign({x:0.6,y:1.5,w:12.1,colW:[4.6,2.5,2.5,2.5],fontSize:14,rowH:0.6},TBL));foot(s);
+  P.writeFile({fileName:'BabeChat_Taiwan_Weekly_'+lab+'.pptx'});
+ }
+ function wire(){var b=document.getElementById('opsPptx');if(!b){return setTimeout(wire,150);}fillSel();b.onclick=gen;}
+ setTimeout(wire,300);
 })();
 </script>
 
