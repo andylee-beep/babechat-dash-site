@@ -80,8 +80,8 @@ document.getElementById('enter').onclick=chk;document.getElementById('pw').addEv
 <div class="sec"><span class="n">06</span><h2 data-i="sec06">素材表現</h2>
 <select id="creMonth" class="topsel"><option value="2026-07" selected>7月</option><option value="2026-06">6月</option><option value="2026-05">5月</option><option value="2026-04">4月</option></select>
 <select id="creSel" class="topsel"><option value="10">Top 10</option><option value="30" selected>Top 30</option><option value="50">Top 50</option><option value="100">Top 100</option><option value="150">Top 150</option></select></div>
-<div style="margin:10px 0;padding:11px 15px;border-radius:10px;background:#fff3f3;border:1px solid #f3b4b4;color:#b23b3b;font-size:13px;line-height:1.6">⚠️ <b>素材花費防呆</b>：下列廣告活動底下掛了 2 支以上素材。廣告渠道只提供「活動層」花費、無法拆到單支素材，因此這些素材的<b>花費／ROAS 會失準</b>——請投手改為「一活動一支素材」。<ul style="margin:7px 0 0 18px;padding:0"><li><b>X</b>　活動 <code>babechat_brand_signup_tw</code>：掛了 <b>30</b> 支素材</li><li><b>RevX</b>　活動 <code>babechat_brand_traffic_tw</code>：掛了 <b>17</b> 支素材</li><li><b>FB</b>　活動 <code>babechat_brand_signup_tw</code>：掛了 <b>12</b> 支素材</li><li><b>X</b>　活動 <code>babechat_brand_traffic_tw</code>：掛了 <b>10</b> 支素材</li><li><b>X</b>　活動 <code>babechat_brand_purchase_tw</code>：掛了 <b>9</b> 支素材</li><li><b>FB</b>　活動 <code>babechat_brand_Purchase_tw</code>：掛了 <b>8</b> 支素材</li><li><b>18.ads</b>　活動 <code>babechat_brand_traffic_tw</code>：掛了 <b>2</b> 支素材</li><li><b>Google</b>　活動 <code>babechat_brand_Purchase_tw</code>：掛了 <b>2</b> 支素材</li></ul></div>
 <div class="tabs" id="creChans"></div>
+<div class="dupwarn" data-ch="ggads" style="display:none;margin:0 0 10px;padding:11px 15px;border-radius:10px;background:#fff3f3;border:1px solid #f3b4b4;color:#b23b3b;font-size:13px;line-height:1.6">⚠️ <b>素材花費防呆</b>：<b>Google</b> 只提供「活動層」花費，下列活動掛了 2 支以上素材、花費無法拆到單支，這些素材的<b>花費／ROAS 會失準</b>——請投手改為「一活動一支素材」。<ul style="margin:7px 0 0 18px;padding:0"><li>活動 <code>babechat_brand_Purchase_tw</code>：掛了 <b>2</b> 支素材</li></ul></div>
 <div class="wrap" id="crewrap"></div>
 <div class="note" data-i="note06">依該月註冊 cohort 分窗：付D0/3/7/15/30＝註冊後 N 天內付費率；R0/3/7/15/30＝N 天內營收÷素材當月花費（綠≥100%／紅&lt;50%）；次留/D7留＝隔日/第7天回訪率。該窗成熟人數未達 6 成顯示「—」（避免小樣本誤導，例如 R0 有值但 R3 只算到少數人）。點欄位可排序。</div>
 <div class="sec"><span class="n">07</span><h2><span data-i="sec04">用戶消耗</span> Top <span id="topN">30</span></h2>
@@ -121,7 +121,8 @@ function sortCre(th){const tb=th.closest('table'),idx=th.cellIndex;const asc=!th
  tb.querySelectorAll('th').forEach(h=>h.classList.remove('asc','desc'));th.classList.add(asc?'asc':'desc');applyCre();}
 function applyCre(){let n=0;document.querySelectorAll('#crewrap tr[data-ch]').forEach(tr=>{
   const m=(creChan==='all'||tr.dataset.ch===creChan);
-  if(m&&n<creLimit){tr.style.display='';n++;}else tr.style.display='none';});}
+  if(m&&n<creLimit){tr.style.display='';n++;}else tr.style.display='none';});
+  document.querySelectorAll('.dupwarn').forEach(d=>d.style.display=(d.dataset.ch===creChan)?'block':'none');}
 function buildChans(){const chs=[...new Set([...document.querySelectorAll('#crewrap tr[data-ch]')].map(t=>t.dataset.ch))];
   const box=document.getElementById('creChans');
   box.innerHTML='<button class="tab on" data-ch="all">'+t('all_ch')+'</button>'+chs.map(c=>'<button class="tab" data-ch="'+c+'">'+c+'</button>').join('');
