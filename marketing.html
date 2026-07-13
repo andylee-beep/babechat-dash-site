@@ -74,7 +74,6 @@ document.getElementById('enter').onclick=chk;document.getElementById('pw').addEv
 <div class="tabs" id="dxTabs"></div>
 <div class="tabs gran" id="dxGran"></div>
 <div class="tabs" id="dxRange"><span style="font-size:13px;color:var(--mut)" data-i="d_from">起</span><input type="date" id="d1"><span style="font-size:13px;color:var(--mut)" data-i="d_to">迄</span><input type="date" id="d2"><button class="tab" id="apply" data-i="d_apply">套用</button></div>
-<div class="cards" id="dxCards" style="margin-bottom:14px"></div>
 <div class="wrap"><table class="dx"><thead id="dxHead"></thead><tbody id="dxBody"></tbody></table></div>
 <div class="note" data-i="note05">各窗以「同一批成熟成員（滿足最大成熟窗）」計算，保證 R0≤R3≤…≤R90 單調；未滿期窗顯示「—」。粒度可選 月/週/日/自訂。Roas 綠≥100%／黃50-99／紅&lt;50。</div>
 <div class="sec"><span class="n">06</span><h2 data-i="sec06">素材表現</h2>
@@ -167,8 +166,6 @@ function buckets(){const arr=D[cv];
 function fmt(k,v){if(v===null||v===undefined)return "—";if(MONEY.has(k))return Math.round(v).toLocaleString()+"<br><span style='color:var(--mut);font-size:10px'>$"+Math.round(v/1380).toLocaleString()+"</span>";if(k==="su"||k==="op")return Math.round(v).toLocaleString();if(PCT.has(k))return v+"%";return v;}
 function col(k,v){if(v===null)return "";if(ROAS.has(k)){if(v>=100)return "color:var(--ok)";if(v>=50)return "color:var(--warn)";return "color:var(--bad)";}return "";}
 function rnd(){const d=buckets();document.getElementById("dxHead").innerHTML="<tr>"+COLS.map(c=>"<th>"+t(c[1])+"</th>").join("")+"</tr>";const tt=d.total;let tr="<tr class='tot'>"+COLS.map(c=>"<td style='"+col(c[0],tt[c[0]])+"'>"+fmt(c[0],tt[c[0]])+"</td>").join("")+"</tr>";d.rows.slice().reverse().forEach(r=>{tr+="<tr>"+COLS.map(c=>"<td style='"+col(c[0],r[c[0]])+"'>"+fmt(c[0],r[c[0]])+"</td>").join("")+"</tr>";});document.getElementById("dxBody").innerHTML=tr;
- const cd=[[t('dc_reg'),Math.round(tt.su).toLocaleString()],[t('dc_cost'),"₩"+Math.round(tt.cost).toLocaleString()+" ($"+Math.round(tt.cost/1380).toLocaleString()+")"],[t('dc_p30'),(tt.p30===null?"—":tt.p30+"%")],[t('dc_roas'),(tt.r30!==null?tt.r30+"%":"—")]];
- document.getElementById("dxCards").innerHTML=cd.map(x=>"<div class='card'><div class='cl'>"+x[0]+"</div><div class='cv' style='font-size:19px'>"+x[1]+"</div></div>").join("");
  document.querySelectorAll("#dxTabs .tab").forEach(b=>b.classList.toggle("on",b.dataset.v===cv));document.querySelectorAll("#dxGran .tab").forEach(b=>b.classList.toggle("on",b.dataset.g===cg));
  document.getElementById('dxRange').style.display=(cg==='custom')?'flex':'none';}
 const DS=D[VIEWS[0]];if(DS.length){document.getElementById('d1').value=DS[0].ds;document.getElementById('d2').value=DS[DS.length-1].ds;}
