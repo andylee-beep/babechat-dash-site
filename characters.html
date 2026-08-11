@@ -46,20 +46,30 @@ code{background:#12151d;padding:1px 5px;border-radius:4px;font-size:12px}
 .chart .sub{font-size:11px;color:#6b7280;margin:-6px 0 10px}
 
 /* ── 三頁共用字級標尺（ui_type.py）────────────────────────── */
-h2{font-size:18px}
-table th{font-size:12px}
-table td{font-size:14px}
+h2,.sh h2{font-size:20px}   /* Overview(v2) 的區塊標題是 .sh h2，權重比裸 h2 高 */
+table th{font-size:13px}
+table td{font-size:15px}
 /* Marketing：.cl 標籤／.cv 數字／.cu 副值／.cs 說明 */
-.cl{font-size:13px} .cv{font-size:25px} .cu{font-size:13px} .cs{font-size:12.5px}
+.cl{font-size:14px} .cv{font-size:28px} .cu{font-size:14px} .cs{font-size:13.5px}
 /* Overview(v2)：.lab 標籤／.val 數字／.sub 說明／.by 次要／.foot 頁尾 */
-.kpi .lab{font-size:13px} .kpi .val{font-size:25px} .kpi .sub{font-size:12.5px}
-.by{font-size:12.5px} .foot{font-size:11.5px} .ttl{font-size:13.5px}
+.kpi .lab{font-size:14px} .kpi .val{font-size:28px} .kpi .sub{font-size:13.5px}
+.by{font-size:13.5px} .foot{font-size:12px} .ttl{font-size:14.5px}
 /* Character：.kpi .v 數字／.kpi .l 標籤／.kpi .s 說明／.sec .hint 提示 */
-.kpi .v{font-size:24px} .kpi .l{font-size:13px} .kpi .s{font-size:11.5px}
-.sec h2{font-size:18px} .sec .hint{font-size:11.5px} .srcbar{font-size:12.5px}
-.chart h3{font-size:13.5px} .chart .sub{font-size:11.5px} .cnt{font-size:12.5px}
-/* 註腳下限：不要再有 11px 以下的字（.rk 排名圓圈／.pct 長條內百分比是固定尺寸元件，保持原樣避免撐破版面）*/
-.note,.cap,.hint,small,.pill{font-size:11.5px}
+.kpi .v{font-size:28px} .kpi .l{font-size:14px} .kpi .s{font-size:12.5px}
+.sec h2{font-size:20px} .sec .hint{font-size:12.5px} .srcbar{font-size:13.5px}
+.chart h3{font-size:14.5px} .chart .sub{font-size:12.5px} .cnt{font-size:13.5px}
+/* Character 的表單控制項一併放大，不然跟旁邊的字不搭 */
+.ctl .lbl{font-size:13.5px} .ctl input,.ctl select,.ctl button.qb{font-size:14px}
+/* 註腳下限：不要再有 12px 以下的字
+   （.rk 排名圓圈／.pct 長條內百分比／.r 圖表單位 是固定尺寸元件，維持原樣避免撐破外框）*/
+.note,.cap,.hint,small,.pill{font-size:12px}
+
+/* ── 核心指標：一行四張、共兩行（Andy 指定）────────────────── */
+/* #kpi_core 是 Overview(v2) 的 8 張卡；.kpis 是 Character 的 8 張卡 */
+@media(min-width:1000px){
+  #kpi_core.kgrid{grid-template-columns:repeat(4,1fr)}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+}
 </style></head><body><div class="wrap">
 <div class="top">
   <div>
@@ -88,7 +98,7 @@ table td{font-size:14px}
   <button class="qb" data-q="30" data-i="q30"></button>
   <button class="qb" data-q="m" data-i="qm"></button>
   <button class="qb on" data-q="all" data-i="qall"></button>
-  <span style="width:14px"></span>
+  <div style="flex-basis:100%;height:0"></div>
   <input class="q" id="q" data-ip="search">
   <select id="fnat"><option value="" data-i="nat_all"></option><option value="韓國" data-i="kr"></option><option value="台灣" data-i="tw"></option></select>
   <select id="fadu"><option value="" data-i="adu_all"></option><option value="adult" data-i="adult"></option><option value="sfw" data-i="sfw"></option></select>
@@ -347,12 +357,12 @@ function renderCharts(rows,g,tot){
     +g.map(function(x){
       var np=rows.length? x.m.n/rows.length*100:0, rp=tot? x.m.rev/tot*100:0;
       return '<div style="margin-bottom:11px"><div style="font-size:11.5px;color:#9aa1b1;margin-bottom:3px">'+x.k+'</div>'
-      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="font-size:11.5px;color:#6b7280;width:38px">'+t('ch3n')+'</span>'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="font-size:12px;color:#6b7280;width:42px">'+t('ch3n')+'</span>'
       +'<div style="flex:1;height:8px;background:#12151d;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+np+'%;background:#4b5563;border-radius:4px"></div></div>'
-      +'<span style="font-size:11.5px;width:46px;text-align:right">'+np.toFixed(1)+'%</span></div>'
-      +'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:11.5px;color:#6b7280;width:38px">'+t('ch3r')+'</span>'
+      +'<span style="font-size:12px;width:50px;text-align:right">'+np.toFixed(1)+'%</span></div>'
+      +'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:#6b7280;width:42px">'+t('ch3r')+'</span>'
       +'<div style="flex:1;height:8px;background:#12151d;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+rp+'%;background:'+x.c+';border-radius:4px"></div></div>'
-      +'<span style="font-size:11.5px;width:46px;text-align:right">'+rp.toFixed(1)+'%</span></div></div>';
+      +'<span style="font-size:12px;width:50px;text-align:right">'+rp.toFixed(1)+'%</span></div></div>';
     }).join('')+'</div>';
   var df=dateField(), mo={};
   rows.forEach(function(x){var d=x[df]; if(d) mo[d.slice(0,7)]=(mo[d.slice(0,7)]||0)+1});
@@ -363,7 +373,7 @@ function renderCharts(rows,g,tot){
       return '<div title="'+k+'：'+mo[k]+'" style="flex:1;min-width:6px;display:flex;flex-direction:column;justify-content:flex-end;height:100%">'
         +'<div style="height:'+hh+'%;background:linear-gradient(180deg,#a855f7,#6d28d9);border-radius:3px 3px 0 0;min-height:2px"></div></div>';
     }).join('')+'</div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:11.5px;color:#6b7280;margin-top:5px">'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:5px">'
     +'<span>'+(ks[0]||'')+'</span><span>'+tf('ch4peak',mx)+'</span><span>'+(ks[ks.length-1]||'')+'</span></div></div>';
   $('charts').innerHTML=c1+c2+c3+c4;
 }
