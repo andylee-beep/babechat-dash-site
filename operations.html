@@ -153,6 +153,22 @@ tr.dcdone td{opacity:.5}tr.dcdone .lbl{text-decoration:line-through}
 #chartModal h3{font-size:15px;font-weight:800;margin-bottom:12px;padding-right:40px}
 #chartModal .cv{flex:1;position:relative;min-height:0}
 #modalClose{position:absolute;top:12px;right:14px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:17px;cursor:pointer}
+
+/* ── 三頁共用字級標尺（ui_type.py）────────────────────────── */
+h2{font-size:18px}
+table th{font-size:12px}
+table td{font-size:14px}
+/* Marketing：.cl 標籤／.cv 數字／.cu 副值／.cs 說明 */
+.cl{font-size:13px} .cv{font-size:25px} .cu{font-size:13px} .cs{font-size:12.5px}
+/* Overview(v2)：.lab 標籤／.val 數字／.sub 說明／.by 次要／.foot 頁尾 */
+.kpi .lab{font-size:13px} .kpi .val{font-size:25px} .kpi .sub{font-size:12.5px}
+.by{font-size:12.5px} .foot{font-size:11.5px} .ttl{font-size:13.5px}
+/* Character：.kpi .v 數字／.kpi .l 標籤／.kpi .s 說明／.sec .hint 提示 */
+.kpi .v{font-size:24px} .kpi .l{font-size:13px} .kpi .s{font-size:11.5px}
+.sec h2{font-size:18px} .sec .hint{font-size:11.5px} .srcbar{font-size:12.5px}
+.chart h3{font-size:13.5px} .chart .sub{font-size:11.5px} .cnt{font-size:12.5px}
+/* 註腳下限：不要再有 11px 以下的字（.rk 排名圓圈／.pct 長條內百分比是固定尺寸元件，保持原樣避免撐破版面）*/
+.note,.cap,.hint,small,.pill{font-size:11.5px}
 </style>
 </head>
 <body class="r-TW">
@@ -161,9 +177,9 @@ tr.dcdone td{opacity:.5}tr.dcdone .lbl{text-decoration:line-through}
 <header>
   <div class="brand">
     <div><h1><span class="b">BabeChat</span> 台灣營運報表</h1>
-    <div class="sub" data-i18n>매출 · 사용자 · 캐릭터 · 크리에이터 인사이트 | Snowflake 기반</div></div>
+    <div class="sub" data-i18n>매출 · 사용자 · 캐릭터 · 크리에이터 인사이트 | BigQuery(mart_dash) 기반</div></div>
   </div>
-  <div class="meta"><div class="d" data-i18n>데이터 기준일: <b>2026-06-27</b></div><div class="pills"><span class="pill" data-i18n>라이브 (Snowflake)</span><span class="pill dev">v2</span></div></div>
+  <div class="meta"><div class="d" data-i18n>데이터 기준일: <b>2026-06-27</b></div><div class="pills"><span class="pill" data-i18n>BigQuery (mart_dash)</span><span class="pill dev">v2</span></div></div>
   <div class="seg" id="langseg"><button data-l="ko">한국어</button><button class="on" data-l="zh">繁體中文</button></div>
   <div class="seg" id="regionseg"><button data-r="TW" class="on">🇹🇼 <span data-i18n>대만</span></button><button data-r="KR">🇰🇷 <span data-i18n>한국</span></button><button data-r="JP">🇯🇵 <span data-i18n>일본</span></button><button data-r="ALL" id="allBtn" style="display:none">🌏 <span data-i18n>전체</span></button></div>
   
@@ -615,7 +631,7 @@ renderRegion=function(){__renderRegion0();applyView();};
 $$('#viewseg button').forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;applyView();});
 
 // ===== i18n =====
-const DICT={"주간 매출($)":"每週營收($)","실시간 데이터(data.json)를 불러오지 못했습니다. 이 대시보드는 시드 없이 실데이터만 표시합니다 — 새로고침하거나 관리자에게 문의하세요.":"無法載入即時資料(data.json)。本儀表板僅顯示真實資料 — 請重新整理或聯繫管理員。","⚠️ discord.json을 불러오지 못했습니다 — 표시할 커뮤니티 데이터가 없습니다.":"⚠️ 無法載入 discord.json — 沒有可顯示的社群資料。","매출 · 사용자 · 캐릭터 · 크리에이터 인사이트 | Snowflake 기반":"營收 · 使用者 · 角色 · 創作者洞察 | 基於Snowflake","라이브 (Snowflake)":"即時(Snowflake)","대만":"台灣","한국":"韓國","일본":"日本","핵심 지표":"核心指標","매출 · 사용자 추이":"營收 · 使用者趨勢","주간 (최근 12주)":"每週(近12週)","주간 매출":"每週營收","신규 사용자 · 활성(WAU)":"新增使用者 · 活躍(WAU)","명":"人","주간 신규 캐릭터":"每週新增角色","개":"個","주간 상세 (최근 6주)":"每週明細(近6週)","주":"週","신규":"新增","결제건":"付款筆","매출":"營收","결제자":"付款者","신규 캐릭터":"新增角色","사용자 · 캐릭터 현황":"使用者 · 角色現況","사용자 구성":"使用者組成","캐릭터 라이브러리":"角色庫","수익 / 비수익 캐릭터":"營收/非營收角色","제작 IP 비중 (대만)":"製作IP佔比(台灣)","캐릭터":"角色","캐릭터 인사이트":"角色洞察","ProChat(유료) 사용수 · pt":"ProChat(付費)使用數 · pt","캐릭터 ProChat TOP 6":"角色 ProChat TOP 6","월별 · 누적":"每月 · 累計","전체":"全部","성인":"成人","비성인":"非成人","작가":"作者","누적":"累計","현지(대만 IP) 제작 캐릭터 TOP 6":"在地(台灣IP)製作角色 TOP 6","성인 / 비성인 ProChat 비중":"成人/非成人 ProChat佔比","대만 IP 분석":"台灣IP分析","TW-IP 확인 기준":"以TW-IP確認","제작자 IP 분포":"製作者IP分布","IP 국가":"IP國家","대화수":"對話數","현지(대만 IP) 작가 TOP 6":"在地(台灣IP)作者 TOP 6","팔로워":"粉絲","탑 사용자 · 탑 작가":"頂級使用者 · 作者","최고 결제 사용자 TOP 6":"最高付款使用者 TOP 6","결제액":"付款額","결제액(₩)":"付款額(₩)","건수":"筆數","닉네임":"暱稱","인기 작가 TOP 6":"人氣作者 TOP 6","대화수 · 행 클릭=캐릭터":"對話數 · 點列=角色","글로벌 비교 (대만 · 한국 · 일본)":"全球比較(台灣·韓國·日本)","매출 비중 (USD)":"營收佔比(USD)","수익 캐릭터 비율 & DAU/MAU":"營收角色比率 & DAU/MAU","지표":"指標","성장 전략 (대만)":"成長策略(台灣)","대만 매출 Trajectory":"台灣營收 Trajectory","수익화 인프라 격차":"變現基礎設施差距","기능":"功能","시사점":"啟示","데이터 기준일:":"資料基準日：","BigQuery(mart_dash) 집계. 매출은 한국·일본·대만 모두 ₩(KRW) 기준(revenue_krw). USD 환산 $1=₩1,380. '현지(대만)'=접속 IP가 TW로 확인된 계정. '수익 캐릭터'=ProChat 유료 1건 이상. 수동 갱신(BigQuery 재수집 시).":"BigQuery(mart_dash) 彙整。營收（韓/日/台）統一以 ₩(KRW) 記錄(revenue_krw)。USD換算 $1=₩1,380。「在地(台灣)」=連線IP確認為TW的帳號。「營收角色」=ProChat付費至少1筆。手動更新（重撈 BigQuery 時）。",
+const DICT={"주간 매출($)":"每週營收($)","실시간 데이터(data.json)를 불러오지 못했습니다. 이 대시보드는 시드 없이 실데이터만 표시합니다 — 새로고침하거나 관리자에게 문의하세요.":"無法載入即時資料(data.json)。本儀表板僅顯示真實資料 — 請重新整理或聯繫管理員。","⚠️ discord.json을 불러오지 못했습니다 — 표시할 커뮤니티 데이터가 없습니다.":"⚠️ 無法載入 discord.json — 沒有可顯示的社群資料。","매출 · 사용자 · 캐릭터 · 크리에이터 인사이트 | BigQuery(mart_dash) 기반":"營收 · 使用者 · 角色 · 創作者洞察 | 基於 BigQuery(mart_dash)","BigQuery (mart_dash)":"BigQuery(mart_dash)","대만":"台灣","한국":"韓國","일본":"日本","핵심 지표":"核心指標","매출 · 사용자 추이":"營收 · 使用者趨勢","주간 (최근 12주)":"每週(近12週)","주간 매출":"每週營收","신규 사용자 · 활성(WAU)":"新增使用者 · 活躍(WAU)","명":"人","주간 신규 캐릭터":"每週新增角色","개":"個","주간 상세 (최근 6주)":"每週明細(近6週)","주":"週","신규":"新增","결제건":"付款筆","매출":"營收","결제자":"付款者","신규 캐릭터":"新增角色","사용자 · 캐릭터 현황":"使用者 · 角色現況","사용자 구성":"使用者組成","캐릭터 라이브러리":"角色庫","수익 / 비수익 캐릭터":"營收/非營收角色","제작 IP 비중 (대만)":"製作IP佔比(台灣)","캐릭터":"角色","캐릭터 인사이트":"角色洞察","ProChat(유료) 사용수 · pt":"ProChat(付費)使用數 · pt","캐릭터 ProChat TOP 6":"角色 ProChat TOP 6","월별 · 누적":"每月 · 累計","전체":"全部","성인":"成人","비성인":"非成人","작가":"作者","누적":"累計","현지(대만 IP) 제작 캐릭터 TOP 6":"在地(台灣IP)製作角色 TOP 6","성인 / 비성인 ProChat 비중":"成人/非成人 ProChat佔比","대만 IP 분석":"台灣IP分析","TW-IP 확인 기준":"以TW-IP確認","제작자 IP 분포":"製作者IP分布","IP 국가":"IP國家","대화수":"對話數","현지(대만 IP) 작가 TOP 6":"在地(台灣IP)作者 TOP 6","팔로워":"粉絲","탑 사용자 · 탑 작가":"頂級使用者 · 作者","최고 결제 사용자 TOP 6":"最高付款使用者 TOP 6","결제액":"付款額","결제액(₩)":"付款額(₩)","건수":"筆數","닉네임":"暱稱","인기 작가 TOP 6":"人氣作者 TOP 6","대화수 · 행 클릭=캐릭터":"對話數 · 點列=角色","글로벌 비교 (대만 · 한국 · 일본)":"全球比較(台灣·韓國·日本)","매출 비중 (USD)":"營收佔比(USD)","수익 캐릭터 비율 & DAU/MAU":"營收角色比率 & DAU/MAU","지표":"指標","성장 전략 (대만)":"成長策略(台灣)","대만 매출 Trajectory":"台灣營收 Trajectory","수익화 인프라 격차":"變現基礎設施差距","기능":"功能","시사점":"啟示","데이터 기준일:":"資料基準日：","BigQuery(mart_dash) 집계. 매출은 한국·일본·대만 모두 ₩(KRW) 기준(revenue_krw). USD 환산 $1=₩1,380. '현지(대만)'=접속 IP가 TW로 확인된 계정. '수익 캐릭터'=ProChat 유료 1건 이상. 수동 갱신(BigQuery 재수집 시).":"BigQuery(mart_dash) 彙整。營收（韓/日/台）統一以 ₩(KRW) 記錄(revenue_krw)。USD換算 $1=₩1,380。「在地(台灣)」=連線IP確認為TW的帳號。「營收角色」=ProChat付費至少1筆。手動更新（重撈 BigQuery 時）。",
 "패스/구독 (USER_PASSES)":"通行證/訂閱 (USER_PASSES)","패스 상품 (PASS_PRODUCTS)":"通行證商品 (PASS_PRODUCTS)","크리에이터 후원 (DONATIONS)":"創作者贊助 (DONATIONS)","크리에이터 수익설정":"創作者收益設定","KR 핵심 매출원 TW 전무":"KR核心營收來源TW全無","구독 매출 불가":"無法訂閱營收","작가 직접 수익 거의 없음":"作者直接收益幾乎為零","작가 등급/정산 부재":"缺乏作者等級/結算",
 "결제 패스·구독 상품 즉시 도입":"立即導入付款通行證·訂閱商品","고액 결제자(웨일) 관리":"高額付款者(鯨魚)管理","현지 크리에이터 수익화·육성":"在地創作者變現·培養","수익 캐릭터 비율 개선":"提升營收角色比率","리텐션·고착도 개선":"留存·黏著度改善",
 "대만은 USER_PASSES·PASS_PRODUCTS가 모두 0. 한국은 누적 89.9만 건 패스 구매가 핵심 매출원. 월정액 패스/구독만 설정해도 가장 빠른 ARPPU 상승 가능.":"台灣 USER_PASSES·PASS_PRODUCTS 皆為0。韓國累計89.9萬筆通行證購買為核心營收來源。只要設定月費通行證/訂閱即可最快提升ARPPU。",
@@ -799,7 +815,7 @@ try{const c=$('#canon');if(c)c.href=(window.__APP_CONFIG__&&window.__APP_CONFIG_
   var P=new PptxGenJS();P.defineLayout({name:'W',width:13.33,height:7.5});P.layout='W';
   var PINK='ff2d6f',BG='0b0b12',CARD='16161f',LINE='23232e',WHITE='FFFFFF',GRAY='8d87a3',GREEN='34d399',RED='fb7185',HL='ff8fb3';
   var genAt=((d.meta&&d.meta.generatedAt)||'').slice(0,10);
-  function foot(s){s.addText('BabeChat Taiwan  ·  Source: Airbridge + Snowflake  ·  Generated '+genAt,{x:0.5,y:7.05,w:12.3,h:0.3,fontSize:8,color:GRAY});}
+  function foot(s){s.addText('BabeChat Taiwan  ·  Source: Airbridge + BigQuery  ·  Generated '+genAt,{x:0.5,y:7.05,w:12.3,h:0.3,fontSize:8,color:GRAY});}
   function head(s,tx){s.addText(tx,{x:0.6,y:0.45,w:12.1,h:0.6,fontSize:23,bold:true,color:PINK});}
   var TBL={color:'e8e6f0',fill:{color:CARD},border:{type:'solid',color:LINE,pt:1},valign:'middle'};
   var H=function(t,a){return {text:t,options:{bold:true,color:WHITE,align:a||'left'}};};
