@@ -212,6 +212,17 @@ var T={
          '<b>기간 실적</b>: 지표는 선택한 기간에 <b>실제 발생한</b> 대화와 매출입니다(생애 누적 아님). 매출＝일별 전체 매출 × 해당 캐릭터의 당일 포인트 사용 비중을 일자별 합산. <b>기간 내 대화가 있는 캐릭터만 표시합니다.</b>'],
  cov_p:['期間 %s ~ %s：全站營收 NT$%s，其中 NT$%s（%s）可歸戶到角色','기간 %s ~ %s: 전체 매출 NT$%s 중 NT$%s(%s) 캐릭터 귀속 가능'],
  pd_range:['期間資料涵蓋 %s ~ %s，更早的期間算不出來（來源表從那天才開始）','기간 데이터 범위 %s ~ %s, 그 이전은 계산 불가'],
+ch5:['每日對話量 vs 營收','일별 대화량 vs 매출'],
+ ch5s:['依期間資料，隨上方篩選連動（%s ~ %s）','기간 데이터 기준, 위 필터에 연동(%s ~ %s)'],
+ ch6:['累計角色數 vs 創作者數','누적 캐릭터 수 vs 크리에이터 수'],
+ ch6s:['依「%s」累加，看角色庫成長','「%s」 기준 누적, 캐릭터 라이브러리 성장'],
+ ch7:['累計 成人 vs 一般角色','누적 성인 vs 일반 캐릭터'],
+ ch7s:['依「%s」累加，看內容結構變化','「%s」 기준 누적, 콘텐츠 구성 변화'],
+ l_chat:['對話量','대화량'], l_rev:['營收','매출'],
+ l_char:['角色數','캐릭터 수'], l_auth:['創作者數','크리에이터 수'],
+ l_adult:['成人','성인'], l_sfw:['一般','일반'],
+ n_cre:['建立日','생성일'], n_pub:['發布日','공개일'],
+ nodata:['此範圍沒有資料','해당 범위에 데이터 없음'],
  est_p:['⚠ %s 為<b>暫估</b>：公司彙總表尚未出帳，這幾天先用原始訊息即時計算（口徑相同，明天會自動換成正式值）。','⚠ %s는 <b>잠정치</b>: 집계 테이블 미반영분은 원본 메시지에서 즉시 계산했습니다(동일 기준, 내일 확정치로 자동 대체).'],
  from:['起','시작'], to:['迄','종료'],
  q_latest:['最新一天','최신일'], q_prev:['前一天','전일'],
@@ -294,6 +305,7 @@ function setRange(a,b,tag){ $('d1').value=a||''; $('d2').value=b||''; qbActive=t
 function mode(){ return $('dfield').value }              // period | cre | pub
 function isPeriod(){ return mode()==='period' && PD.rows.length>0 }
 function dateField(){ return mode()==='pub' ? I.pub : I.cre }
+function dfName(){ return mode()==='pub' ? t('n_pub') : t('n_cre') }
 function dfLabel(){ return mode()==='period' ? t('f_period') : (mode()==='pub' ? t('f_pub') : t('f_cre')) }
 
 function filtered(){
@@ -398,6 +410,64 @@ function barsH(items,fmt){
       +'<div style="height:100%;width:'+w+'%;background:'+x.c+';border-radius:5px"></div></div></div>';
   }).join('');
 }
+
+/* ── 雙線折線圖（純 SVG，無外部套件）────────────────────────
+   兩條線各自用自己的最大值正規化（量級差很多時才比得出形狀）。   */
+function lines2(labels, s1, s2, c1, c2, n1, n2, f1, f2){
+  var n=labels.length;
+  if(!n) return '<div style="color:#6b7280;font-size:12.5px;padding:18px 0">'+t('nodata')+'</div>';
+  var W=100, H=44;
+  var m1=Math.max.apply(null,s1.concat([1])), m2=Math.max.apply(null,s2.concat([1]));
+  var px=function(i){ return n<2 ? W/2 : i/(n-1)*W; };
+  var mk=function(arr,mx){ return arr.map(function(v,i){
+      return (i?'L':'M')+px(i).toFixed(2)+' '+(H-(v/mx*H)).toFixed(2); }).join(' '); };
+  var dots=function(arr,mx,c,f){ return arr.map(function(v,i){
+      return '<circle cx="'+px(i).toFixed(2)+'" cy="'+(H-(v/mx*H)).toFixed(2)+'" r="0.7" fill="'+c+'">'
+           + '<title>'+labels[i]+'\n'+f(v)+'</title></circle>'; }).join(''); };
+  return '<div style="display:flex;gap:14px;font-size:12px;margin-bottom:6px">'
+    +'<span style="color:'+c1+'">■ '+n1+'　<b>'+f1(s1[n-1])+'</b></span>'
+    +'<span style="color:'+c2+'">■ '+n2+'　<b>'+f2(s2[n-1])+'</b></span></div>'
+    +'<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="width:100%;height:120px;overflow:visible">'
+    +'<path d="'+mk(s1,m1)+'" fill="none" stroke="'+c1+'" stroke-width="0.7"/>'
+    +'<path d="'+mk(s2,m2)+'" fill="none" stroke="'+c2+'" stroke-width="0.7"/>'
+    +dots(s1,m1,c1,f1)+dots(s2,m2,c2,f2)+'</svg>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:5px">'
+    +'<span>'+labels[0]+'</span><span>'+labels[n-1]+'</span></div>';
+}
+
+/* 每日：篩選後角色的對話量與歸戶營收（營收＝當日全站營收 × 該群當日點數佔比） */
+function dailyMix(rows){
+  var ids={}; rows.forEach(function(x){ ids[x[I.cid]]=1; });
+  var a=$('d1').value, b=$('d2').value, idx=[], i;
+  for(i=0;i<PD.dates.length;i++){ var d=PD.dates[i];
+    if(a&&d<a) continue; if(b&&d>b) continue; idx.push(i); }
+  var msg={}, pts={}, tot={};
+  for(i=0;i<PD.rows.length;i++){ var r=PD.rows[i];
+    tot[r[0]]=(tot[r[0]]||0)+r[3];
+    if(ids[r[1]]){ msg[r[0]]=(msg[r[0]]||0)+r[2]; pts[r[0]]=(pts[r[0]]||0)+r[3]; } }
+  var L=[],A=[],B=[];
+  idx.forEach(function(i){
+    var rv=(PD.rev[i]||0)/PD.fx, tp=tot[i]||0;
+    L.push(PD.dates[i]); A.push(msg[i]||0);
+    B.push((tp&&rv)? rv*(pts[i]||0)/tp : 0); });
+  return {L:L,A:A,B:B};
+}
+
+/* 每日累計：依 dateField 累加（角色數/創作者數、成人/一般） */
+function cumSeries(rows){
+  var df=dateField(), byd={};
+  rows.forEach(function(x){ var d=x[df]; if(!d) return;
+    var o=byd[d]||(byd[d]={n:0,ad:0,au:{}});
+    o.n++; if(x[I.adu]) o.ad++; o.au[x[I.aid]]=1; });
+  var L=Object.keys(byd).sort(), seenAu={}, cn=0, ca=0, au=0;
+  var CH=[],AU=[],AD=[],SF=[];
+  L.forEach(function(d){ var o=byd[d];
+    cn+=o.n; ca+=o.ad;
+    for(var k in o.au){ if(!seenAu[k]){ seenAu[k]=1; au++; } }
+    CH.push(cn); AU.push(au); AD.push(ca); SF.push(cn-ca); });
+  return {L:L, CH:CH, AU:AU, AD:AD, SF:SF};
+}
+
 function renderCharts(rows,g,tot){
   var c1='<div class="chart"><h3>'+t('ch1')+'</h3><div class="sub">'+t('ch1s')+'</div>'
     +barsH(g.map(function(x){return {k:x.k,v:x.m.rev,c:x.c}}),function(v){return 'NT$'+nf(v)+'（'+pct(v,tot)+'）'})+'</div>';
@@ -417,7 +487,7 @@ function renderCharts(rows,g,tot){
   var df=dateField(), mo={};
   rows.forEach(function(x){var d=x[df]; if(d) mo[d.slice(0,7)]=(mo[d.slice(0,7)]||0)+1});
   var ks=Object.keys(mo).sort(), mx=Math.max.apply(null,ks.map(function(k){return mo[k]}).concat([1]));
-  var c4='<div class="chart"><h3>'+t('ch4')+'</h3><div class="sub">'+tf('ch4s',dfLabel(),ks.length)+'</div>'
+  var c4='<div class="chart"><h3>'+t('ch4')+'</h3><div class="sub">'+tf('ch4s',dfName(),ks.length)+'</div>'
     +'<div style="display:flex;align-items:flex-end;gap:3px;height:120px">'
     +ks.map(function(k){var hh=mo[k]/mx*100;
       return '<div title="'+k+'：'+mo[k]+'" style="flex:1;min-width:6px;display:flex;flex-direction:column;justify-content:flex-end;height:100%">'
@@ -425,7 +495,20 @@ function renderCharts(rows,g,tot){
     }).join('')+'</div>'
     +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:5px">'
     +'<span>'+(ks[0]||'')+'</span><span>'+tf('ch4peak',mx)+'</span><span>'+(ks[ks.length-1]||'')+'</span></div></div>';
-  $('charts').innerHTML=c1+c2+c3+c4;
+  // ── 新增三張每日折線圖 ──
+  var dm=dailyMix(rows);
+  var c5='<div class="chart"><h3>'+t('ch5')+'</h3><div class="sub">'
+    +tf('ch5s', dm.L[0]||'—', dm.L[dm.L.length-1]||'—')+'</div>'
+    +lines2(dm.L, dm.A, dm.B, '#60a5fa', '#f472b6', t('l_chat'), t('l_rev'),
+            function(v){return nf(Math.round(v));}, function(v){return 'NT$'+nf(Math.round(v));})+'</div>';
+  var cs=cumSeries(rows);
+  var c6='<div class="chart"><h3>'+t('ch6')+'</h3><div class="sub">'+tf('ch6s',dfName())+'</div>'
+    +lines2(cs.L, cs.CH, cs.AU, '#a855f7', '#22d3ee', t('l_char'), t('l_auth'),
+            function(v){return nf(v);}, function(v){return nf(v);})+'</div>';
+  var c7='<div class="chart"><h3>'+t('ch7')+'</h3><div class="sub">'+tf('ch7s',dfName())+'</div>'
+    +lines2(cs.L, cs.AD, cs.SF, '#fb7185', '#4ade80', t('l_adult'), t('l_sfw'),
+            function(v){return nf(v);}, function(v){return nf(v);})+'</div>';
+  $('charts').innerHTML=c1+c2+c3+c4+c5+c6+c7;
 }
 
 /* ── 角色明細 ── */
