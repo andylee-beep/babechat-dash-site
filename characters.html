@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="favicon.png"><title>BabeChat 台灣角色大盤</title><style>
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="favicon.png"><title>BabeChat 台灣角色大盤</title><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script><style>
 :root{--bg:#0f1117;--card:#171a23;--line:#262a36;--tx:#e8eaf0;--dim:#9aa1b1;--hl:#c084fc;
 --kr:#f472b6;--tw:#60a5fa;--grad:linear-gradient(90deg,#a855f7,#ec4899)}
 *{box-sizing:border-box}
@@ -42,6 +42,10 @@ button.qb.on{background:var(--grad);border-color:transparent;color:#fff}
 code{background:#12151d;padding:1px 5px;border-radius:4px;font-size:12px}
 .charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;margin-top:12px}
 .chart{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.chartw{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:12px}
+.chartw h3{margin:0 0 4px;font-size:14.5px;font-weight:700;color:var(--tx)}
+.chartw .sub{font-size:12.5px;color:#6b7280;margin:0 0 10px}
+.chartbox{position:relative;height:270px}
 .chart h3{margin:0 0 10px;font-size:13px;font-weight:700;color:var(--tx)}
 .chart .sub{font-size:11px;color:#6b7280;margin:-6px 0 10px}
 
@@ -113,6 +117,7 @@ table td{font-size:15px}
 <div class="sec"><h2 data-i="sec_cross"></h2><span class="hint" data-i="hint_cross"></span></div>
 <div id="cross"></div>
 <div class="charts" id="charts"></div>
+<div id="charts2"></div>
 <div class="note" id="noteNat"></div>
 
 <div class="sec"><h2 data-i="sec_chars"></h2><span class="hint" id="hintChars"></span></div>
@@ -411,28 +416,31 @@ function barsH(items,fmt){
   }).join('');
 }
 
-/* ── 雙線折線圖（純 SVG，無外部套件）────────────────────────
-   兩條線各自用自己的最大值正規化（量級差很多時才比得出形狀）。   */
-function lines2(labels, s1, s2, c1, c2, n1, n2, f1, f2){
-  var n=labels.length;
-  if(!n) return '<div style="color:#6b7280;font-size:12.5px;padding:18px 0">'+t('nodata')+'</div>';
-  var W=100, H=44;
-  var m1=Math.max.apply(null,s1.concat([1])), m2=Math.max.apply(null,s2.concat([1]));
-  var px=function(i){ return n<2 ? W/2 : i/(n-1)*W; };
-  var mk=function(arr,mx){ return arr.map(function(v,i){
-      return (i?'L':'M')+px(i).toFixed(2)+' '+(H-(v/mx*H)).toFixed(2); }).join(' '); };
-  var dots=function(arr,mx,c,f){ return arr.map(function(v,i){
-      return '<circle cx="'+px(i).toFixed(2)+'" cy="'+(H-(v/mx*H)).toFixed(2)+'" r="0.7" fill="'+c+'">'
-           + '<title>'+labels[i]+'\n'+f(v)+'</title></circle>'; }).join(''); };
-  return '<div style="display:flex;gap:14px;font-size:12px;margin-bottom:6px">'
-    +'<span style="color:'+c1+'">■ '+n1+'　<b>'+f1(s1[n-1])+'</b></span>'
-    +'<span style="color:'+c2+'">■ '+n2+'　<b>'+f2(s2[n-1])+'</b></span></div>'
-    +'<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="width:100%;height:120px;overflow:visible">'
-    +'<path d="'+mk(s1,m1)+'" fill="none" stroke="'+c1+'" stroke-width="0.7"/>'
-    +'<path d="'+mk(s2,m2)+'" fill="none" stroke="'+c2+'" stroke-width="0.7"/>'
-    +dots(s1,m1,c1,f1)+dots(s2,m2,c2,f2)+'</svg>'
-    +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:5px">'
-    +'<span>'+labels[0]+'</span><span>'+labels[n-1]+'</span></div>';
+/* ── Chart.js 雙線圖（與 Marketing 頁同一套：座標軸 + 格線 + hover 顯示數值）──
+   量級差很多時用左右雙 Y 軸（dual=true），同單位就共用一軸。            */
+var _CH2=[];
+function lineCard(id, title, sub){
+  return '<div class="chartw"><h3>'+title+'</h3><div class="sub">'+sub+'</div>'
+       + '<div class="chartbox"><canvas id="'+id+'"></canvas></div></div>';
+}
+function drawLine(id, labels, a, b, ca, cb, na, nb, fa, fb, dual){
+  var el=document.getElementById(id); if(!el||!window.Chart) return;
+  var prev=Chart.getChart(el); if(prev) prev.destroy();
+  var grid='rgba(255,255,255,.05)', tick='#9aa1b1';
+  var ds=[{label:na,data:a,borderColor:ca,backgroundColor:ca.replace('rgb','rgba').replace(')',',.10)'),
+           tension:.3,fill:true,pointRadius:2,pointHoverRadius:5,borderWidth:2},
+          {label:nb,data:b,borderColor:cb,borderDash:[5,4],tension:.3,fill:false,
+           pointRadius:2,pointHoverRadius:5,borderWidth:2}];
+  if(dual) ds[1].yAxisID='y1';
+  var sc={x:{ticks:{color:tick,maxRotation:45,autoSkip:true,maxTicksLimit:18},grid:{color:grid}},
+          y:{position:'left',ticks:{color:tick,callback:function(v){return fa(v);}},grid:{color:grid}}};
+  if(dual) sc.y1={position:'right',ticks:{color:cb,callback:function(v){return fb(v);}},grid:{drawOnChartArea:false}};
+  _CH2.push(new Chart(el,{type:'line',data:{labels:labels,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{color:tick,boxWidth:14,font:{size:12.5}}},
+        tooltip:{callbacks:{label:function(c){
+          return c.dataset.label+'：'+(c.datasetIndex===0?fa(c.raw):fb(c.raw)); }}}},
+      scales:sc}}));
 }
 
 /* 每日：篩選後角色的對話量與歸戶營收（營收＝當日全站營收 × 該群當日點數佔比） */
@@ -495,20 +503,28 @@ function renderCharts(rows,g,tot){
     }).join('')+'</div>'
     +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:5px">'
     +'<span>'+(ks[0]||'')+'</span><span>'+tf('ch4peak',mx)+'</span><span>'+(ks[ks.length-1]||'')+'</span></div></div>';
-  // ── 新增三張每日折線圖 ──
-  var dm=dailyMix(rows);
-  var c5='<div class="chart"><h3>'+t('ch5')+'</h3><div class="sub">'
-    +tf('ch5s', dm.L[0]||'—', dm.L[dm.L.length-1]||'—')+'</div>'
-    +lines2(dm.L, dm.A, dm.B, '#60a5fa', '#f472b6', t('l_chat'), t('l_rev'),
-            function(v){return nf(Math.round(v));}, function(v){return 'NT$'+nf(Math.round(v));})+'</div>';
-  var cs=cumSeries(rows);
-  var c6='<div class="chart"><h3>'+t('ch6')+'</h3><div class="sub">'+tf('ch6s',dfName())+'</div>'
-    +lines2(cs.L, cs.CH, cs.AU, '#a855f7', '#22d3ee', t('l_char'), t('l_auth'),
-            function(v){return nf(v);}, function(v){return nf(v);})+'</div>';
-  var c7='<div class="chart"><h3>'+t('ch7')+'</h3><div class="sub">'+tf('ch7s',dfName())+'</div>'
-    +lines2(cs.L, cs.AD, cs.SF, '#fb7185', '#4ade80', t('l_adult'), t('l_sfw'),
-            function(v){return nf(v);}, function(v){return nf(v);})+'</div>';
-  $('charts').innerHTML=c1+c2+c3+c4+c5+c6+c7;
+  $('charts').innerHTML=c1+c2+c3+c4;
+
+  // ── 三張每日折線圖（Chart.js，一卡一行）──
+  _CH2.forEach(function(c){ try{c.destroy();}catch(e){} }); _CH2=[];
+  var dm=dailyMix(rows), cs=cumSeries(rows);
+  var nfk=function(v){ return v>=1000 ? nf(Math.round(v/1000))+'k' : nf(Math.round(v)); };
+  $('charts2').innerHTML =
+      lineCard('lc1', t('ch5'), tf('ch5s', dm.L[0]||'—', dm.L[dm.L.length-1]||'—'))
+    + lineCard('lc2', t('ch6'), tf('ch6s', dfName()))
+    + lineCard('lc3', t('ch7'), tf('ch7s', dfName()));
+  // ⚠ 讀一次 offsetWidth 強制瀏覽器排版，再建圖。
+  //   innerHTML 塞完 canvas 的同一個 tick 若直接建圖，Chart.js 會讀到容器寬度 0 並記住，
+  //   之後 resize() 也救不回來（畫布永遠 0px 寬）。用 requestAnimationFrame 則會有重繪時序問題。
+  void $('charts2').offsetWidth;
+  (function(){
+    drawLine('lc1', dm.L, dm.A, dm.B, 'rgb(96,165,250)', 'rgb(244,114,182)',
+             t('l_chat'), t('l_rev'), nfk, function(v){return 'NT$'+nfk(v);}, true);
+    drawLine('lc2', cs.L, cs.CH, cs.AU, 'rgb(168,85,247)', 'rgb(34,211,238)',
+             t('l_char'), t('l_auth'), nf, nf, false);
+    drawLine('lc3', cs.L, cs.AD, cs.SF, 'rgb(251,113,133)', 'rgb(74,222,128)',
+             t('l_adult'), t('l_sfw'), nf, nf, false);
+  })();
 }
 
 /* ── 角色明細 ── */
