@@ -217,12 +217,13 @@ var T={
          '<b>기간 실적</b>: 지표는 선택한 기간에 <b>실제 발생한</b> 대화와 매출입니다(생애 누적 아님). 매출＝일별 전체 매출 × 해당 캐릭터의 당일 포인트 사용 비중을 일자별 합산. <b>기간 내 대화가 있는 캐릭터만 표시합니다.</b>'],
  cov_p:['期間 %s ~ %s：全站營收 NT$%s，其中 NT$%s（%s）可歸戶到角色','기간 %s ~ %s: 전체 매출 NT$%s 중 NT$%s(%s) 캐릭터 귀속 가능'],
  pd_range:['期間資料涵蓋 %s ~ %s，更早的期間算不出來（來源表從那天才開始）','기간 데이터 범위 %s ~ %s, 그 이전은 계산 불가'],
-ch5:['每日對話量 vs 營收','일별 대화량 vs 매출'],
+ch5:['對話量 vs 營收','대화량 vs 매출'],
  ch5s:['依期間資料，隨上方篩選連動（%s ~ %s）','기간 데이터 기준, 위 필터에 연동(%s ~ %s)'],
- ch6:['累計角色數 vs 創作者數','누적 캐릭터 수 vs 크리에이터 수'],
- ch6s:['依「%s」累加，看角色庫成長','「%s」 기준 누적, 캐릭터 라이브러리 성장'],
- ch7:['累計 成人 vs 一般角色','누적 성인 vs 일반 캐릭터'],
- ch7s:['依「%s」累加，看內容結構變化','「%s」 기준 누적, 콘텐츠 구성 변화'],
+ ch6:['角色數 vs 創作者數','캐릭터 수 vs 크리에이터 수'],
+ ch6s:['依「%s」計，看角色庫成長','「%s」 기준, 캐릭터 라이브러리 성장'],
+ ch7:['成人 vs 一般角色','성인 vs 일반 캐릭터'],
+ ch7s:['依「%s」計，看內容結構變化','「%s」 기준, 콘텐츠 구성 변화'],
+ m_cum:['累計','누적'], m_day:['每日','일별'],
  l_chat:['對話量','대화량'], l_rev:['營收','매출'],
  l_char:['角色數','캐릭터 수'], l_auth:['創作者數','크리에이터 수'],
  l_adult:['成人','성인'], l_sfw:['一般','일반'],
@@ -419,10 +420,32 @@ function barsH(items,fmt){
 /* ── Chart.js 雙線圖（與 Marketing 頁同一套：座標軸 + 格線 + hover 顯示數值）──
    量級差很多時用左右雙 Y 軸（dual=true），同單位就共用一軸。            */
 var _CH2=[];
+var _CDATA={}, _CMODE={lc1:'d', lc2:'c', lc3:'c'};   // 預設：對話量每日、另兩張累計
 function lineCard(id, title, sub){
-  return '<div class="chartw"><h3>'+title+'</h3><div class="sub">'+sub+'</div>'
+  var m=_CMODE[id];
+  return '<div class="chartw">'
+       + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+       +   '<h3 style="margin:0">'+title+'</h3>'
+       +   '<select class="cmode" data-id="'+id+'">'
+       +     '<option value="c"'+(m==='c'?' selected':'')+'>'+t('m_cum')+'</option>'
+       +     '<option value="d"'+(m==='d'?' selected':'')+'>'+t('m_day')+'</option>'
+       +   '</select></div>'
+       + '<div class="sub">'+sub+'</div>'
        + '<div class="chartbox"><canvas id="'+id+'"></canvas></div></div>';
 }
+/* 依目前模式（累計/每日）畫某一張圖 */
+function paintLine(id){
+  var o=_CDATA[id]; if(!o) return;
+  var cum=(_CMODE[id]==='c');
+  drawLine(id, o.L, cum?o.ca:o.da, cum?o.cb:o.db, o.c1, o.c2, o.n1, o.n2, o.f1, o.f2, o.dual);
+}
+function bindModes(){
+  document.querySelectorAll('#charts2 select.cmode').forEach(function(sel){
+    sel.onchange=function(){ _CMODE[this.dataset.id]=this.value; paintLine(this.dataset.id); };
+  });
+}
+/* 累加成累計序列 */
+function runSum(a){ var s=0; return a.map(function(v){ s+=v; return s; }); }
 function drawLine(id, labels, a, b, ca, cb, na, nb, fa, fb, dual){
   var el=document.getElementById(id); if(!el||!window.Chart) return;
   var prev=Chart.getChart(el); if(prev) prev.destroy();
@@ -468,12 +491,14 @@ function cumSeries(rows){
     var o=byd[d]||(byd[d]={n:0,ad:0,au:{}});
     o.n++; if(x[I.adu]) o.ad++; o.au[x[I.aid]]=1; });
   var L=Object.keys(byd).sort(), seenAu={}, cn=0, ca=0, au=0;
-  var CH=[],AU=[],AD=[],SF=[];
-  L.forEach(function(d){ var o=byd[d];
-    cn+=o.n; ca+=o.ad;
-    for(var k in o.au){ if(!seenAu[k]){ seenAu[k]=1; au++; } }
-    CH.push(cn); AU.push(au); AD.push(ca); SF.push(cn-ca); });
-  return {L:L, CH:CH, AU:AU, AD:AD, SF:SF};
+  var CH=[],AU=[],AD=[],SF=[];            // 累計
+  var dCH=[],dAU=[],dAD=[],dSF=[];        // 每日（新增）
+  L.forEach(function(d){ var o=byd[d], newAu=0;
+    for(var k in o.au){ if(!seenAu[k]){ seenAu[k]=1; newAu++; } }
+    cn+=o.n; ca+=o.ad; au+=newAu;
+    CH.push(cn); AU.push(au); AD.push(ca); SF.push(cn-ca);
+    dCH.push(o.n); dAU.push(newAu); dAD.push(o.ad); dSF.push(o.n-o.ad); });
+  return {L:L, CH:CH, AU:AU, AD:AD, SF:SF, dCH:dCH, dAU:dAU, dAD:dAD, dSF:dSF};
 }
 
 function renderCharts(rows,g,tot){
@@ -505,10 +530,21 @@ function renderCharts(rows,g,tot){
     +'<span>'+(ks[0]||'')+'</span><span>'+tf('ch4peak',mx)+'</span><span>'+(ks[ks.length-1]||'')+'</span></div></div>';
   $('charts').innerHTML=c1+c2+c3+c4;
 
-  // ── 三張每日折線圖（Chart.js，一卡一行）──
+  // ── 三張折線圖（Chart.js，一卡一行，可切 累計/每日）──
   _CH2.forEach(function(c){ try{c.destroy();}catch(e){} }); _CH2=[];
   var dm=dailyMix(rows), cs=cumSeries(rows);
   var nfk=function(v){ return v>=1000 ? nf(Math.round(v/1000))+'k' : nf(Math.round(v)); };
+  var money=function(v){ return 'NT$'+nfk(v); };
+  _CDATA={
+    lc1:{L:dm.L, da:dm.A, db:dm.B, ca:runSum(dm.A), cb:runSum(dm.B),
+         c1:'rgb(96,165,250)', c2:'rgb(244,114,182)', n1:t('l_chat'), n2:t('l_rev'),
+         f1:nfk, f2:money, dual:true},
+    lc2:{L:cs.L, da:cs.dCH, db:cs.dAU, ca:cs.CH, cb:cs.AU,
+         c1:'rgb(168,85,247)', c2:'rgb(34,211,238)', n1:t('l_char'), n2:t('l_auth'),
+         f1:nf, f2:nf, dual:false},
+    lc3:{L:cs.L, da:cs.dAD, db:cs.dSF, ca:cs.AD, cb:cs.SF,
+         c1:'rgb(251,113,133)', c2:'rgb(74,222,128)', n1:t('l_adult'), n2:t('l_sfw'),
+         f1:nf, f2:nf, dual:false}};
   $('charts2').innerHTML =
       lineCard('lc1', t('ch5'), tf('ch5s', dm.L[0]||'—', dm.L[dm.L.length-1]||'—'))
     + lineCard('lc2', t('ch6'), tf('ch6s', dfName()))
@@ -517,14 +553,8 @@ function renderCharts(rows,g,tot){
   //   innerHTML 塞完 canvas 的同一個 tick 若直接建圖，Chart.js 會讀到容器寬度 0 並記住，
   //   之後 resize() 也救不回來（畫布永遠 0px 寬）。用 requestAnimationFrame 則會有重繪時序問題。
   void $('charts2').offsetWidth;
-  (function(){
-    drawLine('lc1', dm.L, dm.A, dm.B, 'rgb(96,165,250)', 'rgb(244,114,182)',
-             t('l_chat'), t('l_rev'), nfk, function(v){return 'NT$'+nfk(v);}, true);
-    drawLine('lc2', cs.L, cs.CH, cs.AU, 'rgb(168,85,247)', 'rgb(34,211,238)',
-             t('l_char'), t('l_auth'), nf, nf, false);
-    drawLine('lc3', cs.L, cs.AD, cs.SF, 'rgb(251,113,133)', 'rgb(74,222,128)',
-             t('l_adult'), t('l_sfw'), nf, nf, false);
-  })();
+  paintLine('lc1'); paintLine('lc2'); paintLine('lc3');
+  bindModes();
 }
 
 /* ── 角色明細 ── */
