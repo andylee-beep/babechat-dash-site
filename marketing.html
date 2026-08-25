@@ -295,21 +295,24 @@ document.getElementById('btnPptx').onclick=function(){
   const chNm2=c=>({'facebook.business':'Facebook','x.ads':'X (Twitter)','revx.ads':'RevX','18.ads':'18.ads',
                    'google.adwords':'Google','ggads':'Google','dcard.ads':'Dcard','exoclick.ads':'ExoClick',
                    'appier.ads':'Appier','PerformanceMKT':'PerfMKT','ig':'IG','social':'Social'}[c]||c);
-  const chCols=['Week','Signups','Spend$','CPR$','D1 Ret','D3 Ret','D7 Ret','D0 Pay','D3 Pay','D7 Pay','D15 Pay','D30 Pay','R0','R3','R7','R15','R30'];
-  const cellsFrom=(g)=>[g.su.toLocaleString(),'$'+Math.round(g.cost/RT).toLocaleString(),(g.su?'$'+Math.round(g.cost/g.su/RT):'—'),
-    pf(g.d1),pf(g.d3r),pf(g.d7r),pf(g.p0),pf(g.p3),pf(g.p7),pf(g.p15),pf(g.p30),
-    (g.r0!==null?g.r0+'%':'—'),(g.r3!==null?g.r3+'%':'—'),(g.r7!==null?g.r7+'%':'—'),(g.r15!==null?g.r15+'%':'—'),(g.r30!==null?g.r30+'%':'—')];
-  const chViews=[['總量','Overall (All Channels)'],['facebook.business','Facebook'],['x.ads','X (Twitter)']];   // Organic 頁已移除(Andy 2026-08-11)
+  // 2026-08-25 Andy：加 Revenue$；拿掉 D30 Pay 與 R30（D30 窗要 30 天才成熟，近 4 週幾乎全是「—」）
+  const chCols=['Week','Signups','Spend$','Revenue$','CPR$','D1 Ret','D3 Ret','D7 Ret','D0 Pay','D3 Pay','D7 Pay','D15 Pay','R0','R3','R7','R15'];
+  const cellsFrom=(g)=>[g.su.toLocaleString(),'$'+Math.round(g.cost/RT).toLocaleString(),'$'+Math.round((g.rev||0)/RT).toLocaleString(),(g.su?'$'+Math.round(g.cost/g.su/RT):'—'),
+    pf(g.d1),pf(g.d3r),pf(g.d7r),pf(g.p0),pf(g.p3),pf(g.p7),pf(g.p15),
+    (g.r0!==null?g.r0+'%':'—'),(g.r3!==null?g.r3+'%':'—'),(g.r7!==null?g.r7+'%':'—'),(g.r15!==null?g.r15+'%':'—')];
+  // Organic 頁已移除(Andy 2026-08-11)；Google 於 2026-08-25 補上——它是第二大渠道($7.6K/近兩週)，
+  // 先前沒放是因為點擊/曝光資料殘缺，但本頁 16 欄全是 cohort 指標、不含 CTR/CPM，不受影響。
+  const chViews=[['總量','Overall (All Channels)'],['facebook.business','Facebook'],['google.adwords','Google'],['x.ads','X (Twitter)']];
   chViews.forEach(([v,lbl])=>{
-    s=P.addSlide();s.background={color:'FFFFFF'};title(s,(v==='總量'?'Overall':'Channel · '+lbl)+' · Last 4 Weeks (D30 cohort)');
+    s=P.addSlide();s.background={color:'FFFFFF'};title(s,(v==='總量'?'Overall':'Channel · '+lbl)+' · Last 4 Weeks (D15 cohort)');
     const arrAll=(D[v]||[]).filter(r=>r.ds>=a4&&r.ds<=b4);
     const rows=[chCols.map((x,i)=>({text:x,options:{bold:true,color:'FFFFFF',fill:{color:NAVY}}}))];
     const tot=agg(arrAll,''); rows.push(['Total'].concat(cellsFrom(tot)).map((x,i)=>({text:String(x),options:{bold:true,fill:{color:'EEF2F7'}}})));
     last4.slice().reverse().forEach(w=>{const wa=w.id,wb=(w.id<DECK.end?addDays(w.id,6):DECK.end);
       const g=agg((D[v]||[]).filter(r=>r.ds>=wa&&r.ds<=wb),''); rows.push([w.lbl].concat(cellsFrom(g)).map(x=>({text:String(x)})));});
     s.addTable(rows,{x:0.3,y:1.25,w:12.7,fontSize:11,border:{type:'solid',color:'E1E6EE',pt:1},align:'center',valign:'middle',rowH:0.55,
-      colW:[1.62,0.74,0.82,0.72,0.62,0.62,0.62,0.62,0.62,0.62,0.68,0.74,0.58,0.58,0.58,0.58,0.58]});
-    s.addText('D30 needs 30-day-mature cohorts; recent weeks may show "—" on D15/D30. ROAS = revenue within N days / spend.',{x:0.3,y:5.5,w:12.7,h:0.4,fontSize:10,color:GRAY});
+      colW:[1.58,0.76,0.86,0.92,0.76,0.66,0.66,0.66,0.66,0.66,0.66,0.72,0.62,0.62,0.62,0.62]});
+    s.addText('Revenue = cohort lifetime revenue to date (not capped at D15). D15 needs 15-day-mature cohorts; recent weeks may show "—" on D15. ROAS = revenue within N days / spend.',{x:0.3,y:5.5,w:12.7,h:0.4,fontSize:10,color:GRAY});
     foot(s);
   });
   // 5b Spend Mix：當週花費佔比（各渠道）vs 前三週 —— 100% 堆疊條 + 實額表
