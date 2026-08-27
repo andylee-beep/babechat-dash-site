@@ -20,6 +20,7 @@ header{height:56px;display:flex;align-items:center;gap:16px;padding:0 20px;borde
 .seg button.on{background:var(--grad);color:#fff}
 .seg button[data-v="marketing"].on{background:linear-gradient(135deg,#38bdf8,#3b82f6)}
 .seg button[data-v="characters"].on{background:linear-gradient(135deg,#a855f7,#ec4899)}
+.seg button[data-v="users"].on{background:linear-gradient(135deg,#14b8a6,#0891b2)}
 iframe{width:100%;height:calc(100vh - 56px);border:0;display:block;background:var(--bg)}
 #lock{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
 #lock .lg{width:52px;height:52px;border-radius:14px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:4px}
@@ -45,12 +46,13 @@ iframe{width:100%;height:calc(100vh - 56px);border:0;display:block;background:va
     <button class="on" data-v="operations">Overview</button>
     <button data-v="marketing">Marketing</button>
     <button data-v="characters">Character</button>
+    <button data-v="users">Users</button>
   </div>
 </header>
 <iframe id="fr" title="dashboard"></iframe>
 
 <script>
-var SRC={operations:"operations.html",marketing:"marketing.html",characters:"characters.html"};
+var SRC={operations:"operations.html",marketing:"marketing.html",characters:"characters.html",users:"users.html"};
 var VIEW="operations";
 var fr=document.getElementById("fr");
 function load(){fr.src=SRC[VIEW];}
