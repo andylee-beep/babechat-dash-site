@@ -204,13 +204,34 @@ function setWA(m){
 (function(){
   var sel=document.getElementById('platSel');
   if(!sel) return;
+  /* 02 之後的區塊沒有拆 os，選 iOS／Android 時顯示的是 App 合計。
+     只靠上方一條提示不夠——Andy 2026-09-07 就是在這裡誤以為 iOS 有花費。
+     改成在每個受影響的區塊標題旁掛一個橘色標記，切過去一眼就看得到。 */
+  var FALLBACK_SEC = ['sec02','sec03','sec03b','sec02b','sec_app','sec05','sec06'];
+  function markFallback(on){
+    FALLBACK_SEC.forEach(function(k){
+      var h=document.querySelector('[data-i="'+k+'"]');
+      if(!h) return;
+      var tag=h.parentNode.querySelector('.osFb');
+      if(on){
+        if(!tag){
+          tag=document.createElement('span');
+          tag.className='osFb';
+          tag.style.cssText='margin-left:8px;font-size:11px;font-weight:400;color:#EF9F27;'
+            +'border:1px solid #EF9F27;border-radius:999px;padding:2px 8px;vertical-align:middle';
+          h.parentNode.appendChild(tag);
+        }
+        tag.textContent = (LG==='ko') ? 'App 합계 (os 미분리)' : '顯示 App 合計（未拆 iOS／Android）';
+      } else if(tag) tag.remove();
+    });
+  }
   sel.addEventListener('change',function(){
-    var v=sel.value;
+    var v=sel.value, isOS=(v==='ios'||v==='and');
     setWA(v);
-    var pf=(v==='ios'||v==='and')?'app':v;
-    if(typeof setPF==='function') setPF(pf);
+    if(typeof setPF==='function') setPF(isOS?'app':v);
     var n=document.getElementById('osNote');
-    if(n) n.style.display=(v==='ios'||v==='and')?'':'none';
+    if(n) n.style.display=isOS?'':'none';
+    markFallback(isOS);
   });
 })();
 const APPD={"lab": ["08-13", "08-14", "08-17", "08-20", "08-21", "08-22", "08-23", "08-24", "08-25", "08-26", "08-27", "08-28", "08-29", "08-30", "08-31", "09-01", "09-02", "09-03", "09-04", "09-05", "09-06"], "val": [11000, 21671, 21698, 11000, 33000, 10014, 109655, 89249, 347689, 434769, 167117, 178129, 196375, 659424, 173532, 596036, 358340, 231301, 298032, 397275, 248588], "os": {"Android": [11000, 21671, 21698, 11000, 11000, 10014, 21281, 19592, 19503, 57747, 31716, 21007, 10016, 196598, 58983, 172855, 87765, 117829, 114438, 188604, 94905], "iOS": [0, 0, 0, 0, 22000, 0, 88374, 69657, 328187, 377022, 135401, 157122, 186359, 462826, 114549, 423181, 270574, 113473, 183594, 208672, 153683]}};
