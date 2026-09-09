@@ -345,11 +345,16 @@ function agg(recs,label){let su=0,op=0,cost=0,n=0,d1=0,d3=0,d7=0,revtot=0,npay=0
  // ⚠ 2026-09-09：App 模式的成熟窗要用 **App cohort** 的人數算，不能用 web 的。
  //   用 web 的話，合計列會判定成 90 天窗 → base 只剩 6 月以前的日子 → 那時 App 花費是 0
  //   → 分母 0 → ROAS 整欄變「—」。Andy 回報「roas 全部歸 0」就是這個。
- const _cohN = (_ap&&_hasAC) ? acN : n;
+ // ⚠⚠ App 模式**只取有 App 廣告花費的日子**來算 ROAS。
+ //   不這樣做的話，合計列會拿「8 月沒投放時賺的錢」除以「9 月的廣告費」——
+ //   實測跑出 R0 473%／R3 1387% 這種假數字（跟先前 web cohort 那個錯誤同一種病）。
+ //   限定同一批日子之後，分子分母才是同一群人、同一段期間。
+ const _rr = _ap ? recs.filter(function(r){return _gac(r)>0;}) : recs;
  const _cohR = (_ap&&_hasAC) ? function(r){return r.an||0;} : function(r){return r.n;};
- const matn=HOR.map(h=>recs.reduce((a,r)=>a+(mature(r.ds,h)?_cohR(r):0),0));
+ const _cohN = _rr.reduce(function(a,r){return a+_cohR(r);},0);
+ const matn=HOR.map(h=>_rr.reduce((a,r)=>a+(mature(r.ds,h)?_cohR(r):0),0));
  let Hs=0;for(let i=0;i<HOR.length;i++){if(matn[i]>=Math.max(1,Math.round(0.6*_cohN)))Hs=i;}
- const base=recs.filter(r=>mature(r.ds,HOR[Hs]));
+ const base=_rr.filter(r=>mature(r.ds,HOR[Hs]));
  // ⚠ bcost 跟著平台走：App 模式用 acost（os=Android/iOS 的花費），web 用 r.cost。
  //   拿錯會算出假 ROAS——先前 App 模式沿用 web 花費，畫面顯示「App ROAS 0%」。
  const bn=base.reduce((a,r)=>a+r.n,0),
