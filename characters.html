@@ -24,7 +24,7 @@ h1{font-size:25px;margin:0 0 4px;background:var(--grad);-webkit-background-clip:
 .kpi .s{font-size:11px;color:#6b7280;margin-top:2px}
 table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-th{background:#1d2130;font-size:12px;color:var(--dim);font-weight:700;position:sticky;top:var(--topH,0);z-index:2}
+th{background:#1d2130;font-size:12px;color:var(--dim);font-weight:700;position:sticky;top:0;z-index:2}
 td.r,th.r{text-align:right} td.c,th.c{text-align:center} td.rl{color:var(--dim)} td.hl{color:var(--hl);font-weight:700}
 tr:hover td{background:#1c2030}
 .cross td:not(.rl){text-align:right;font-variant-numeric:tabular-nums}
@@ -692,34 +692,19 @@ function applyLang(){
   $('noteDates').innerHTML=tf('note_dates',nf(NLIVE),nf(NOPUB));
   $('noteNat').innerHTML=t('note_nat')+t('note_rev');
   var w=$('warnNat'); if(w) w.innerHTML=tf('warn_nat',w.dataset.n);
-  if(window._setTopH) window._setTopH();   // 文字長度變了→固定列高度可能變，重量一次
   document.querySelectorAll('.langseg button').forEach(function(b){b.classList.toggle('on',b.dataset.l===LANG)});
   draw();
 }
 document.querySelectorAll('.langseg button').forEach(function(b){
   b.onclick=function(){ LANG=b.dataset.l; localStorage.setItem('charLang',LANG); applyLang(); };});
 
-/* ── 頂部固定列：重新整理鈕 ＋ 讓表頭 sticky 停在它下面 ── */
+/* ── 頂部固定列的重新整理鈕 ── */
+/* ⚠ 不要幫 th 加 top 偏移。表格外層 .tblwrap 有 overflow:auto，表頭的 sticky 是相對
+     那個容器、不是相對視窗，所以永遠碰不到頁面頂部的固定列。2026-09-16 曾加過
+     --topH 偏移，結果表頭往容器內下移，浮在資料列中間（Users 頁先被發現）。 */
 (function(){
   var rb=document.getElementById('btnRefresh');
   if(rb) rb.onclick=function(){ location.href=location.pathname+'?t='+Date.now(); };
-  // 表頭的 position:sticky 原本 top:0，會跟固定列重疊；量測實際高度後寫進 --topH。
-  function setTopH(){
-    var t=document.querySelector('.top');
-    if(t) document.documentElement.style.setProperty('--topH', t.offsetHeight+'px');
-  }
-  // ⚠ 一定要在文字填完之後再量：applyLang() 會改寫 h1／srcbar，高度會變。
-  //   只在腳本執行當下量一次的話會少算（實測 1440px 下 73px vs 實際 116px）。
-  window._setTopH = setTopH;
-  setTopH();
-  requestAnimationFrame(setTopH);
-  setTimeout(setTopH, 400);
-  window.addEventListener('load', setTopH);
-  window.addEventListener('resize', setTopH);
-  if(window.ResizeObserver){
-    var el=document.querySelector('.top');
-    if(el) new ResizeObserver(setTopH).observe(el);
-  }
 })();
 
 ['q','fnat','fadu','fvis','dfield','d1','d2'].forEach(function(id){
