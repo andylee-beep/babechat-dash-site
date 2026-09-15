@@ -4,7 +4,10 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,"Pretendard","Noto Sans TC","Noto Sans KR",sans-serif;font-size:14px}
 .wrap{max-width:1480px;margin:0 auto;padding:22px 18px 60px}
-.top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.top{position:sticky;top:0;z-index:50;background:rgba(15,17,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);margin:-22px -18px 18px;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.rfbtn{background:var(--card);border:1px solid var(--line);color:var(--dim);font-weight:700;font-size:12.5px;padding:7px 13px;border-radius:9px;cursor:pointer;font-family:inherit}
+.rfbtn:hover{color:var(--tx)}
+.ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 h1{font-size:25px;margin:0 0 4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
 .langseg{display:flex;gap:3px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px;flex:0 0 auto}
 .langseg button{border:0;background:transparent;color:var(--dim);font-weight:800;font-size:12.5px;padding:6px 13px;border-radius:8px;cursor:pointer;font-family:inherit}
@@ -21,7 +24,7 @@ h1{font-size:25px;margin:0 0 4px;background:var(--grad);-webkit-background-clip:
 .kpi .s{font-size:11px;color:#6b7280;margin-top:2px}
 table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-th{background:#1d2130;font-size:12px;color:var(--dim);font-weight:700;position:sticky;top:0;z-index:2}
+th{background:#1d2130;font-size:12px;color:var(--dim);font-weight:700;position:sticky;top:var(--topH,0);z-index:2}
 td.r,th.r{text-align:right} td.c,th.c{text-align:center} td.rl{color:var(--dim)} td.hl{color:var(--hl);font-weight:700}
 tr:hover td{background:#1c2030}
 .cross td:not(.rl){text-align:right;font-variant-numeric:tabular-nums}
@@ -83,9 +86,12 @@ table td{font-size:15px}
       <span id="asofLbl"></span><span>·</span><span>BigQuery babechat-bigquery.babechat_tw_prod（refresh_bq.py 自動更新）</span>
     </div>
   </div>
-  <div class="langseg">
-    <button data-l="zh" class="on">中文</button>
-    <button data-l="ko">한국어</button>
+  <div class="ctrls">
+    <button id="btnRefresh" class="rfbtn" data-i="btn_refresh"></button>
+    <div class="langseg">
+      <button data-l="zh" class="on">中文</button>
+      <button data-l="ko">한국어</button>
+    </div>
   </div>
 </div>
 
@@ -203,6 +209,7 @@ function periodAgg(a,b){
 /* ═══════ 文案（[中文, 한국어]）═══════ */
 var T={
  title:['BabeChat 台灣 · 角色大盤','BabeChat 대만 · 캐릭터 대시보드'],
+ btn_refresh:['↻ 重新整理','↻ 새로고침'],
  src:['資料源','데이터 소스'], snapshot:['快照','스냅샷'],
  bigquery:['BigQuery（即時）','BigQuery(실시간)'], snowflake:['Snowflake（即時）','Snowflake(실시간)'],
  asof:['資料截止','데이터 기준일'],
@@ -685,11 +692,35 @@ function applyLang(){
   $('noteDates').innerHTML=tf('note_dates',nf(NLIVE),nf(NOPUB));
   $('noteNat').innerHTML=t('note_nat')+t('note_rev');
   var w=$('warnNat'); if(w) w.innerHTML=tf('warn_nat',w.dataset.n);
+  if(window._setTopH) window._setTopH();   // 文字長度變了→固定列高度可能變，重量一次
   document.querySelectorAll('.langseg button').forEach(function(b){b.classList.toggle('on',b.dataset.l===LANG)});
   draw();
 }
 document.querySelectorAll('.langseg button').forEach(function(b){
   b.onclick=function(){ LANG=b.dataset.l; localStorage.setItem('charLang',LANG); applyLang(); };});
+
+/* ── 頂部固定列：重新整理鈕 ＋ 讓表頭 sticky 停在它下面 ── */
+(function(){
+  var rb=document.getElementById('btnRefresh');
+  if(rb) rb.onclick=function(){ location.href=location.pathname+'?t='+Date.now(); };
+  // 表頭的 position:sticky 原本 top:0，會跟固定列重疊；量測實際高度後寫進 --topH。
+  function setTopH(){
+    var t=document.querySelector('.top');
+    if(t) document.documentElement.style.setProperty('--topH', t.offsetHeight+'px');
+  }
+  // ⚠ 一定要在文字填完之後再量：applyLang() 會改寫 h1／srcbar，高度會變。
+  //   只在腳本執行當下量一次的話會少算（實測 1440px 下 73px vs 實際 116px）。
+  window._setTopH = setTopH;
+  setTopH();
+  requestAnimationFrame(setTopH);
+  setTimeout(setTopH, 400);
+  window.addEventListener('load', setTopH);
+  window.addEventListener('resize', setTopH);
+  if(window.ResizeObserver){
+    var el=document.querySelector('.top');
+    if(el) new ResizeObserver(setTopH).observe(el);
+  }
+})();
 
 ['q','fnat','fadu','fvis','dfield','d1','d2'].forEach(function(id){
   $(id).addEventListener(id==='q'?'input':'change',function(){
