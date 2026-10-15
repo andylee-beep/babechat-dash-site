@@ -67,6 +67,10 @@ h1{font-size:21px;margin:0;font-weight:800;background:var(--grad);-webkit-backgr
 .kpi .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .kpi.alert{border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
 .kpi.alert .v{color:var(--warn)}
+.kpi.goal{border-color:color-mix(in srgb,var(--good) 45%,var(--line))}
+.kpi.goal .v{color:var(--good)}
+.meter{height:6px;background:var(--card2);border-radius:3px;margin-top:8px;overflow:hidden}
+.meter b{display:block;height:100%;background:var(--good);border-radius:3px}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
 .card h3{font-size:13.5px;margin:0 0 10px;font-weight:700}
@@ -253,7 +257,7 @@ zh:{
  h_axis:'五軸分布',note_axis:'每軸各評 0～3。綜合等級＝五軸中四軸達該級、其餘一軸至少低一級；要升級先補最低的那一軸。',
  h_gap:'缺口排行',hint_gap:'卡住最多角色的項目（每支角色每項只算一次）；綠標＝10 分鐘內可補',h_gap_all:'全部角色',h_gap_mid:'只看 Level 1～2（最接近升級的一群）',quick:'10 分鐘',
  seg:{top20:'Top 20',top50:'Top 21–50',good:'is_good',notgood:'not good',na:'未判定'},
- o_all:'全部來源',o_kr:'韓國轉移',o_tw:'台灣本土',org:{kr:'韓國轉移',tw:'台灣本土'},k_org:'韓國轉移 ／ 台灣本土',k_org_s:'依《대만 이식 작품 명단》＋同創作者帳號判定',
+ o_all:'全部來源',o_kr:'韓國轉移',o_tw:'台灣本土',org:{kr:'韓國轉移',tw:'台灣本土'},k_org:'韓國轉移 ／ 台灣本土',k_org_s:'依《대만 이식 작품 명단》＋同創作者帳號判定',k_goal:'本土 Level 2 以上（目標 15%）',k_goal_s:(n,d,g)=>`${n} 支／${d} 支，還差 ${g} 支`,
  axn:{a:'A 設定字數',b:'B 結構／世界觀',c:'C 世界書',d:'D 圖片',e:'E 開場'},
  ph_creator:'搜尋創作者',min_chars:'最少角色數',note_creator:'點創作者可跳到角色明細並套用篩選。平均分＝well_made_score（A+B+C+D+E，0～15）。',
  ph_char:'搜尋角色名／創作者／ID',f_seg:'分組',f_weak:'最弱軸',f_adult:'含成人',seg_na:'未判定',
@@ -280,7 +284,7 @@ ko:{
  h_axis:'5축 분포',note_axis:'축마다 0~3. 종합 레벨 = 5축 중 4축이 해당 레벨 이상, 나머지 1축도 한 단계 아래 이상. 올리려면 가장 낮은 축부터.',
  h_gap:'부족 항목 순위',hint_gap:'가장 많은 캐릭터를 막고 있는 항목(캐릭터당 항목별 1회). 초록 표시 = 10분이면 수정 가능',h_gap_all:'전체 캐릭터',h_gap_mid:'Level 1~2만 (승급에 가장 가까운 그룹)',quick:'10분',
  seg:{top20:'Top 20',top50:'Top 21–50',good:'is_good',notgood:'not good',na:'미판정'},
- o_all:'전체',o_kr:'KR 이식',o_tw:'TW 로컬',org:{kr:'KR 이식',tw:'TW 로컬'},k_org:'KR 이식 / TW 로컬',k_org_s:'《대만 이식 작품 명단》+ 같은 크리에이터 계정 기준',
+ o_all:'전체',o_kr:'KR 이식',o_tw:'TW 로컬',org:{kr:'KR 이식',tw:'TW 로컬'},k_org:'KR 이식 / TW 로컬',k_org_s:'《대만 이식 작품 명단》+ 같은 크리에이터 계정 기준',k_goal:'TW 로컬 Level 2 이상 (목표 15%)',k_goal_s:(n,d,g)=>`${n} / ${d}개, ${g}개 더 필요`,
  axn:{a:'A 설정 분량',b:'B 구조/세계관',c:'C 로어북',d:'D 이미지',e:'E 도입부'},
  ph_creator:'크리에이터 검색',min_chars:'최소 캐릭터 수',note_creator:'크리에이터를 누르면 캐릭터 상세로 이동해 필터가 적용됩니다. 평균 점수 = well_made_score (A+B+C+D+E, 0~15).',
  ph_char:'캐릭터명 / 크리에이터 / ID 검색',f_seg:'구간',f_weak:'최저 축',f_adult:'성인 포함',seg_na:'미판정',
@@ -357,7 +361,9 @@ function renderOverview(){
   `<div class="kpi"><div class="v">${(sum/N).toFixed(1)}</div><div class="l">${u.k_avg}</div><div class="s">well_made_score</div></div>`+
   `<div class="kpi alert"><div class="v">${fmt(l3bad)}</div><div class="l">${u.k_l3bad}</div><div class="s">${u.k_l3bad_s}</div></div>`+
   `<div class="kpi"><div class="v">${fmt(quick)}</div><div class="l">${u.k_quick}</div><div class="s">${u.k_quick_s}</div></div>`+
-  (M==='TW'&&!O?(()=>{let k=0;for(const r of R)if(origin(r)==='kr')k++;return `<div class="kpi"><div class="v" style="font-size:20px;white-space:nowrap"><span style="color:var(--kr)">${fmt(k)}</span> <span style="color:var(--mute);font-size:14px">／</span> <span style="color:var(--tw)">${fmt(N-k)}</span></div><div class="l">${u.k_org}</div><div class="s">${u.k_org_s}</div></div>`})():'');
+  (M==='TW'&&!O?(()=>{let k=0;for(const r of R)if(origin(r)==='kr')k++;return `<div class="kpi"><div class="v" style="font-size:20px;white-space:nowrap"><span style="color:var(--kr)">${fmt(k)}</span> <span style="color:var(--mute);font-size:14px">／</span> <span style="color:var(--tw)">${fmt(N-k)}</span></div><div class="l">${u.k_org}</div><div class="s">${u.k_org_s}</div></div>`})():'')+
+  (M==='TW'?(()=>{const loc=DATA.TW.rows.filter(r=>origin(r)==='tw'),d=loc.length,n=loc.filter(r=>r[F.lv]>=2).length,p=d?n/d*100:0,need=Math.max(0,Math.ceil(d*0.15)-n);
+   return `<div class="kpi goal"><div class="v" style="white-space:nowrap">${p.toFixed(1)}% <span style="color:var(--mute);font-size:15px">→ 15%</span></div><div class="l">${u.k_goal}</div><div class="s">${u.k_goal_s(fmt(n),fmt(d),fmt(need))}</div><div class="meter"><b style="width:${Math.min(100,p/15*100).toFixed(1)}%"></b></div></div>`})():'');
  $('#lg1').innerHTML=[3,2,1,0].map(l=>`<span><i class="s${l}"></i>Level ${l}</span>`).join('');
  const segs=['top20','top50','good','notgood','na'],S={};segs.forEach(s=>S[s]=[0,0,0,0]);
  for(const r of R)S[seg(r)][r[F.lv]]++;
