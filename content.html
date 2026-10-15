@@ -6,7 +6,7 @@
 <link rel="icon" href="favicon.png">
 </head>
 <body>
-<title>well_made 角色等級儀表板</title>
+<title>well_made 角色 Level 儀表板</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: sticky control bar → tabbed single column (總覽 / 創作者 / 角色明細 / 規則)。Dark-first，沿用角色大盤的深色系；等級 0–3 用單一藍色序列色階，L0 退成灰。 */
@@ -47,6 +47,8 @@ h1{font-size:21px;margin:0;font-weight:800;background:var(--grad);-webkit-backgr
 .sub{font-size:12px;color:var(--dim);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .badge{background:color-mix(in srgb,var(--accent) 18%,var(--card));color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);padding:2px 9px;border-radius:99px;font-weight:700;font-size:11px;letter-spacing:.03em}
 .ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rfbtn{background:var(--card);border:1px solid var(--line);color:var(--dim);font-weight:700;font-size:12.5px;padding:7px 12px;border-radius:9px;cursor:pointer;font-family:inherit}
+.rfbtn:hover{color:var(--tx);border-color:var(--accent)}
 .seg{display:flex;gap:3px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
 .seg button{border:0;background:transparent;color:var(--dim);font-weight:700;font-size:12.5px;padding:6px 13px;border-radius:8px;cursor:pointer;font-family:inherit}
 .seg button.on{background:var(--grad);color:#fff}
@@ -157,7 +159,7 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
 <div class="wrap">
   <div class="top">
     <div>
-      <h1 data-i="title">well_made 角色等級儀表板</h1>
+      <h1 data-i="title">well_made 角色 Level 儀表板</h1>
       <div class="sub">
         <span class="badge" id="b-rule">v1.0</span>
         <span id="b-asof"></span>
@@ -165,6 +167,7 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
       </div>
     </div>
     <div class="ctrls">
+      <button class="rfbtn" id="rf" data-i="refresh" title="跳過快取重新載入">↻ 重新整理</button>
       <div class="seg" id="mseg">
         <button data-m="TW" class="on">TW 台灣</button>
         <button data-m="KR">KR 韓國</button>
@@ -191,7 +194,7 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
   <section id="p-ov">
     <div class="kpis" id="kpis"></div>
 
-    <div class="sec"><h2 data-i="h_cross">等級 × 表現交叉</h2><span class="hint" data-i="hint_cross">等級判定不含任何表現數據；分組只是拿來驗證門檻有沒有分出頂尖作品</span></div>
+    <div class="sec"><h2 data-i="h_cross">Level × 表現交叉</h2><span class="hint" data-i="hint_cross">Level 判定不含任何表現數據；分組只是拿來驗證門檻有沒有分出頂尖作品</span></div>
     <div class="grid2">
       <div class="card">
         <div class="legend" id="lg1"></div>
@@ -199,9 +202,9 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
         <div class="note" data-i="note_cross">Top 20／21–50 取 2026 年 9 月月榜（mart_v2.v2_agg_characters_top）。is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。</div>
       </div>
       <div class="card">
-        <h3 data-i="h_axis">五軸分布</h3>
+        <h3 data-i="h_axis">五個項目的分數分布</h3>
         <div class="rows" id="axes"></div>
-        <div class="note" data-i="note_axis">每軸各評 0～3。綜合等級＝五軸中四軸達該級、其餘一軸至少低一級；要升級先補最低的那一軸。</div>
+        <div class="note" data-i="note_axis">每個項目各評 0～3 分。Level＝五個項目中有四項達該分數、其餘一項至少只低一分；要升 Level 先補分數最低的項目。</div>
       </div>
     </div>
 
@@ -230,7 +233,7 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
       <span id="lvf"><button class="qb on" data-v="3">3</button><button class="qb on" data-v="2">2</button><button class="qb on" data-v="1">1</button><button class="qb on" data-v="0">0</button></span>
       <span class="lbl" data-i="f_seg">分組</span>
       <select id="segf"><option value="">—</option><option value="top20">Top 20</option><option value="top50">Top 21–50</option><option value="good">is_good</option><option value="notgood">not good</option><option value="na" data-i="seg_na">未判定</option></select>
-      <span class="lbl" data-i="f_weak">最弱軸</span>
+      <span class="lbl" data-i="f_weak">最低分項目</span>
       <select id="weak"><option value="">—</option><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option><option value="e">E</option></select>
       <label style="font-size:12px;color:var(--dim)"><input type="checkbox" id="adult" checked> <span data-i="f_adult">含成人</span></label>
       <span class="cnt" id="cnt"></span>
@@ -249,20 +252,20 @@ const F={id:0,name:1,creator:2,adult:3,pub:4,lv:5,sc:6,a:7,b:8,c:9,d:10,e:11,dl:
 const AX=['a','b','c','d','e'];
 const T={
 zh:{
- title:'well_made 角色等級儀表板',tab_ov:'總覽',tab_cr:'創作者',tab_ch:'角色明細',tab_ru:'規則說明',
+ title:'well_made 角色 Level 儀表板',tab_ov:'總覽',tab_cr:'創作者',tab_ch:'角色明細',tab_ru:'規則說明',
  asof:'資料日期',rule:'規則',scope_TW:'TW 公開＋連結角色全量',scope_KR:'KR 2026-03 後登錄＋9 月 Top 50（排除 tookit）',
- k_total:'角色數',k_avg:'平均分（0～15）',k_lv:'Level',k_l3bad:'Level 3 但 is_good=false',k_l3bad_s:'做得好、沒紅的作品',k_quick:'補 10 分鐘項目就能脫離 Level 0',k_quick_s:'只缺 B1／E1 項目的 Level 0 角色',
- h_cross:'等級 × 表現交叉',hint_cross:'等級判定不含任何表現數據；分組只是拿來驗證門檻有沒有分出頂尖作品',
+ k_total:'角色數',k_avg:'平均總分（0～15）',k_lv:'Level',k_l3bad:'Level 3 但 is_good=false',k_l3bad_s:'做得好、沒紅的作品',k_quick:'補 10 分鐘項目就能脫離 Level 0',k_quick_s:'只缺 B1／E1 項目的 Level 0 角色',
+ h_cross:'Level × 表現交叉',hint_cross:'Level 判定不含任何表現數據；分組只是拿來驗證門檻有沒有分出頂尖作品',
  note_cross:'Top 20／21–50 取 2026 年 9 月月榜（mart_v2.v2_agg_characters_top）。is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。',
- h_axis:'五軸分布',note_axis:'每軸各評 0～3。綜合等級＝五軸中四軸達該級、其餘一軸至少低一級；要升級先補最低的那一軸。',
+ h_axis:'五個項目的分數分布',note_axis:'每個項目各評 0～3 分。Level＝五個項目中有四項達該分數、其餘一項至少只低一分；要升 Level 先補分數最低的項目。',
  h_gap:'缺口排行',hint_gap:'卡住最多角色的項目（每支角色每項只算一次）；綠標＝10 分鐘內可補',h_gap_all:'全部角色',h_gap_mid:'只看 Level 1～2（最接近升級的一群）',quick:'10 分鐘',
  seg:{top20:'Top 20',top50:'Top 21–50',good:'is_good',notgood:'not good',na:'未判定'},
- o_all:'全部來源',o_kr:'韓國轉移',o_tw:'台灣本土',org:{kr:'韓國轉移',tw:'台灣本土'},k_org:'韓國轉移 ／ 台灣本土',k_org_s:'依《대만 이식 작품 명단》＋同創作者帳號判定',k_goal:'本土 Level 2 以上（目標 15%）',k_goal_s:(n,d,g)=>`${n} 支／${d} 支，還差 ${g} 支`,
+ o_all:'全部來源',o_kr:'韓國轉移',o_tw:'台灣本土',org:{kr:'韓國轉移',tw:'台灣本土'},k_org:'韓國轉移 ／ 台灣本土',k_org_s:'依《대만 이식 작품 명단》＋同創作者帳號判定',k_goal:'本土 Level 2 以上（目標 15%）',k_goal_s:(n3,n2,n,d,g)=>`Level 3 ${n3} ＋ Level 2 ${n2} ＝ ${n} 支／${d} 支，還差 ${g} 支`,refresh:'↻ 重新整理',
  axn:{a:'A 設定字數',b:'B 結構／世界觀',c:'C 世界書',d:'D 圖片',e:'E 開場'},
  ph_creator:'搜尋創作者',min_chars:'最少角色數',note_creator:'點創作者可跳到角色明細並套用篩選。平均分＝well_made_score（A+B+C+D+E，0～15）。',
- ph_char:'搜尋角色名／創作者／ID',f_seg:'分組',f_weak:'最弱軸',f_adult:'含成人',seg_na:'未判定',
- ch:['創作者','來源','角色數','平均分','L3','L2 以上','L0','最高分角色'],
- th:['角色','創作者','來源','L','分','A B C D E','is_good','Top','登錄','缺口'],
+ ph_char:'搜尋角色名／創作者／ID',f_seg:'分組',f_weak:'最低分項目',f_adult:'含成人',seg_na:'未判定',
+ ch:['創作者','來源','角色數','平均總分','L3','L2 以上','L0','最高分角色'],
+ th:['角色','創作者','來源','Level','總分','A B C D E 分數','is_good','Top','登錄','缺口'],
  none:'無缺口',chars:'支',page:'頁',of:'／',
  d:{dl:'設定字數',pm:'提示詞模式',nh:'區段標題數',w:'世界觀區段',r:'規則區段',ms:'模式／狀態窗',ut:'使用 {{user}}',nl:'世界書條數',al:'每條平均字數',nm:'模式切換條目',ne:'情緒圖片',ip:'圖片 URL／代碼',ia:'開場情境字數',im:'開場台詞字數',dsc:'介紹字數',nt:'標籤數',nr:'建議回覆',nsc:'起始劇本',pg:'遊玩指南字數',u7:'7 日用戶',w1:'首週留存',pub:'登錄日'},
  yes:'有',no:'無',unset:'未選',
@@ -276,20 +279,20 @@ zh:{
  cur:'目前',unit_c:'字',unit_n:'條',unit_p:'張',unit_t:'個'
 },
 ko:{
- title:'well_made 캐릭터 등급 대시보드',tab_ov:'개요',tab_cr:'크리에이터',tab_ch:'캐릭터 상세',tab_ru:'기준 설명',
+ title:'well_made 캐릭터 Level 대시보드',tab_ov:'개요',tab_cr:'크리에이터',tab_ch:'캐릭터 상세',tab_ru:'기준 설명',
  asof:'데이터 기준',rule:'규칙',scope_TW:'TW 공개+링크 캐릭터 전체',scope_KR:'KR 2026-03 이후 등록 + 9월 Top 50 (tookit 제외)',
- k_total:'캐릭터 수',k_avg:'평균 점수 (0~15)',k_lv:'Level',k_l3bad:'Level 3인데 is_good=false',k_l3bad_s:'잘 만들었는데 안 뜬 작품',k_quick:'10분 항목만 채우면 Level 0 탈출',k_quick_s:'B1/E1 항목만 부족한 Level 0 캐릭터',
- h_cross:'레벨 × 성과 교차',hint_cross:'레벨 판정에 성과는 들어가지 않음. 구간은 기준이 상위권을 가르는지 검증하는 참조',
+ k_total:'캐릭터 수',k_avg:'평균 총점 (0~15)',k_lv:'Level',k_l3bad:'Level 3인데 is_good=false',k_l3bad_s:'잘 만들었는데 안 뜬 작품',k_quick:'10분 항목만 채우면 Level 0 탈출',k_quick_s:'B1/E1 항목만 부족한 Level 0 캐릭터',
+ h_cross:'Level × 성과 교차',hint_cross:'Level 판정에 성과는 들어가지 않음. 구간은 기준이 상위권을 가르는지 검증하는 참조',
  note_cross:'Top 20 / 21–50은 2026년 9월 월간 랭킹(mart_v2.v2_agg_characters_top). is_good은 mart_v2.v2_crtd_character_quality(7일 유저수+첫 주 리텐션), 관찰 기간 미달은 「미판정」.',
- h_axis:'5축 분포',note_axis:'축마다 0~3. 종합 레벨 = 5축 중 4축이 해당 레벨 이상, 나머지 1축도 한 단계 아래 이상. 올리려면 가장 낮은 축부터.',
+ h_axis:'5개 항목 점수 분포',note_axis:'항목마다 0~3점. Level = 5개 항목 중 4개가 해당 점수 이상, 나머지 1개도 한 점 아래 이상. Level을 올리려면 점수가 가장 낮은 항목부터.',
  h_gap:'부족 항목 순위',hint_gap:'가장 많은 캐릭터를 막고 있는 항목(캐릭터당 항목별 1회). 초록 표시 = 10분이면 수정 가능',h_gap_all:'전체 캐릭터',h_gap_mid:'Level 1~2만 (승급에 가장 가까운 그룹)',quick:'10분',
  seg:{top20:'Top 20',top50:'Top 21–50',good:'is_good',notgood:'not good',na:'미판정'},
- o_all:'전체',o_kr:'KR 이식',o_tw:'TW 로컬',org:{kr:'KR 이식',tw:'TW 로컬'},k_org:'KR 이식 / TW 로컬',k_org_s:'《대만 이식 작품 명단》+ 같은 크리에이터 계정 기준',k_goal:'TW 로컬 Level 2 이상 (목표 15%)',k_goal_s:(n,d,g)=>`${n} / ${d}개, ${g}개 더 필요`,
+ o_all:'전체',o_kr:'KR 이식',o_tw:'TW 로컬',org:{kr:'KR 이식',tw:'TW 로컬'},k_org:'KR 이식 / TW 로컬',k_org_s:'《대만 이식 작품 명단》+ 같은 크리에이터 계정 기준',k_goal:'TW 로컬 Level 2 이상 (목표 15%)',k_goal_s:(n3,n2,n,d,g)=>`Level 3 ${n3} + Level 2 ${n2} = ${n} / ${d}개, ${g}개 더 필요`,refresh:'↻ 새로고침',
  axn:{a:'A 설정 분량',b:'B 구조/세계관',c:'C 로어북',d:'D 이미지',e:'E 도입부'},
  ph_creator:'크리에이터 검색',min_chars:'최소 캐릭터 수',note_creator:'크리에이터를 누르면 캐릭터 상세로 이동해 필터가 적용됩니다. 평균 점수 = well_made_score (A+B+C+D+E, 0~15).',
- ph_char:'캐릭터명 / 크리에이터 / ID 검색',f_seg:'구간',f_weak:'최저 축',f_adult:'성인 포함',seg_na:'미판정',
- ch:['크리에이터','출처','캐릭터 수','평균 점수','L3','L2 이상','L0','최고점 캐릭터'],
- th:['캐릭터','크리에이터','출처','L','점','A B C D E','is_good','Top','등록','부족 항목'],
+ ph_char:'캐릭터명 / 크리에이터 / ID 검색',f_seg:'구간',f_weak:'최저 점수 항목',f_adult:'성인 포함',seg_na:'미판정',
+ ch:['크리에이터','출처','캐릭터 수','평균 총점','L3','L2 이상','L0','최고점 캐릭터'],
+ th:['캐릭터','크리에이터','출처','Level','총점','A B C D E 점수','is_good','Top','등록','부족 항목'],
  none:'부족 항목 없음',chars:'개',page:'페이지',of:'/',
  d:{dl:'설정 글자수',pm:'프롬프트 모드',nh:'섹션 헤더 수',w:'세계관 섹션',r:'규칙 섹션',ms:'모드/상태창',ut:'{{user}} 사용',nl:'로어북 조수',al:'조당 평균 글자수',nm:'모드 전환 조목',ne:'감정 이미지',ip:'이미지 URL/코드',ia:'첫 상황 글자수',im:'첫 대사 글자수',dsc:'소개 글자수',nt:'태그 수',nr:'추천 답변',nsc:'시작 시나리오',pg:'플레이 가이드 글자수',u7:'7일 유저',w1:'첫 주 리텐션',pub:'등록일'},
  yes:'있음',no:'없음',unset:'미선택',
@@ -362,8 +365,8 @@ function renderOverview(){
   `<div class="kpi alert"><div class="v">${fmt(l3bad)}</div><div class="l">${u.k_l3bad}</div><div class="s">${u.k_l3bad_s}</div></div>`+
   `<div class="kpi"><div class="v">${fmt(quick)}</div><div class="l">${u.k_quick}</div><div class="s">${u.k_quick_s}</div></div>`+
   (M==='TW'&&!O?(()=>{let k=0;for(const r of R)if(origin(r)==='kr')k++;return `<div class="kpi"><div class="v" style="font-size:20px;white-space:nowrap"><span style="color:var(--kr)">${fmt(k)}</span> <span style="color:var(--mute);font-size:14px">／</span> <span style="color:var(--tw)">${fmt(N-k)}</span></div><div class="l">${u.k_org}</div><div class="s">${u.k_org_s}</div></div>`})():'')+
-  (M==='TW'?(()=>{const loc=DATA.TW.rows.filter(r=>origin(r)==='tw'),d=loc.length,n=loc.filter(r=>r[F.lv]>=2).length,p=d?n/d*100:0,need=Math.max(0,Math.ceil(d*0.15)-n);
-   return `<div class="kpi goal"><div class="v" style="white-space:nowrap">${p.toFixed(1)}% <span style="color:var(--mute);font-size:15px">→ 15%</span></div><div class="l">${u.k_goal}</div><div class="s">${u.k_goal_s(fmt(n),fmt(d),fmt(need))}</div><div class="meter"><b style="width:${Math.min(100,p/15*100).toFixed(1)}%"></b></div></div>`})():'');
+  (M==='TW'?(()=>{const loc=DATA.TW.rows.filter(r=>origin(r)==='tw'),d=loc.length,n3=loc.filter(r=>r[F.lv]===3).length,n2=loc.filter(r=>r[F.lv]===2).length,n=n2+n3,p=d?n/d*100:0,need=Math.max(0,Math.ceil(d*0.15)-n);
+   return `<div class="kpi goal"><div class="v" style="white-space:nowrap">${p.toFixed(1)}% <span style="color:var(--mute);font-size:15px">→ 15%</span></div><div class="l">${u.k_goal}</div><div class="s">${u.k_goal_s(fmt(n3),fmt(n2),fmt(n),fmt(d),fmt(need))}</div><div class="meter"><b style="width:${Math.min(100,p/15*100).toFixed(1)}%"></b></div></div>`})():'');
  $('#lg1').innerHTML=[3,2,1,0].map(l=>`<span><i class="s${l}"></i>Level ${l}</span>`).join('');
  const segs=['top20','top50','good','notgood','na'],S={};segs.forEach(s=>S[s]=[0,0,0,0]);
  for(const r of R)S[seg(r)][r[F.lv]]++;
@@ -427,23 +430,23 @@ function detail(r){
 
 /* ---------- rules ---------- */
 const RULES={zh:`
-<div class="sec"><h2>等級一覽</h2><span class="hint">規則 v1.0（2026-10-12）。只看創作者寫的內容，不放任何表現數據。</span></div>
-<div class="tblwrap"><table><thead><tr><th>Level</th><th>意義</th><th>達標條件（五軸皆須）</th><th>怎麼到達</th></tr></thead><tbody>
+<div class="sec"><h2>Level 0～3 是什麼</h2><span class="hint">規則 v1.0（2026-10-12）。只看創作者寫的內容，不放任何表現數據。</span></div>
+<div class="tblwrap"><table><thead><tr><th>Level</th><th>意義</th><th>達標條件（五個項目都要）</th><th>怎麼到達</th></tr></thead><tbody>
 <tr><td>0 未達標</td><td>Level 1 任一項缺漏</td><td>—</td><td>補齊 Level 1 項目，多半 10 分鐘就能完成。</td></tr>
 <tr><td>1 基本達標</td><td>官方指南的必填欄位都填了</td><td>設定 1,500 字以上 · 已選提示詞模式 · 使用 {{user}} 變數 · 開場情境＋開場台詞 300 字以上 · 標籤 3 個以上</td><td>把製作頁面的空欄位補滿。開場台詞不要一句問候，寫到能看出說話方式的長度。</td></tr>
 <tr><td>2 相當不錯</td><td>有世界觀和世界書，且結構化</td><td>設定 3,000 字以上 · 區段標題 5 個以上＋世界觀或規則區段 · 世界書 5 條以上、每條 200 字以上 · 情緒圖片 5 張以上（或圖片代碼） · 開場情境＋台詞 500 字以上＋介紹 100 字以上</td><td>把設定分成 Markdown 區段，寫出世界觀與規則。用世界書模板（配角、地點、規則、事件）寫滿 5 條。上傳情緒圖片。</td></tr>
 <tr><td>3 好角色</td><td>Top 50 的典型，連模式、事件、圖片體系都設計好</td><td>設定 5,000 字以上 · custom_plus＋標題 10 個以上＋世界觀、規則、模式／狀態窗都有 · 世界書 20 條以上、每條 250 字以上 · 情緒圖片 10 張以上（或代碼→圖片對照表） · 開場情境 600 字＋開場台詞 150 字＋（建議回覆、起始劇本 2 個、遊玩指南擇一）</td><td>切換到 custom_plus，加入模式、狀態窗、事件、輸出規則。世界書依配角、地點、規則、事件、模式累積到 20 條以上，1～5 號放核心配角與模式。在設定裡寫圖片代碼表與輸出規則。</td></tr>
 </tbody></table></div>
-<div class="sec"><h2>綜合等級判定</h2></div>
+<div class="sec"><h2>五個項目的分數怎麼合成 Level</h2></div>
 <div class="tblwrap"><table><thead><tr><th>well_made_level</th><th>條件</th></tr></thead><tbody>
-<tr><td>3</td><td>5 軸中有 4 軸以上為 Level 3，其餘 1 軸也達 Level 2 以上</td></tr>
-<tr><td>2</td><td>5 軸中有 4 軸以上達 Level 2 以上，且所有軸都達 Level 1 以上</td></tr>
-<tr><td>1</td><td>所有軸都達 Level 1 以上</td></tr>
-<tr><td>0</td><td>任一軸為 Level 0</td></tr>
+<tr><td>3</td><td>五個項目中有四項 3 分，其餘一項至少 2 分</td></tr>
+<tr><td>2</td><td>五個項目中有四項 2 分以上，且每一項都至少 1 分</td></tr>
+<tr><td>1</td><td>每一項都至少 1 分</td></tr>
+<tr><td>0</td><td>任何一項 0 分</td></tr>
 </tbody></table></div>
-<p>輔助值：well_made_score ＝ A+B+C+D+E（0～15，同等級內排序用）。要提升綜合等級，先補軸等級最低的項目。軸 C 的世界書種類／順序／模式條目、軸 D 的代碼表與輸出規則、軸 B 的世界觀檢查清單不在自動判定內，Level 3 候選每月人工審核一次。</p>
-<div class="sec"><h2>五軸門檻</h2></div>
-<div class="tblwrap"><table><thead><tr><th>軸</th><th>Level 1</th><th>Level 2</th><th>Level 3</th></tr></thead><tbody>
+<p>總分 well_made_score ＝ 五個項目的分數相加（0～15，同 Level 內排序用）。要提升 Level，先補分數最低的項目。項目 C 的世界書種類／順序／模式條目、項目 D 的代碼表與輸出規則、項目 B 的世界觀檢查清單不在自動判定內，Level 3 候選每月人工審核一次。</p>
+<div class="sec"><h2>各項目的分數門檻</h2></div>
+<div class="tblwrap"><table><thead><tr><th>項目</th><th>1 分</th><th>2 分</th><th>3 分</th></tr></thead><tbody>
 <tr><td>A 設定字數</td><td>1,500 字以上</td><td>3,000 字以上</td><td>5,000 字以上</td></tr>
 <tr><td>B 結構／世界觀</td><td>已選提示詞模式 ＋ 設定或世界書有 {{user}}</td><td>區段標題 5 個以上 ＋ 有世界觀或規則區段</td><td>custom_plus ＋ 標題 10 個以上 ＋ 世界觀、規則、模式／狀態窗三區段都有</td></tr>
 <tr><td>C 世界書</td><td>可以沒有；若有，關鍵字不得為空</td><td>5 條以上 ＋ 每條平均 200 字以上</td><td>20 條以上 ＋ 每條平均 250 字以上（人工再看種類、順序、模式條目）</td></tr>
@@ -456,23 +459,23 @@ const RULES={zh:`
 <p>babechat-bigquery.babechat_{tw,kr}_prod 的 characters、keyword_book、emotion_images、starting_scenarios（is_deleted=0、visibility ∈ public/link、世界書與劇本 deleted_at IS NULL；KR 排除 tookit）。表現交叉用 mart_v2.v2_crtd_character_quality（is_good）與 mart_v2.v2_agg_characters_top（2026-09 月榜）。本頁是快照，重跑 wellmade_fetch.sql 即可更新。</p>
 <p>限制：世界觀／規則／模式區段用關鍵字比對，寫法不同可能漏判；世界書關鍵字品質與圖片代碼表完成度無法自動量測。KR 比較組限定 2026-03 之後登錄的作品。</p>`,
 ko:`
-<div class="sec"><h2>레벨 한눈에 보기</h2><span class="hint">규칙 v1.0 (2026-10-12). 크리에이터가 쓴 것만 보고 성과는 넣지 않는다.</span></div>
-<div class="tblwrap"><table><thead><tr><th>Level</th><th>뜻</th><th>되려면 (5축 모두)</th><th>어떻게 도달하나</th></tr></thead><tbody>
+<div class="sec"><h2>Level 0~3이란</h2><span class="hint">규칙 v1.0 (2026-10-12). 크리에이터가 쓴 것만 보고 성과는 넣지 않는다.</span></div>
+<div class="tblwrap"><table><thead><tr><th>Level</th><th>뜻</th><th>되려면 (5개 항목 모두)</th><th>어떻게 도달하나</th></tr></thead><tbody>
 <tr><td>0 미달</td><td>Level 1 조건 중 하나라도 빠짐</td><td>—</td><td>Level 1 항목을 채운다. 대부분 10분이면 된다.</td></tr>
 <tr><td>1 기본 충족</td><td>공식 가이드의 필수 칸이 다 채워짐</td><td>설정 1,500자 이상 · 프롬프트 모드 선택 · {{user}} 변수 사용 · 첫 상황+첫 대사 300자 이상 · 태그 3개 이상</td><td>제작 화면의 빈칸을 없앤다. 첫 대사를 한 줄 인사가 아니라 말투가 드러나는 분량으로 늘린다.</td></tr>
 <tr><td>2 꽤 괜찮음</td><td>세계관과 로어북이 있고 구조화됨</td><td>설정 3,000자 이상 · 섹션 헤더 5개 이상 + 세계관 또는 규칙 섹션 · 로어북 5조 이상, 조당 200자 이상 · 감정 이미지 5장 이상(또는 이미지 코드) · 첫 상황+첫 대사 500자 이상 + 소개 100자 이상</td><td>설정을 마크다운 섹션으로 나누고 세계관·규칙을 쓴다. 로어북 템플릿(조연·장소·규칙·이벤트)으로 5조를 채운다. 감정 이미지를 올린다.</td></tr>
 <tr><td>3 좋은 캐릭터</td><td>Top 50의 전형. 모드·이벤트·이미지 체계까지 설계됨</td><td>설정 5,000자 이상 · custom_plus + 헤더 10개 이상 + 세계관·규칙·모드/상태창 모두 · 로어북 20조 이상, 조당 250자 이상 · 감정 이미지 10장 이상(또는 코드→이미지 매핑표) · 첫 상황 600자 + 첫 대사 150자 + (추천 답변·시작 시나리오 2개·플레이 가이드 중 하나)</td><td>custom_plus로 전환해 모드·상태창·이벤트·출력 규칙을 넣는다. 로어북을 조연·장소·규칙·이벤트·모드로 20조 이상 쌓고 1~5번에 핵심 조연·모드를 둔다. 이미지 코드표와 출력 규칙을 설정에 적는다.</td></tr>
 </tbody></table></div>
-<div class="sec"><h2>종합 레벨 판정</h2></div>
+<div class="sec"><h2>항목 점수를 Level로 합치는 법</h2></div>
 <div class="tblwrap"><table><thead><tr><th>well_made_level</th><th>조건</th></tr></thead><tbody>
-<tr><td>3</td><td>5축 중 4축 이상이 Level 3이고, 나머지 1축도 Level 2 이상</td></tr>
-<tr><td>2</td><td>5축 중 4축 이상이 Level 2 이상이고, 모든 축이 Level 1 이상</td></tr>
-<tr><td>1</td><td>모든 축이 Level 1 이상</td></tr>
-<tr><td>0</td><td>어느 한 축이라도 Level 0</td></tr>
+<tr><td>3</td><td>5개 항목 중 4개가 3점, 나머지 1개도 2점 이상</td></tr>
+<tr><td>2</td><td>5개 항목 중 4개가 2점 이상이고, 모든 항목이 1점 이상</td></tr>
+<tr><td>1</td><td>모든 항목이 1점 이상</td></tr>
+<tr><td>0</td><td>어느 한 항목이라도 0점</td></tr>
 </tbody></table></div>
-<p>보조 값: well_made_score = A+B+C+D+E (0~15, 같은 레벨 안 순위용). 종합 레벨을 올리려면 축 레벨이 가장 낮은 항목부터 고친다. 축 C의 로어북 종류·순서·모드 조목, 축 D의 코드표·출력 규칙, 축 B의 세계관 체크리스트는 자동 판정에서 빠져 있어 Level 3 후보만 월 1회 수동 검수한다.</p>
-<div class="sec"><h2>축별 기준</h2></div>
-<div class="tblwrap"><table><thead><tr><th>축</th><th>Level 1</th><th>Level 2</th><th>Level 3</th></tr></thead><tbody>
+<p>총점 well_made_score = 5개 항목 점수의 합 (0~15, 같은 Level 안 순위용). Level을 올리려면 점수가 가장 낮은 항목부터 고친다. 항목 C의 로어북 종류·순서·모드 조목, 항목 D의 코드표·출력 규칙, 항목 B의 세계관 체크리스트는 자동 판정에서 빠져 있어 Level 3 후보만 월 1회 수동 검수한다.</p>
+<div class="sec"><h2>항목별 점수 기준</h2></div>
+<div class="tblwrap"><table><thead><tr><th>항목</th><th>1점</th><th>2점</th><th>3점</th></tr></thead><tbody>
 <tr><td>A 설정 분량</td><td>1,500자 이상</td><td>3,000자 이상</td><td>5,000자 이상</td></tr>
 <tr><td>B 구조·세계관</td><td>프롬프트 모드 선택 + 설정 또는 로어북에 {{user}}</td><td>섹션 헤더 5개 이상 + 세계관 또는 규칙 섹션</td><td>custom_plus + 헤더 10개 이상 + 세계관·규칙·모드/상태창 모두</td></tr>
 <tr><td>C 로어북</td><td>없어도 됨. 있다면 키워드가 비어 있지 않을 것</td><td>5조 이상 + 조당 평균 200자 이상</td><td>20조 이상 + 조당 평균 250자 이상 (종류·순서·모드 조목은 수동)</td></tr>
@@ -495,6 +498,7 @@ function applyLang(){
  $('#oseg').hidden=M!=='TW';
  $('#p-ru').innerHTML=RULES[L];
 }
+$('#rf').addEventListener('click',()=>{const u=new URL(location.href);u.searchParams.set('v',Date.now());location.replace(u.toString())});
 $('#oseg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;O=b.dataset.o;$$('#oseg button').forEach(x=>x.classList.toggle('on',x===b));page=0;renderAll()});
 function renderAll(){applyLang();renderOverview();renderCreators();renderChars()}
 function showTab(k){TAB=k;$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===k));['ov','cr','ch','ru'].forEach(x=>$('#p-'+x).hidden=x!==k);window.scrollTo({top:0})}
