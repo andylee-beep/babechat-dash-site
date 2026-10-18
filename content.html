@@ -60,11 +60,14 @@ h1{font-size:21px;margin:0;font-weight:800;background:var(--grad);-webkit-backgr
 .sec{display:flex;align-items:baseline;gap:10px;margin:26px 0 10px;flex-wrap:wrap}
 .sec h2{font-size:16px;margin:0;font-weight:700}
 .sec .hint{font-size:11.5px;color:var(--mute)}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;min-width:0;display:flex;flex-direction:column}
 .kpi .v{font-size:24px;font-weight:800;line-height:1.1}
 .kpi .l{font-size:12px;color:var(--dim);margin-top:4px}
 .kpi .s{font-size:11px;color:var(--mute);margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:11px;color:var(--mute);margin-top:auto;padding-top:6px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .d b{font-weight:700}
+.momnote{font-size:11.5px;color:var(--mute);margin-top:8px;line-height:1.6}
 .kpi.hero .v{font-size:34px}
 .kpi .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .kpi.alert{border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
@@ -147,6 +150,8 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
 .rules .tblwrap{max-height:none}
 .rules p{font-size:13px;color:var(--dim);line-height:1.65;max-width:72ch}
 #tip{position:fixed;z-index:99;pointer-events:none;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.25);display:none;max-width:260px;line-height:1.5}
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){
   .row{grid-template-columns:84px 1fr 44px}
   .kpi .v{font-size:20px}.kpi.hero .v{font-size:28px}
@@ -193,6 +198,7 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
 
   <section id="p-ov">
     <div class="kpis" id="kpis"></div>
+    <div class="momnote" id="momnote"></div>
 
     <div class="sec"><h2 data-i="h_cross">Level × 表現交叉</h2><span class="hint" data-i="hint_cross">Level 判定不含任何表現數據；分組只是拿來驗證門檻有沒有分出頂尖作品</span></div>
     <div class="grid2">
@@ -255,6 +261,7 @@ zh:{
  title:'well_made 角色 Level 儀表板',tab_ov:'總覽',tab_cr:'創作者',tab_ch:'角色明細',tab_ru:'規則說明',
  asof:'資料日期',rule:'規則',scope_TW:'TW 公開＋連結角色全量',scope_KR:'KR 2026-03 後登錄＋9 月 Top 50（排除 tookit）',
  k_total:'角色數',k_avg:'平均總分（0～15）',k_lv:'Level',k_l3bad:'Level 3 但 is_good=false',k_l3bad_s:'做得好、沒紅的作品',k_quick:'補 10 分鐘項目就能脫離 Level 0',k_quick_s:'只缺 B1／E1 項目的 Level 0 角色',
+ mom:'上月',mom_na:'上月無可比資料',note_mom:c=>`上月同期＝登錄日在 ${c} 以前、且現在仍公開的角色（本次快照重算）。新增的角色不計入上月，所以差異主要反映「這個月新上架的角色把整體拉高還是拉低」。已下架的角色兩邊都不在，評分項目一律用今天的內容，不是當時的版本。`,
  h_cross:'Level × 表現交叉',hint_cross:'Level 判定不含任何表現數據；分組只是拿來驗證門檻有沒有分出頂尖作品',
  note_cross:'Top 20／21–50 取 2026 年 9 月月榜（mart_v2.v2_agg_characters_top）。is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。',
  h_axis:'五個項目的分數分布',note_axis:'每個項目各評 0～3 分。Level＝五個項目中有四項達該分數、其餘一項至少只低一分；要升 Level 先補分數最低的項目。',
@@ -282,6 +289,7 @@ ko:{
  title:'well_made 캐릭터 Level 대시보드',tab_ov:'개요',tab_cr:'크리에이터',tab_ch:'캐릭터 상세',tab_ru:'기준 설명',
  asof:'데이터 기준',rule:'규칙',scope_TW:'TW 공개+링크 캐릭터 전체',scope_KR:'KR 2026-03 이후 등록 + 9월 Top 50 (tookit 제외)',
  k_total:'캐릭터 수',k_avg:'평균 총점 (0~15)',k_lv:'Level',k_l3bad:'Level 3인데 is_good=false',k_l3bad_s:'잘 만들었는데 안 뜬 작품',k_quick:'10분 항목만 채우면 Level 0 탈출',k_quick_s:'B1/E1 항목만 부족한 Level 0 캐릭터',
+ mom:'전월',mom_na:'전월 비교 데이터 없음',note_mom:c=>`전월 동기 = 등록일이 ${c} 이전이고 지금도 공개 중인 캐릭터(이번 스냅샷으로 재계산). 신규 캐릭터는 전월에 포함되지 않으므로, 증감은 주로 '이번 달 새로 올라온 캐릭터가 전체 수준을 올렸는지 내렸는지'를 뜻합니다. 내려간 캐릭터는 양쪽 모두에 없고, 평가 항목은 당시 버전이 아니라 오늘 기준입니다.`,
  h_cross:'Level × 성과 교차',hint_cross:'Level 판정에 성과는 들어가지 않음. 구간은 기준이 상위권을 가르는지 검증하는 참조',
  note_cross:'Top 20 / 21–50은 2026년 9월 월간 랭킹(mart_v2.v2_agg_characters_top). is_good은 mart_v2.v2_crtd_character_quality(7일 유저수+첫 주 리텐션), 관찰 기간 미달은 「미판정」.',
  h_axis:'5개 항목 점수 분포',note_axis:'항목마다 0~3점. Level = 5개 항목 중 4개가 해당 점수 이상, 나머지 1개도 한 점 아래 이상. Level을 올리려면 점수가 가장 낮은 항목부터.',
@@ -316,6 +324,21 @@ let O='';
 const ORG=(()=>{const o=(DATA.TW&&DATA.TW.origin)||{ids:[],creators:[]};return {ids:new Set(o.ids),cr:new Set(o.creators)}})();
 function origin(r){if(M!=='TW')return null;return (ORG.ids.has(r[F.id])||ORG.cr.has((r[F.creator]||'').trim()))?'kr':'tw'}
 function rows(){const R=DATA[M].rows;return (M==='TW'&&O)?R.filter(r=>origin(r)===O):R}
+/* ---------- 上月同期（以登錄日回推，資料是同一份快照） ---------- */
+function momCut(){const s=(DATA[M].asof||'').split('-').map(Number);
+ if(s.length!==3||!s[0])return null;
+ let y=s[0],mo=s[1]-1,d=s[2],pm=mo-1,py=y; if(pm<0){pm=11;py--}
+ const last=new Date(Date.UTC(py,pm+1,0)).getUTCDate(); if(d>last)d=last;
+ return py+'-'+String(pm+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function momOf(R){const c=momCut();return c?R.filter(r=>r[F.pub]!=='-'&&r[F.pub]<=c):[]}
+/* cur/prev 數值；dir 1=越高越好 -1=越低越好 0=中性；o.dec 小數位 o.rel 加百分比 o.unit 單位 o.pv 自訂上月顯示 */
+function dl(cur,prev,dir,o){o=o||{};
+ if(prev==null||!isFinite(prev))return `<div class="d">${t().mom_na}</div>`;
+ const dec=o.dec||0,eps=dec?0.05:0.5,d=cur-prev,flat=Math.abs(d)<eps;
+ const txt=flat?'±0':(d>0?'+':'−')+(dec?Math.abs(d).toFixed(dec):fmt(Math.round(Math.abs(d))))+(o.unit||'');
+ const rel=(o.rel&&!flat&&prev>0)?' ('+(d>0?'+':'−')+Math.abs(d/prev*100).toFixed(1)+'%)':'';
+ const col=(!dir||flat)?'var(--mute)':(((d>0?1:-1)===dir)?'var(--good)':'var(--crit)');
+ return `<div class="d">${t().mom} ${o.pv!=null?o.pv:fmt(prev)} · <b style="color:${col}">${txt}${rel}</b></div>`}
 function orgPill(r){const o=origin(r);return o?`<span class="pill ${o==='kr'?'k':'w'}">${t().org[o]}</span>`:''}
 function seg(r){const k=r[F.rk];if(k!=null&&k<=20)return 'top20';if(k!=null)return 'top50';if(r[F.ig]===1)return 'good';if(r[F.ig]===0)return 'notgood';return 'na'}
 function gaps(r){
@@ -358,15 +381,21 @@ function renderOverview(){
  const R=rows(),u=t(),N=R.length;
  const lv=[0,0,0,0];let sum=0,l3bad=0,quick=0;
  for(const r of R){lv[r[F.lv]]++;sum+=r[F.sc];if(r[F.lv]===3&&r[F.ig]===0)l3bad++;if(quickOnly(r))quick++}
+ const P=momOf(R),PN=P.length,plv=[0,0,0,0];let psum=0,pl3bad=0,pquick=0;
+ for(const r of P){plv[r[F.lv]]++;psum+=r[F.sc];if(r[F.lv]===3&&r[F.ig]===0)pl3bad++;if(quickOnly(r))pquick++}
+ const has=PN>0;
  $('#kpis').innerHTML=
-  `<div class="kpi hero"><div class="v">${fmt(N)}</div><div class="l">${u.k_total}</div><div class="s">${M==='TW'?u.scope_TW:u.scope_KR}</div></div>`+
-  [3,2,1,0].map(l=>`<div class="kpi"><div class="v"><span class="sw s${l}"></span>${fmt(lv[l])}</div><div class="l">${u.k_lv} ${l}</div><div class="s">${pct(lv[l],N)}</div></div>`).join('')+
-  `<div class="kpi"><div class="v">${(sum/N).toFixed(1)}</div><div class="l">${u.k_avg}</div><div class="s">well_made_score</div></div>`+
-  `<div class="kpi alert"><div class="v">${fmt(l3bad)}</div><div class="l">${u.k_l3bad}</div><div class="s">${u.k_l3bad_s}</div></div>`+
-  `<div class="kpi"><div class="v">${fmt(quick)}</div><div class="l">${u.k_quick}</div><div class="s">${u.k_quick_s}</div></div>`+
-  (M==='TW'&&!O?(()=>{let k=0;for(const r of R)if(origin(r)==='kr')k++;return `<div class="kpi"><div class="v" style="font-size:20px;white-space:nowrap"><span style="color:var(--kr)">${fmt(k)}</span> <span style="color:var(--mute);font-size:14px">／</span> <span style="color:var(--tw)">${fmt(N-k)}</span></div><div class="l">${u.k_org}</div><div class="s">${u.k_org_s}</div></div>`})():'')+
-  (M==='TW'?(()=>{const loc=DATA.TW.rows.filter(r=>origin(r)==='tw'),d=loc.length,n3=loc.filter(r=>r[F.lv]===3).length,n2=loc.filter(r=>r[F.lv]===2).length,n=n2+n3,p=d?n/d*100:0,need=Math.max(0,Math.ceil(d*0.15)-n);
-   return `<div class="kpi goal"><div class="v" style="white-space:nowrap">${p.toFixed(1)}% <span style="color:var(--mute);font-size:15px">→ 15%</span></div><div class="l">${u.k_goal}</div><div class="s">${u.k_goal_s(fmt(n3),fmt(n2),fmt(n),fmt(d),fmt(need))}</div><div class="meter"><b style="width:${Math.min(100,p/15*100).toFixed(1)}%"></b></div></div>`})():'');
+  `<div class="kpi hero"><div class="v">${fmt(N)}</div><div class="l">${u.k_total}</div><div class="s">${M==='TW'?u.scope_TW:u.scope_KR}</div>${dl(N,has?PN:null,0,{rel:1})}</div>`+
+  [3,2,1,0].map(l=>`<div class="kpi"><div class="v"><span class="sw s${l}"></span>${fmt(lv[l])}</div><div class="l">${u.k_lv} ${l}</div><div class="s">${pct(lv[l],N)}</div>${dl(lv[l],has?plv[l]:null,l>=2?1:(l===0?-1:0),{rel:1})}</div>`).join('')+
+  `<div class="kpi"><div class="v">${(sum/N).toFixed(1)}</div><div class="l">${u.k_avg}</div><div class="s">well_made_score</div>${dl(sum/N,has?psum/PN:null,1,{dec:1,pv:has?(psum/PN).toFixed(1):null})}</div>`+
+  `<div class="kpi alert"><div class="v">${fmt(l3bad)}</div><div class="l">${u.k_l3bad}</div><div class="s">${u.k_l3bad_s}</div>${dl(l3bad,has?pl3bad:null,-1,{rel:1})}</div>`+
+  `<div class="kpi"><div class="v">${fmt(quick)}</div><div class="l">${u.k_quick}</div><div class="s">${u.k_quick_s}</div>${dl(quick,has?pquick:null,0,{rel:1})}</div>`+
+  (M==='TW'&&!O?(()=>{let k=0,pk=0;for(const r of R)if(origin(r)==='kr')k++;for(const r of P)if(origin(r)==='kr')pk++;
+   return `<div class="kpi"><div class="v" style="font-size:20px;white-space:nowrap"><span style="color:var(--kr)">${fmt(k)}</span> <span style="color:var(--mute);font-size:14px">／</span> <span style="color:var(--tw)">${fmt(N-k)}</span></div><div class="l">${u.k_org}</div><div class="s">${u.k_org_s}</div>${has?`<div class="d">${u.mom} <span style="color:var(--kr)">${fmt(pk)}</span> ／ <span style="color:var(--tw)">${fmt(PN-pk)}</span> · <b style="color:var(--mute)">+${fmt(k-pk)} ／ +${fmt((N-k)-(PN-pk))}</b></div>`:`<div class="d">${u.mom_na}</div>`}</div>`})():'')+
+  (M==='TW'?(()=>{const g=A=>{const loc=A.filter(r=>origin(r)==='tw'),d=loc.length,n3=loc.filter(r=>r[F.lv]===3).length,n2=loc.filter(r=>r[F.lv]===2).length,n=n2+n3;return {d,n3,n2,n,p:d?n/d*100:0}};
+   const c=g(DATA.TW.rows),q=g(momOf(DATA.TW.rows)),need=Math.max(0,Math.ceil(c.d*0.15)-c.n);
+   return `<div class="kpi goal"><div class="v" style="white-space:nowrap">${c.p.toFixed(1)}% <span style="color:var(--mute);font-size:15px">→ 15%</span></div><div class="l">${u.k_goal}</div><div class="s">${u.k_goal_s(fmt(c.n3),fmt(c.n2),fmt(c.n),fmt(c.d),fmt(need))}</div><div class="meter"><b style="width:${Math.min(100,c.p/15*100).toFixed(1)}%"></b></div>${dl(c.p,q.d?q.p:null,1,{dec:1,unit:'pp',pv:q.d?q.p.toFixed(1)+'%':null})}</div>`})():'');
+ { const c=momCut(),e=$('#momnote'); if(e)e.textContent=c?u.note_mom(c):''; }
  $('#lg1').innerHTML=[3,2,1,0].map(l=>`<span><i class="s${l}"></i>Level ${l}</span>`).join('');
  const segs=['top20','top50','good','notgood','na'],S={};segs.forEach(s=>S[s]=[0,0,0,0]);
  for(const r of R)S[seg(r)][r[F.lv]]++;
