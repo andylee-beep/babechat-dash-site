@@ -165,13 +165,22 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
 .mx tr:last-child td{border-bottom:none;font-weight:700;color:var(--tx)}
 .mx td.z{color:var(--mute)}
 .mx .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:0}
-.tl .row{grid-template-columns:minmax(56px,70px) 1fr 92px}
-.tl .trk{background:var(--card2);border-radius:4px;overflow:hidden}
-.tl .bar{background:transparent;height:20px;min-width:3px}
-.tl .bar span{min-width:2px}
-.tl .n b{color:var(--tx);font-weight:700}
-.tl .n i{font-style:normal;color:var(--good);margin-left:5px;font-size:11px}
-@media (max-width:700px){.tl .row{grid-template-columns:50px 1fr 74px}}
+.lnhd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.lnhd .legend{margin:0}
+.lnhd .legend span{cursor:pointer;user-select:none;padding:1px 2px;border-radius:4px}
+.lnhd .legend span.off{opacity:.38}
+.lnhd .legend span:focus-visible{outline:1px solid var(--accent)}
+.scl{margin-left:auto;display:flex;gap:2px}
+.scl button{font:inherit;font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--mute);cursor:pointer}
+.scl button.on{background:var(--accent);color:var(--accent-ink);border-color:transparent;font-weight:700}
+.lnwrap{position:relative;min-height:240px}
+.lnwrap svg{display:block;width:100%;height:auto;overflow:visible}
+.lnwrap .gl{stroke:var(--line);stroke-width:1}
+.lnwrap .ax{fill:var(--mute);font-size:10.5px}
+.lnwrap path.ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.lnwrap .hit{fill:transparent}
+.lnwrap .hit:hover{fill:var(--card2);fill-opacity:.55}
+#tip{white-space:pre-line}
 @media (prefers-reduced-motion:no-preference){.gap .t .trk b{transition:width .35s ease}}
 </style>
 
@@ -237,8 +246,11 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
       </div>
       <div class="card">
         <h3 data-i="h_tl">每月累計（依上架月）</h3>
-        <div class="legend" id="lg2"></div>
-        <div class="rows tl" id="tl"></div>
+        <div class="lnhd">
+          <div class="legend" id="lg2"></div>
+          <div class="scl" id="scl"><button data-s="lin" class="on" data-i="sc_lin">線性</button><button data-s="log" data-i="sc_log">對數</button></div>
+        </div>
+        <div class="lnwrap" id="tl"></div>
         <div class="note" data-i="note_tl">長條長度＝該月底的累計角色數，依 Level 堆疊；綠字是當月新增。等級與 is_good 一律用今天的內容判定，所以過去月份的 L2／L3 會比當時實際的高（創作者後來改好的也算在當時）；已下架的角色不在任何月份裡。</div>
       </div>
     </div>
@@ -300,7 +312,7 @@ zh:{
  h_axis:'五個項目的分數分布',note_axis:'每個項目各評 0～3 分。Level＝五個項目中有四項達該分數、其餘一項至少只低一分；要升 Level 先補分數最低的項目。',
  h_growth:'累積與成長',hint_growth:'全部是支數不是比例；時間線依角色的上架月累計',
  h_mix:'is_good × Level 數量',note_mix:'is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。括號內是該 Level 已判定角色中 is_good 的比例。',
- h_tl:'每月累計（依上架月）',note_tl:'長條長度＝該月底的累計角色數，依 Level 堆疊；綠字是當月新增。等級與 is_good 一律用今天的內容判定，所以過去月份的 L2／L3 會比當時實際的高（創作者後來改好的也算在當時）；已下架的角色不在任何月份裡。',
+ h_tl:'每月累計（依上架月）',sc_lin:'線性',sc_log:'對數',note_tl:'每條線是到該月底為止的累計支數。點圖例可以單獨關掉一條線，y 軸會跟著只剩下的線重算——L0 比其他級距大一個量級，關掉它才看得出 L2／L3 的斜率；「對數」則是直接比成長倍率。等級與 is_good 一律用今天的內容判定，所以過去月份的 L2／L3 會比當時實際的高（創作者後來改好的也算在當時）；已下架的角色不在任何月份裡。',
  h_tlt:'每月數字',ig_yes:'is_good',ig_no:'not good',ig_na:'未判定',tot:'合計',col_new:'新增',col_cum:'累計',col_month:'月份',
  no_pub:(n,t)=>`另有 ${n} 支沒有上架日（多半是連結限定／未正式公開），不在時間線裡；時間線涵蓋 ${t} 支中的其餘部分。最早幾個月只有個位數，已折成「≤」那一列。`,
  h_gap:'缺口排行',hint_gap:'卡住最多角色的項目（每支角色每項只算一次）；綠標＝10 分鐘內可補',h_gap_all:'全部角色',h_gap_mid:'只看 Level 1～2（最接近升級的一群）',quick:'10 分鐘',
@@ -333,7 +345,7 @@ ko:{
  h_axis:'5개 항목 점수 분포',note_axis:'항목마다 0~3점. Level = 5개 항목 중 4개가 해당 점수 이상, 나머지 1개도 한 점 아래 이상. Level을 올리려면 점수가 가장 낮은 항목부터.',
  h_growth:'누적과 성장',hint_growth:'모두 비율이 아니라 건수. 타임라인은 캐릭터 등록월 기준 누적',
  h_mix:'is_good × Level 건수',note_mix:'is_good은 mart_v2.v2_crtd_character_quality(7일 유저수+첫 주 리텐션), 관찰 기간 미달은 「미판정」. 괄호 안은 해당 Level에서 판정된 캐릭터 중 is_good 비율.',
- h_tl:'월별 누적(등록월 기준)',note_tl:'막대 길이는 그달 말 기준 누적 캐릭터 수이며 Level별로 쌓았습니다. 초록색은 그달 신규. 등급과 is_good은 모두 오늘 내용으로 판정하므로 과거 달의 L2·L3는 당시 실제보다 높게 보입니다(크리에이터가 나중에 개선한 것도 그때로 계산). 내려간 캐릭터는 어느 달에도 없습니다.',
+ h_tl:'월별 누적(등록월 기준)',sc_lin:'선형',sc_log:'로그',note_tl:'각 선은 그달 말까지의 누적 건수입니다. 범례를 누르면 선을 하나씩 끌 수 있고 y축은 남은 선에 맞춰 다시 계산됩니다. L0가 다른 등급보다 한 자릿수 크기 때문에 L0를 꺼야 L2·L3의 기울기가 보입니다. 「로그」는 성장 배수를 그대로 비교합니다. 등급과 is_good은 모두 오늘 내용으로 판정하므로 과거 달의 L2·L3는 당시 실제보다 높게 보입니다(크리에이터가 나중에 개선한 것도 그때로 계산). 내려간 캐릭터는 어느 달에도 없습니다.',
  h_tlt:'월별 수치',ig_yes:'is_good',ig_no:'not good',ig_na:'미판정',tot:'합계',col_new:'신규',col_cum:'누적',col_month:'월',
  no_pub:(n,t)=>`등록일이 없는 캐릭터가 ${n}개 더 있어(대부분 링크 전용·정식 공개 전) 타임라인에는 포함되지 않습니다. 전체 ${t}개 중 나머지가 타임라인에 들어 있습니다. 초기 몇 달은 한 자릿수라 「≤」 행 하나로 묶었습니다.`,
  h_gap:'부족 항목 순위',hint_gap:'가장 많은 캐릭터를 막고 있는 항목(캐릭터당 항목별 1회). 초록 표시 = 10분이면 수정 가능',h_gap_all:'전체 캐릭터',h_gap_mid:'Level 1~2만 (승급에 가장 가까운 그룹)',quick:'10분',
@@ -452,8 +464,59 @@ function renderOverview(){
  renderGrowth(R);
 }
 
-/* ---------- 累積與成長（數量矩陣＋依上架月的累計時間線） ---------- */
+/* ---------- 累積與成長（數量矩陣＋依上架月的累計曲線） ---------- */
 const igOf=r=>r[F.ig]===1?'y':(r[F.ig]===0?'n':'na');
+let TLACC=null, TLSC='lin';
+const TLOFF=new Set();
+const TLS=()=>[
+ {k:'n', c:'var(--accent)',w:2.6,lab:t().col_cum},
+ {k:'y', c:'var(--good)',  w:2,  lab:t().ig_yes},
+ {k:'l0',c:'var(--l0)',    w:2,  lab:'Level 0'},
+ {k:'l1',c:'var(--l1)',    w:2,  lab:'Level 1'},
+ {k:'l2',c:'var(--l2)',    w:2,  lab:'Level 2'},
+ {k:'l3',c:'var(--l3)',    w:2,  lab:'Level 3'}];
+const tlVal=(a,k)=>k==='n'?a.n:(k==='y'?a.y:a.lv[+k[1]]);
+function tlTicks(lo,hi,log){
+ if(log){const o=[];for(let p=0;Math.pow(10,p)<=hi*1.000001;p++)o.push(Math.pow(10,p));
+  if(o[o.length-1]<hi)o.push(hi);return o.filter(v=>v>=lo)}
+ const raw=hi/4,m=Math.pow(10,Math.floor(Math.log10(raw)||0)),st=[1,2,2.5,5,10].find(s=>s*m>=raw)*m;
+ const o=[];for(let v=0;v<=hi+st*0.001;v+=st)o.push(Math.round(v));return o}
+function drawTl(){
+ const el=$('#tl');if(!el||!TLACC)return;
+ const u=t(),A=TLACC,S=TLS(),on=S.filter(s=>!TLOFF.has(s.k));
+ $('#lg2').innerHTML=S.map(s=>`<span data-k="${s.k}" role="button" tabindex="0" class="${TLOFF.has(s.k)?'off':''}"><i style="background:${s.c}"></i>${esc(s.lab)}</span>`).join('');
+ $$('#scl button').forEach(b=>b.classList.toggle('on',b.dataset.s===TLSC));
+ if(!on.length||A.length<2){el.innerHTML=`<div class="note">${u.none}</div>`;return}
+ const log=TLSC==='log';
+ const W=Math.max(300,el.clientWidth||420),H=250,m={l:46,r:12,t:12,b:24};
+ const iw=W-m.l-m.r,ih=H-m.t-m.b;
+ let hi=0;for(const s of on)for(const a of A)hi=Math.max(hi,tlVal(a,s.k));
+ if(hi<=0)hi=1;
+ const lo=log?1:0;
+ const Y=v=>{if(log){const c=Math.max(v,1);return m.t+ih-(Math.log10(c)/Math.log10(hi||10))*ih}
+  return m.t+ih-(v/hi)*ih};
+ const X=i=>m.l+(A.length===1?iw/2:i*iw/(A.length-1));
+ const ticks=tlTicks(lo,hi,log);
+ let g='';
+ for(const v of ticks){const y=Y(v).toFixed(1);
+  g+=`<line class="gl" x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}"/><text class="ax" x="${m.l-6}" y="${y}" text-anchor="end" dominant-baseline="middle">${fmt(v)}</text>`}
+ const step=Math.ceil(A.length/7);
+ A.forEach((a,i)=>{if(i%step&&i!==A.length-1)return;
+  g+=`<text class="ax" x="${X(i).toFixed(1)}" y="${H-6}" text-anchor="middle">${esc(a.m.replace(/^(≤)?20/,'$1'))}</text>`});
+ for(const s of on){
+  let d='',open=false;
+  A.forEach((a,i)=>{const v=tlVal(a,s.k);
+   if(log&&v<1){open=false;return}                 /* 對數沒有 0，線從第一個有值的月開始 */
+   d+=(open?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';open=true});
+  if(d)g+=`<path class="ln" d="${d.trim()}" stroke="${s.c}"/>`;
+  A.forEach((a,i)=>{const v=tlVal(a,s.k);if(log&&v<1)return;
+   g+=`<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="2.6" fill="${s.c}"/>`})}
+ const hw=A.length>1?iw/(A.length-1):iw;
+ A.forEach((a,i)=>{
+  const tipTxt=a.m+'\n'+on.map(s=>s.lab+'  '+fmt(tlVal(a,s.k))).join('\n')+(a.head?'':'\n'+u.col_new+'  +'+fmt(a.add));
+  g+=`<rect class="hit" x="${(X(i)-hw/2).toFixed(1)}" y="${m.t}" width="${hw.toFixed(1)}" height="${ih}" data-tip="${esc(tipTxt)}"/>`});
+ el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMinYMin meet" role="img" aria-label="${esc(u.h_tl)}">${g}</svg>`;
+}
 function renderGrowth(R){
  const u=t();
  /* 1) is_good × Level 數量矩陣：全部是支數 */
@@ -484,12 +547,7 @@ function renderGrowth(R){
  cut=Math.min(cut,Math.max(0,all.length-6));
  cut=Math.max(cut,all.length-15);
  const acc=cut>0?[Object.assign({},all[cut-1],{m:'≤'+all[cut-1].m,add:all[cut-1].n,head:1})].concat(all.slice(cut)):all;
- $('#lg2').innerHTML=[3,2,1,0].map(l=>`<span><i class="s${l}"></i>Level ${l}</span>`).join('');
- $('#tl').innerHTML=acc.map(a=>{
-  const inner=[3,2,1,0].map(l=>{const v=a.lv[l];if(!v)return '';
-   return `<span class="s${l}" style="flex:${v} ${v} 0" data-tip="${esc(a.m)} · Level ${l}: ${fmt(v)}"></span>`}).join('');
-  return `<div class="row"><div class="lab">${a.m}</div><div class="trk"><div class="bar" style="width:${(a.n/mx*100).toFixed(1)}%">${inner}</div></div>`
-   +`<div class="n"><b>${fmt(a.n)}</b>${a.head?'':`<i>+${fmt(a.add)}</i>`}</div></div>`}).join('');
+ TLACC=acc;drawTl();
 
  const th=[u.col_month,u.col_new,u.col_cum,'L3','L2','L1','L0',u.ig_yes,u.ig_na];
  $('#tltbl').innerHTML=`<table class="mx"><thead><tr>${th.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`
@@ -626,6 +684,13 @@ function showTab(k){TAB=k;$$('#tabs button').forEach(b=>b.classList.toggle('on',
 $('#mseg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;M=b.dataset.m;$$('#mseg button').forEach(x=>x.classList.toggle('on',x===b));if(M!=='TW'){O='';$$('#oseg button').forEach(x=>x.classList.toggle('on',x.dataset.o===''))}page=0;renderAll()});
 $('#lseg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;L=b.dataset.l;$$('#lseg button').forEach(x=>x.classList.toggle('on',x===b));try{localStorage.setItem('wm_lang',L)}catch(_){}renderAll()});
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.t)});
+/* 累計曲線：點圖例開關單一條線（y 軸跟著只剩下的線重算）、線性／對數切換、視窗寬度變了重畫 */
+const tlToggle=el=>{if(!el||!el.dataset.k)return;const k=el.dataset.k;
+ if(TLOFF.has(k))TLOFF.delete(k);else if(TLOFF.size<TLS().length-1)TLOFF.add(k);drawTl()};
+$('#lg2').addEventListener('click',e=>tlToggle(e.target.closest('[data-k]')));
+$('#lg2').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tlToggle(e.target.closest('[data-k]'))}});
+$('#scl').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;TLSC=b.dataset.s;drawTl()});
+let tlRz;addEventListener('resize',()=>{clearTimeout(tlRz);tlRz=setTimeout(drawTl,180)});
 ['#q','#segf','#weak','#adult'].forEach(s=>$(s).addEventListener('input',()=>{page=0;renderChars()}));
 $('#lvf').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;b.classList.toggle('on');b.classList.contains('on')?lvSel.add(b.dataset.v):lvSel.delete(b.dataset.v);page=0;renderChars()});
 $('#tbl thead').addEventListener('click',e=>{const th=e.target.closest('th');if(!th||th.dataset.k==='ax'||th.dataset.k==='gap')return;sort=sort[0]===th.dataset.k?[sort[0],-sort[1]]:[th.dataset.k,['name','creator','rk','org'].includes(th.dataset.k)?1:-1];renderChars()});
