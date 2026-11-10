@@ -142,6 +142,16 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
 .det ul{margin:8px 0 0;padding-left:18px;font-size:12.5px}
 .det ul li{margin:2px 0}
 .det .id{font-family:var(--mono);font-size:11px;color:var(--mute);margin-top:8px;word-break:break-all}
+.det .rd{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.det .rd svg{flex:none;width:min(340px,100%);height:auto}
+.det .rd .ax{fill:var(--dim);font-size:10.5px}
+.det .rd .axv{fill:var(--tx);font-size:11px;font-weight:700}
+.det .rd .rl{fill:var(--mute);font-size:9.5px}
+.det .side{flex:1 1 230px;min-width:0}
+.det .side h4{margin:0 0 6px;font-size:12.5px;font-weight:700;color:var(--dim)}
+.det .side ul{margin:0 0 10px;padding-left:18px}
+.det .nx{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;margin-bottom:8px}
+.det .nx .pill{font-size:11px}
 .pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:8px;font-size:12px;color:var(--dim)}
 /* rules */
 .rules table{background:var(--card)}
@@ -323,7 +333,7 @@ zh:{
  ph_char:'搜尋角色名／創作者／ID',f_seg:'分組',f_weak:'最低分項目',f_adult:'含成人',seg_na:'未判定',
  ch:['創作者','來源','角色數','平均總分','L3','L2 以上','L0','最高分角色'],
  th:['角色','創作者','來源','Level','總分','A B C D E 分數','is_good','Top','登錄','缺口'],
- none:'無缺口',chars:'支',page:'頁',of:'／',
+ none:'無缺口',chars:'支',page:'頁',of:'／',h_rd:'五項分數（0～3）',h_next:'升級還差什麼',
  d:{dl:'設定字數',pm:'提示詞模式',nh:'區段標題數',w:'世界觀區段',r:'規則區段',ms:'模式／狀態窗',ut:'使用 {{user}}',nl:'世界書條數',al:'每條平均字數',nm:'模式切換條目',ne:'情緒圖片',ip:'圖片 URL／代碼',ia:'開場情境字數',im:'開場台詞字數',dsc:'介紹字數',nt:'標籤數',nr:'建議回覆',nsc:'起始劇本',pg:'遊玩指南字數',u7:'7 日用戶',w1:'首週留存',pub:'登錄日'},
  yes:'有',no:'無',unset:'未選',
  g:{
@@ -356,7 +366,7 @@ ko:{
  ph_char:'캐릭터명 / 크리에이터 / ID 검색',f_seg:'구간',f_weak:'최저 점수 항목',f_adult:'성인 포함',seg_na:'미판정',
  ch:['크리에이터','출처','캐릭터 수','평균 총점','L3','L2 이상','L0','최고점 캐릭터'],
  th:['캐릭터','크리에이터','출처','Level','총점','A B C D E 점수','is_good','Top','등록','부족 항목'],
- none:'부족 항목 없음',chars:'개',page:'페이지',of:'/',
+ none:'부족 항목 없음',chars:'개',page:'페이지',of:'/',h_rd:'5개 항목 점수(0~3)',h_next:'승급에 부족한 항목',
  d:{dl:'설정 글자수',pm:'프롬프트 모드',nh:'섹션 헤더 수',w:'세계관 섹션',r:'규칙 섹션',ms:'모드/상태창',ut:'{{user}} 사용',nl:'로어북 조수',al:'조당 평균 글자수',nm:'모드 전환 조목',ne:'감정 이미지',ip:'이미지 URL/코드',ia:'첫 상황 글자수',im:'첫 대사 글자수',dsc:'소개 글자수',nt:'태그 수',nr:'추천 답변',nsc:'시작 시나리오',pg:'플레이 가이드 글자수',u7:'7일 유저',w1:'첫 주 리텐션',pub:'등록일'},
  yes:'있음',no:'없음',unset:'미선택',
  g:{
@@ -600,11 +610,45 @@ function renderChars(){
   return `<tr class="rowc" data-i="${page*PS+i}"><td class="nm">${esc(r[F.name])}</td><td class="cr">${esc(r[F.creator]||'')}</td><td>${orgPill(r)}</td><td class="r">${lvPill(r[F.lv])}</td><td class="r">${r[F.sc]}</td><td class="ax5">${ax}</td><td>${ig}</td><td class="r">${r[F.rk]!=null?`<span class="pill t">#${r[F.rk]}</span>`:''}</td><td style="color:var(--dim)">${r[F.pub]}</td><td style="color:var(--dim);max-width:360px;overflow:hidden;text-overflow:ellipsis">${g.length?esc(g.map(gapText).join(' / ')):`<span style="color:var(--good)">${u.none}</span>`}</td></tr>`}).join('');
  $('#tbl tbody')._arr=arr;
 }
+/* 五項雷達：三層環就是 L1／L2／L3 的門檻本身，填色多邊形是這支角色現在的位置。
+   凹進去的那一邊＝卡住升級的項目，右邊的清單是同一件事的文字版（gaps()）。 */
+const RD={cx:180,cy:112,R:62};
+function radar(r){
+ const u=t();
+ const A=AX.map((x,i)=>({x,v:r[F[x]],a:-Math.PI/2+i*2*Math.PI/AX.length}));
+ const P=(a,rad)=>[(RD.cx+Math.cos(a)*rad).toFixed(1),(RD.cy+Math.sin(a)*rad).toFixed(1)].join(',');
+ let g='';
+ for(const k of [3,2,1])
+  g+=`<polygon points="${A.map(p=>P(p.a,RD.R*k/3)).join(' ')}" fill="none" stroke="var(--l${k})" stroke-width="1.1"${k<3?' stroke-dasharray="3 3"':''} opacity=".8"/>`;
+ for(const p of A) g+=`<line x1="${RD.cx}" y1="${RD.cy}" x2="${P(p.a,RD.R).split(',')[0]}" y2="${P(p.a,RD.R).split(',')[1]}" stroke="var(--line)" stroke-width="1"/>`;
+ for(const k of [1,2,3]) g+=`<text class="rl" x="${RD.cx+4}" y="${(RD.cy-RD.R*k/3+3).toFixed(1)}">L${k}</text>`;
+ const lvc=`var(--l${Math.max(1,r[F.lv])})`;
+ g+=`<polygon points="${A.map(p=>P(p.a,RD.R*p.v/3)).join(' ')}" fill="${lvc}" fill-opacity=".32" stroke="${lvc}" stroke-width="2" stroke-linejoin="round"/>`;
+ for(const p of A) g+=`<circle cx="${P(p.a,RD.R*p.v/3).split(',')[0]}" cy="${P(p.a,RD.R*p.v/3).split(',')[1]}" r="3" fill="${lvc}"/>`;
+ for(const p of A){
+  const lx=RD.cx+Math.cos(p.a)*(RD.R+24),ly=RD.cy+Math.sin(p.a)*(RD.R+24);
+  const an=Math.abs(Math.cos(p.a))<0.25?'middle':(Math.cos(p.a)>0?'start':'end');
+  g+=`<text class="ax" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${an}">${esc(u.axn[p.x])}</text>`
+   +`<text class="axv" x="${lx.toFixed(1)}" y="${(ly+13).toFixed(1)}" text-anchor="${an}">${p.v} / 3</text>`}
+ return `<svg viewBox="0 0 360 236" role="img" aria-label="${esc(u.h_rd)}">${g}</svg>`;
+}
+
 function detail(r){
  const u=t(),D=u.d,yn=v=>v?u.yes:u.no;
  const items=[['dl',fmt(r[F.dl])],['pm',r[F.pm]||u.unset],['nh',r[F.nh]],['w',yn(r[F.w])],['r',yn(r[F.r])],['ms',yn(r[F.ms])],['ut',yn(r[F.ut])],['nl',r[F.nl]],['al',r[F.al]],['nm',r[F.nm]],['ne',r[F.ne]],['ip',yn(r[F.ip])],['ia',fmt(r[F.ia])],['im',fmt(r[F.im])],['dsc',r[F.dsc]],['nt',r[F.nt]],['nr',r[F.nr]],['nsc',r[F.nsc]],['pg',fmt(r[F.pg])],['u7',r[F.u7]??'–'],['w1',r[F.w1]!=null?(r[F.w1]*100).toFixed(1)+'%':'–'],['pub',r[F.pub]]];
  const g=gaps(r);
- return `<tr class="det"><td colspan="10"><div class="det"><div class="dg">${items.map(([k,v])=>`<div><span>${D[k]}</span><span>${esc(v)}</span></div>`).join('')}</div>${g.length?`<ul>${g.map(x=>`<li>${esc(gapText(x))}${QUICK.has(x[1])?` <span class="pill g">${u.quick}</span>`:''}</li>`).join('')}</ul>`:''}<div class="id">character_id ${r[F.id]}</div></div></td></tr>`;
+ const lv=r[F.lv];
+ const head=`<div class="nx"><span class="sw s${lv}" style="width:11px;height:11px;border-radius:3px;display:inline-block"></span>`
+  +`<b>Level ${lv}</b>`
+  +`<span>${u.th[4]} <b>${r[F.sc]}</b> / 15</span>`
+  +(r[F.ig]===1?`<span class="pill g">is_good</span>`:(r[F.ig]===0?`<span class="pill b">not good</span>`:`<span class="pill b">${u.seg.na}</span>`))
+  +(r[F.rk]!=null?`<span class="pill t">Top #${r[F.rk]}</span>`:'')+`</div>`;
+ const side=`<div class="side">${head}<h4>${lv<3?u.h_next:u.h_rd}</h4>`
+  +(g.length?`<ul>${g.map(x=>`<li>${esc(gapText(x))}${QUICK.has(x[1])?` <span class="pill g">${u.quick}</span>`:''}</li>`).join('')}</ul>`
+            :`<ul><li>${u.none}</li></ul>`)+`</div>`;
+ return `<tr class="det"><td colspan="10"><div class="det"><div class="rd">${radar(r)}${side}</div>`
+  +`<div class="dg">${items.map(([k,v])=>`<div><span>${D[k]}</span><span>${esc(v)}</span></div>`).join('')}</div>`
+  +`<div class="id">character_id ${r[F.id]}</div></div></td></tr>`;
 }
 
 /* ---------- rules ---------- */
