@@ -238,7 +238,7 @@ tr.det td{background:var(--card2);white-space:normal;padding:12px 14px}
       <div class="card">
         <div class="legend" id="lg1"></div>
         <div class="rows" id="cross"></div>
-        <div class="note" data-i="note_cross">Top 20／21–50 取 2026 年 9 月月榜（mart_v2.v2_agg_characters_top）。is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。</div>
+        <div class="note" data-i="note_cross">Top 20／21–50 取 2026 年 10 月月榜（mart_v2.v2_agg_characters_top）。is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。</div>
       </div>
       <div class="card">
         <h3 data-i="h_axis">五個項目的分數分布</h3>
@@ -314,11 +314,11 @@ const AX=['a','b','c','d','e'];
 const T={
 zh:{
  title:'well_made 角色 Level 儀表板',tab_ov:'總覽',tab_cr:'創作者',tab_ch:'角色明細',tab_ru:'規則說明',
- asof:'資料日期',rule:'規則',scope_TW:'TW 公開＋連結角色全量',scope_KR:'KR 2026-03 後登錄＋9 月 Top 50（排除 tookit）',
+ asof:'資料日期',rule:'規則',scope_TW:'TW 公開＋連結角色全量',scope_KR:'KR 2026-03 後登錄＋10 月 Top 50（排除 tookit）',
  k_total:'角色數',k_avg:'平均總分（0～15）',k_lv:'Level',k_l3bad:'Level 3 但 is_good=false',k_l3bad_s:'做得好、沒紅的作品',k_quick:'補 10 分鐘項目就能脫離 Level 0',k_quick_s:'只缺 B1／E1 項目的 Level 0 角色',
- mom:'上月',mom_na:'上月無可比資料',note_mom:c=>`上月同期＝登錄日在 ${c} 以前、且現在仍公開的角色（本次快照重算）。新增的角色不計入上月，所以差異主要反映「這個月新上架的角色把整體拉高還是拉低」。已下架的角色兩邊都不在，評分項目一律用今天的內容，不是當時的版本。`,
+ mom:'上月',mom_na:'上月無可比資料',note_mom:c=>`上月同期＝登錄日在 ${c} 以前、且現在仍公開的角色（本次快照重算）。新增的角色不計入上月，所以差異主要反映「這個月新上架的角色把整體拉高還是拉低」。已下架的角色兩邊都不在，評分項目一律用今天的內容，不是當時的版本。<b>增減只比「有發布日」的角色</b>（只開連結、沒有發布日的角色無法回推上月，不列入比較），所以「上月＋增減」不會剛好等於卡片上的總數。`,
  h_cross:'Level × 表現交叉',hint_cross:'Level 判定不含任何表現數據；分組只是拿來驗證門檻有沒有分出頂尖作品',
- note_cross:'Top 20／21–50 取 2026 年 9 月月榜（mart_v2.v2_agg_characters_top）。is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。',
+ note_cross:'Top 20／21–50 取 2026 年 10 月月榜（mart_v2.v2_agg_characters_top）。is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。',
  h_axis:'五個項目的分數分布',note_axis:'每個項目各評 0～3 分。Level＝五個項目中有四項達該分數、其餘一項至少只低一分；要升 Level 先補分數最低的項目。',
  h_growth:'累積與成長',hint_growth:'全部是支數不是比例；時間線依角色的上架月累計',
  h_mix:'is_good × Level 數量',note_mix:'is_good 來自 mart_v2.v2_crtd_character_quality（7 日用戶數＋首週留存），未達觀察期的角色列為「未判定」。括號內是該 Level 已判定角色中 is_good 的比例。',
@@ -347,11 +347,11 @@ zh:{
 },
 ko:{
  title:'well_made 캐릭터 Level 대시보드',tab_ov:'개요',tab_cr:'크리에이터',tab_ch:'캐릭터 상세',tab_ru:'기준 설명',
- asof:'데이터 기준',rule:'규칙',scope_TW:'TW 공개+링크 캐릭터 전체',scope_KR:'KR 2026-03 이후 등록 + 9월 Top 50 (tookit 제외)',
+ asof:'데이터 기준',rule:'규칙',scope_TW:'TW 공개+링크 캐릭터 전체',scope_KR:'KR 2026-03 이후 등록 + 10월 Top 50 (tookit 제외)',
  k_total:'캐릭터 수',k_avg:'평균 총점 (0~15)',k_lv:'Level',k_l3bad:'Level 3인데 is_good=false',k_l3bad_s:'잘 만들었는데 안 뜬 작품',k_quick:'10분 항목만 채우면 Level 0 탈출',k_quick_s:'B1/E1 항목만 부족한 Level 0 캐릭터',
- mom:'전월',mom_na:'전월 비교 데이터 없음',note_mom:c=>`전월 동기 = 등록일이 ${c} 이전이고 지금도 공개 중인 캐릭터(이번 스냅샷으로 재계산). 신규 캐릭터는 전월에 포함되지 않으므로, 증감은 주로 '이번 달 새로 올라온 캐릭터가 전체 수준을 올렸는지 내렸는지'를 뜻합니다. 내려간 캐릭터는 양쪽 모두에 없고, 평가 항목은 당시 버전이 아니라 오늘 기준입니다.`,
+ mom:'전월',mom_na:'전월 비교 데이터 없음',note_mom:c=>`전월 동기 = 등록일이 ${c} 이전이고 지금도 공개 중인 캐릭터(이번 스냅샷으로 재계산). 신규 캐릭터는 전월에 포함되지 않으므로, 증감은 주로 '이번 달 새로 올라온 캐릭터가 전체 수준을 올렸는지 내렸는지'를 뜻합니다. 내려간 캐릭터는 양쪽 모두에 없고, 평가 항목은 당시 버전이 아니라 오늘 기준입니다. <b>증감은 '공개일이 있는' 캐릭터끼리만 비교</b>합니다(링크 공개만 하고 공개일이 없는 캐릭터는 전월로 되돌릴 수 없어 제외). 그래서 '전월＋증감'이 카드의 전체 수와 정확히 같지는 않습니다.`,
  h_cross:'Level × 성과 교차',hint_cross:'Level 판정에 성과는 들어가지 않음. 구간은 기준이 상위권을 가르는지 검증하는 참조',
- note_cross:'Top 20 / 21–50은 2026년 9월 월간 랭킹(mart_v2.v2_agg_characters_top). is_good은 mart_v2.v2_crtd_character_quality(7일 유저수+첫 주 리텐션), 관찰 기간 미달은 「미판정」.',
+ note_cross:'Top 20 / 21–50은 2026년 10월 월간 랭킹(mart_v2.v2_agg_characters_top). is_good은 mart_v2.v2_crtd_character_quality(7일 유저수+첫 주 리텐션), 관찰 기간 미달은 「미판정」.',
  h_axis:'5개 항목 점수 분포',note_axis:'항목마다 0~3점. Level = 5개 항목 중 4개가 해당 점수 이상, 나머지 1개도 한 점 아래 이상. Level을 올리려면 점수가 가장 낮은 항목부터.',
  h_growth:'누적과 성장',hint_growth:'모두 비율이 아니라 건수. 타임라인은 캐릭터 등록월 기준 누적',
  h_mix:'is_good × Level 건수',note_mix:'is_good은 mart_v2.v2_crtd_character_quality(7일 유저수+첫 주 리텐션), 관찰 기간 미달은 「미판정」. 괄호 안은 해당 Level에서 판정된 캐릭터 중 is_good 비율.',
@@ -446,21 +446,24 @@ function renderOverview(){
  const R=rows(),u=t(),N=R.length;
  const lv=[0,0,0,0];let sum=0,l3bad=0,quick=0;
  for(const r of R){lv[r[F.lv]]++;sum+=r[F.sc];if(r[F.lv]===3&&r[F.ig]===0)l3bad++;if(quickOnly(r))quick++}
+ // 2026-11-17：「上月」比較要同一個母體——上月只能數有發布日的角色，所以本月的比較值也只算有發布日的（連結限定、沒發布日的不進比較）。
+ const RP=R.filter(r=>r[F.pub]!=='-'),NP=RP.length,lvp=[0,0,0,0];let sump=0,l3badp=0,quickp=0;
+ for(const r of RP){lvp[r[F.lv]]++;sump+=r[F.sc];if(r[F.lv]===3&&r[F.ig]===0)l3badp++;if(quickOnly(r))quickp++}
  const P=momOf(R),PN=P.length,plv=[0,0,0,0];let psum=0,pl3bad=0,pquick=0;
  for(const r of P){plv[r[F.lv]]++;psum+=r[F.sc];if(r[F.lv]===3&&r[F.ig]===0)pl3bad++;if(quickOnly(r))pquick++}
  const has=PN>0;
  $('#kpis').innerHTML=
-  `<div class="kpi hero"><div class="v">${fmt(N)}</div><div class="l">${u.k_total}</div><div class="s">${M==='TW'?u.scope_TW:u.scope_KR}</div>${dl(N,has?PN:null,0,{rel:1})}</div>`+
-  [3,2,1,0].map(l=>`<div class="kpi"><div class="v"><span class="sw s${l}"></span>${fmt(lv[l])}</div><div class="l">${u.k_lv} ${l}</div><div class="s">${pct(lv[l],N)}</div>${dl(lv[l],has?plv[l]:null,l>=2?1:(l===0?-1:0),{rel:1})}</div>`).join('')+
-  `<div class="kpi"><div class="v">${(sum/N).toFixed(1)}</div><div class="l">${u.k_avg}</div><div class="s">well_made_score</div>${dl(sum/N,has?psum/PN:null,1,{dec:1,pv:has?(psum/PN).toFixed(1):null})}</div>`+
-  `<div class="kpi alert"><div class="v">${fmt(l3bad)}</div><div class="l">${u.k_l3bad}</div><div class="s">${u.k_l3bad_s}</div>${dl(l3bad,has?pl3bad:null,-1,{rel:1})}</div>`+
-  `<div class="kpi"><div class="v">${fmt(quick)}</div><div class="l">${u.k_quick}</div><div class="s">${u.k_quick_s}</div>${dl(quick,has?pquick:null,0,{rel:1})}</div>`+
-  (M==='TW'&&!O?(()=>{let k=0,pk=0;for(const r of R)if(origin(r)==='kr')k++;for(const r of P)if(origin(r)==='kr')pk++;
-   return `<div class="kpi"><div class="v" style="font-size:20px;white-space:nowrap"><span style="color:var(--kr)">${fmt(k)}</span> <span style="color:var(--mute);font-size:14px">／</span> <span style="color:var(--tw)">${fmt(N-k)}</span></div><div class="l">${u.k_org}</div><div class="s">${u.k_org_s}</div>${has?`<div class="d">${u.mom} <span style="color:var(--kr)">${fmt(pk)}</span> ／ <span style="color:var(--tw)">${fmt(PN-pk)}</span> · <b style="color:var(--mute)">+${fmt(k-pk)} ／ +${fmt((N-k)-(PN-pk))}</b></div>`:`<div class="d">${u.mom_na}</div>`}</div>`})():'')+
+  `<div class="kpi hero"><div class="v">${fmt(N)}</div><div class="l">${u.k_total}</div><div class="s">${M==='TW'?u.scope_TW:u.scope_KR}</div>${dl(NP,has?PN:null,0,{rel:1})}</div>`+
+  [3,2,1,0].map(l=>`<div class="kpi"><div class="v"><span class="sw s${l}"></span>${fmt(lv[l])}</div><div class="l">${u.k_lv} ${l}</div><div class="s">${pct(lv[l],N)}</div>${dl(lvp[l],has?plv[l]:null,l>=2?1:(l===0?-1:0),{rel:1})}</div>`).join('')+
+  `<div class="kpi"><div class="v">${(sum/N).toFixed(1)}</div><div class="l">${u.k_avg}</div><div class="s">well_made_score</div>${dl(NP?sump/NP:0,has?psum/PN:null,1,{dec:1,pv:has?(psum/PN).toFixed(1):null})}</div>`+
+  `<div class="kpi alert"><div class="v">${fmt(l3bad)}</div><div class="l">${u.k_l3bad}</div><div class="s">${u.k_l3bad_s}</div>${dl(l3badp,has?pl3bad:null,-1,{rel:1})}</div>`+
+  `<div class="kpi"><div class="v">${fmt(quick)}</div><div class="l">${u.k_quick}</div><div class="s">${u.k_quick_s}</div>${dl(quickp,has?pquick:null,0,{rel:1})}</div>`+
+  (M==='TW'&&!O?(()=>{let k=0,pk=0,kq=0;for(const r of R)if(origin(r)==='kr')k++;for(const r of RP)if(origin(r)==='kr')kq++;for(const r of P)if(origin(r)==='kr')pk++;
+   return `<div class="kpi"><div class="v" style="font-size:20px;white-space:nowrap"><span style="color:var(--kr)">${fmt(k)}</span> <span style="color:var(--mute);font-size:14px">／</span> <span style="color:var(--tw)">${fmt(N-k)}</span></div><div class="l">${u.k_org}</div><div class="s">${u.k_org_s}</div>${has?`<div class="d">${u.mom} <span style="color:var(--kr)">${fmt(pk)}</span> ／ <span style="color:var(--tw)">${fmt(PN-pk)}</span> · <b style="color:var(--mute)">+${fmt(kq-pk)} ／ +${fmt((NP-kq)-(PN-pk))}</b></div>`:`<div class="d">${u.mom_na}</div>`}</div>`})():'')+
   (M==='TW'?(()=>{const g=A=>{const loc=A.filter(r=>origin(r)==='tw'),d=loc.length,n3=loc.filter(r=>r[F.lv]===3).length,n2=loc.filter(r=>r[F.lv]===2).length,n=n2+n3;return {d,n3,n2,n,p:d?n/d*100:0}};
-   const c=g(DATA.TW.rows),q=g(momOf(DATA.TW.rows)),need=Math.max(0,Math.ceil(c.d*0.15)-c.n);
-   return `<div class="kpi goal"><div class="v" style="white-space:nowrap">${c.p.toFixed(1)}% <span style="color:var(--mute);font-size:15px">→ 15%</span></div><div class="l">${u.k_goal}</div><div class="s">${u.k_goal_s(fmt(c.n3),fmt(c.n2),fmt(c.n),fmt(c.d),fmt(need))}</div><div class="meter"><b style="width:${Math.min(100,c.p/15*100).toFixed(1)}%"></b></div>${dl(c.p,q.d?q.p:null,1,{dec:1,unit:'pp',pv:q.d?q.p.toFixed(1)+'%':null})}</div>`})():'');
- { const c=momCut(),e=$('#momnote'); if(e)e.textContent=c?u.note_mom(c):''; }
+   const c=g(DATA.TW.rows),cq=g(DATA.TW.rows.filter(r=>r[F.pub]!=='-')),q=g(momOf(DATA.TW.rows)),need=Math.max(0,Math.ceil(c.d*0.15)-c.n);
+   return `<div class="kpi goal"><div class="v" style="white-space:nowrap">${c.p.toFixed(1)}% <span style="color:var(--mute);font-size:15px">→ 15%</span></div><div class="l">${u.k_goal}</div><div class="s">${u.k_goal_s(fmt(c.n3),fmt(c.n2),fmt(c.n),fmt(c.d),fmt(need))}</div><div class="meter"><b style="width:${Math.min(100,c.p/15*100).toFixed(1)}%"></b></div>${dl(cq.p,q.d?q.p:null,1,{dec:1,unit:'pp',pv:q.d?q.p.toFixed(1)+'%':null})}</div>`})():'');
+ { const c=momCut(),e=$('#momnote'); if(e)e.innerHTML=c?u.note_mom(c):''; }
  $('#lg1').innerHTML=[3,2,1,0].map(l=>`<span><i class="s${l}"></i>Level ${l}</span>`).join('');
  const segs=['top20','top50','good','notgood','na'],S={};segs.forEach(s=>S[s]=[0,0,0,0]);
  for(const r of R)S[seg(r)][r[F.lv]]++;
@@ -679,7 +682,7 @@ const RULES={zh:`
 <div class="sec"><h2>來源判定（TW）</h2></div>
 <p>工程端沒有標籤，改用營運表《<a href="https://docs.google.com/spreadsheets/d/1AZDN9ERqcPAQ8IeNE0sSJjFGd-egzriASv3co8e6CW0/edit" style="color:var(--accent)">대만 이식 작품 명단</a>》判定：角色 ID 出現在該表任一分頁（各月批次、審核中但已上線、留言翻譯名單），或與這些角色同一個創作者帳號，即為「韓國轉移」；其餘為「台灣本土」。同帳號規則是因為韓國創作者在 TW 的帳號由公司代管，底下的 Safety 版、改版都是移植作品。表更新後重跑 build 即可。</p>
 <div class="sec"><h2>資料來源</h2></div>
-<p>babechat-bigquery.babechat_{tw,kr}_prod 的 characters、keyword_book、emotion_images、starting_scenarios（is_deleted=0、visibility ∈ public/link、世界書與劇本 deleted_at IS NULL；KR 排除 tookit）。表現交叉用 mart_v2.v2_crtd_character_quality（is_good）與 mart_v2.v2_agg_characters_top（2026-09 月榜）。本頁是快照，重跑 wellmade_fetch.sql 即可更新。</p>
+<p>babechat-bigquery.babechat_{tw,kr}_prod 的 characters、keyword_book、emotion_images、starting_scenarios（is_deleted=0、visibility ∈ public/link、世界書與劇本 deleted_at IS NULL；KR 排除 tookit）。表現交叉用 mart_v2.v2_crtd_character_quality（is_good）與 mart_v2.v2_agg_characters_top（2026-10 月榜）。本頁是快照，重跑 wellmade_fetch.sql 即可更新。</p>
 <p>限制：世界觀／規則／模式區段用關鍵字比對，寫法不同可能漏判；世界書關鍵字品質與圖片代碼表完成度無法自動量測。KR 比較組限定 2026-03 之後登錄的作品。</p>`,
 ko:`
 <div class="sec"><h2>Level 0~3이란</h2><span class="hint">규칙 v1.1 (2026-10-29). 크리에이터가 쓴 것만 보고 성과는 넣지 않는다.</span></div>
@@ -708,7 +711,7 @@ ko:`
 <div class="sec"><h2>출처 판정 (TW)</h2></div>
 <p>개발 측 태그가 없어 운영 시트 《<a href="https://docs.google.com/spreadsheets/d/1AZDN9ERqcPAQ8IeNE0sSJjFGd-egzriASv3co8e6CW0/edit" style="color:var(--accent)">대만 이식 작품 명단</a>》로 판정한다. 캐릭터 ID가 시트의 어느 탭(월별 이식, 미정이지만 공개된 것, 댓글 번역 명단)에든 있거나, 그 캐릭터와 같은 크리에이터 계정이면 「KR 이식」, 나머지는 「TW 로컬」. 같은 계정 규칙을 두는 이유는 KR 크리에이터의 TW 계정은 회사가 대신 운영하므로 그 아래의 Safety판·개정판도 모두 이식작이기 때문. 시트가 바뀌면 build를 다시 돌리면 된다.</p>
 <div class="sec"><h2>데이터 출처</h2></div>
-<p>babechat-bigquery.babechat_{tw,kr}_prod의 characters, keyword_book, emotion_images, starting_scenarios (is_deleted=0, visibility ∈ public/link, 로어북·시나리오 deleted_at IS NULL, KR은 tookit 제외). 성과 교차는 mart_v2.v2_crtd_character_quality(is_good)와 mart_v2.v2_agg_characters_top(2026-09 월간). 이 페이지는 스냅샷이며 wellmade_fetch.sql을 다시 돌리면 갱신된다.</p>
+<p>babechat-bigquery.babechat_{tw,kr}_prod의 characters, keyword_book, emotion_images, starting_scenarios (is_deleted=0, visibility ∈ public/link, 로어북·시나리오 deleted_at IS NULL, KR은 tookit 제외). 성과 교차는 mart_v2.v2_crtd_character_quality(is_good)와 mart_v2.v2_agg_characters_top(2026-10 월간). 이 페이지는 스냅샷이며 wellmade_fetch.sql을 다시 돌리면 갱신된다.</p>
 <p>한계: 세계관·규칙·모드 섹션은 키워드 매칭이라 표기가 다르면 놓칠 수 있고, 로어북 키워드 품질과 이미지 코드표 완성도는 자동으로 재기 어렵다. KR 비교군은 2026-03 이후 등록작으로 한정.</p>`};
 
 /* ---------- wiring ---------- */
