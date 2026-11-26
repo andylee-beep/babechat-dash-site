@@ -37,6 +37,7 @@ iframe{width:100%;height:calc(100vh - 56px);border:0;display:block;background:va
 #lock .sub{color:var(--muted);font-size:13px}
 #lock input{padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:14px;width:220px;font-family:inherit}
 #lock input:focus{outline:none;border-color:var(--pink)}
+#lock button{padding:10px 16px;border-radius:9px;border:0;background:var(--grad);color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer}
 #lock .err{color:#fb7185;font-size:12px;min-height:14px}
 </style>
 </head>
@@ -45,7 +46,10 @@ iframe{width:100%;height:calc(100vh - 56px);border:0;display:block;background:va
   <div class="lg" style="background:none"><img src="logo.png" alt="BabeChat" style="width:100%;height:100%;object-fit:contain;border-radius:14px"></div>
   <h1><span style="color:var(--pink)">BabeChat</span> 台灣 Dashboard</h1>
   <div class="sub">請輸入密碼</div>
-  <input id="pw" type="password" autofocus autocomplete="current-password">
+  <form id="pwf" style="display:flex;gap:8px;align-items:center" onsubmit="chk();return false;">
+    <input id="pw" type="password" autofocus autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="密碼">
+    <button type="submit" id="pwb">進入</button>
+  </form>
   <div class="err" id="err"></div>
 </div>
 
@@ -74,10 +78,10 @@ document.querySelectorAll("#viewseg button").forEach(function(b){b.onclick=funct
 // 密碼閘（與內頁共用 sessionStorage 'bc_ok'）
 var P="babechat888";
 function unlock(){document.getElementById("lock").style.display="none";load();}
-function chk(){var v=document.getElementById("pw").value;
+function chk(){var v=document.getElementById("pw").value.trim();   // 2026-11-25：手機常多打空白／自動大寫，去頭尾空白
   if(v===P){sessionStorage.setItem("bc_ok","1");unlock();}
-  else{document.getElementById("err").textContent="密碼錯誤";document.getElementById("pw").value="";}}
-document.getElementById("pw").addEventListener("keydown",function(e){if(e.key==="Enter")chk();});
+  else{document.getElementById("err").textContent="密碼錯誤，請再試一次";document.getElementById("pw").value="";}}
+// 2026-11-25：原本只能按 Enter 送出，手機上找不到按鈕會以為進不去 → 改成 form＋「進入」按鈕（Enter 一樣有效）
 if(sessionStorage.getItem("bc_ok")==="1"){unlock();}
 </script>
 </body>
